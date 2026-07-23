@@ -1,0 +1,199 @@
+# MOH HRMS Payroll Module - Database Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MOH HRMS PAYROLL MODULE                               │
+│                     Database Schema (Oct 20, 2025)                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           MASTER TABLES (Lookup)                              │
+│                    "What options are available?"                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────┐    ┌─────────────────────────┐    ┌──────────────────────┐
+│ pr_tbl_deductions       │    │ pr_tbl_income           │    │ pr_tbl_payroll_      │
+│ ======================= │    │ ======================= │    │ profile              │
+│ ✅ EXISTS               │    │ ✅ EXISTS               │    │ ==================== │
+│                         │    │                         │    │ ✅ EXISTS            │
+│ • deduction_id (PK)     │    │ • income_id (PK)        │    │                      │
+│ • deduction_type        │    │ • income_type           │    │ • payprofile_id (PK) │
+│ • deduction_title       │    │ • income_title          │    │ • description        │
+│ • is_deleted            │    │ • is_deleted            │    │ • is_deleted         │
+│ • created_at            │    │ • created_at            │    │ • created_at         │
+│ • user_id               │    │ • user_id               │    │ • user_id            │
+│                         │    │                         │    │                      │
+│ Examples:               │    │ Examples:               │    │ Examples:            │
+│ • GSIS                  │    │ • Basic Salary          │    │ • Weekly             │
+│ • PhilHealth            │    │ • PERA                  │    │ • Bi-Weekly          │
+│ • Pag-IBIG              │    │ • COLA                  │    │ • Semi-Monthly       │
+│ • Withholding Tax       │    │ • Hazard Pay            │    │ • Monthly            │
+└─────────────────────────┘    └─────────────────────────┘    └──────────────────────┘
+           │                              │                              │
+           │                              │                              │
+           ▼                              ▼                              ▼
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        JUNCTION TABLES (Assignments)                          │
+│               "Who has what? How much? When?"                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────┐  ┌───────────────────────────┐  ┌──────────────────────┐
+│ pr_tbl_personnel_         │  │ pr_tbl_personnel_         │  │ pr_tbl_pay_pro_      │
+│ deductions                │  │ income                    │  │ personnels           │
+│ ========================= │  │ ========================= │  │ ==================== │
+│ ⚠️  NEEDS CREATION        │  │ 📋 PLANNED (Future)       │  │ ✅ EXISTS            │
+│                           │  │                           │  │                      │
+│ • personnel_deduction_id  │  │ • personnel_income_id     │  │ • ppp_id (PK)        │
+│   (PK)                    │  │   (PK)                    │  │ • personnel_id       │
+│ • personnel_id            │  │ • personnel_id            │  │ • payprofile_id      │
+│ • deduction_id (FK)       │  │ • income_id (FK)          │  │ • status             │
+│ • employer_amt_per_pay 💰 │  │ • amount_per_pay 💰       │  │ • created_at         │
+│ • employee_amt_per_pay 💰 │  │ • is_active               │  │ • user_id            │
+│ • is_active               │  │ • created_at              │  │                      │
+│ • created_at              │  │ • updated_at              │  │ Example:             │
+│ • updated_at              │  │ • user_id                 │  │ Personnel #14 →      │
+│ • user_id                 │  │                           │  │ Profile #1 (Weekly)  │
+│                           │  │ Example:                  │  │ Status: Active       │
+│ Example:                  │  │ Personnel #14 →           │  │                      │
+│ Personnel #14 →           │  │ Income "Basic Salary" →   │  │                      │
+│ Deduction "GSIS" →        │  │ ₱25,000.00/pay            │  │                      │
+│ Employer: ₱500.00/pay     │  │                           │  │                      │
+│ Employee: ₱1,000.00/pay   │  │                           │  │                      │
+└───────────────────────────┘  └───────────────────────────┘  └──────────────────────┘
+           ▲                              ▲                              ▲
+           │                              │                              │
+           └──────────────────────────────┴──────────────────────────────┘
+                                          │
+                                          │
+                                          ▼
+
+                          ┌─────────────────────────────┐
+                          │      personnels             │
+                          │   (Main HRMS Table)         │
+                          │ =========================== │
+                          │                             │
+                          │ • personnel_id (PK)         │
+                          │ • fname, lname, mname       │
+                          │ • position                  │
+                          │ • department                │
+                          │ • designation               │
+                          │ • ... (other fields)        │
+                          └─────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           DATA FLOW EXAMPLE                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Step 1: Admin adds deduction types to pr_tbl_deductions
+        ┌─────────────┬──────────────┬────────────────┐
+        │ deduction_id│ type         │ title          │
+        ├─────────────┼──────────────┼────────────────┤
+        │ 1           │ Mandatory    │ GSIS           │
+        │ 2           │ Mandatory    │ PhilHealth     │
+        │ 3           │ Mandatory    │ Pag-IBIG       │
+        │ 4           │ Voluntary    │ Loan Payment   │
+        └─────────────┴──────────────┴────────────────┘
+
+Step 2: HR assigns deductions to Personnel #14
+        Opens: list_personnel_deductions.php?personnel_id=14
+        
+        ┌─────────────┬────────────────┬──────────────┬──────────────┐
+        │ Deduction   │ Employer/Pay   │ Employee/Pay │ Total        │
+        ├─────────────┼────────────────┼──────────────┼──────────────┤
+        │ GSIS        │ ₱500.00        │ ₱1,000.00    │ ₱1,500.00    │
+        │ PhilHealth  │ ₱200.00        │ ₱200.00      │ ₱400.00      │
+        │ Pag-IBIG    │ ₱100.00        │ ₱100.00      │ ₱200.00      │
+        └─────────────┴────────────────┴──────────────┴──────────────┘
+                                         Grand Total: ₱2,100.00
+
+Step 3: Data saved to pr_tbl_personnel_deductions
+        ┌──────────────┬──────────────┬──────────────┬──────────────┐
+        │ personnel_id │ deduction_id │ employer_amt │ employee_amt │
+        ├──────────────┼──────────────┼──────────────┼──────────────┤
+        │ 14           │ 1 (GSIS)     │ 500.00       │ 1000.00      │
+        │ 14           │ 2 (PhilHlth) │ 200.00       │ 200.00       │
+        │ 14           │ 3 (Pag-IBIG) │ 100.00       │ 100.00       │
+        └──────────────┴──────────────┴──────────────┴──────────────┘
+
+Step 4: Payroll processing uses this data
+        SELECT p.fname, p.lname, d.deduction_title,
+               pd.employer_amt_per_pay, pd.employee_amt_per_pay
+        FROM pr_tbl_personnel_deductions pd
+        JOIN personnels p ON pd.personnel_id = p.personnel_id
+        JOIN pr_tbl_deductions d ON pd.deduction_id = d.deduction_id
+        WHERE pd.is_active = 1
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          KEY DESIGN PRINCIPLES                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+1. SEPARATION OF CONCERNS
+   ✓ Master tables = catalog of options (what exists)
+   ✓ Junction tables = assignments + amounts (who has what, how much)
+
+2. NORMALIZATION
+   ✓ No duplicate data
+   ✓ Easy to update deduction titles (change once in master table)
+   ✓ Historical data preserved (soft deletes)
+
+3. FLEXIBILITY
+   ✓ Add new deduction types without changing structure
+   ✓ Personnel can have different deductions
+   ✓ Amounts vary per personnel
+
+4. INTEGRITY
+   ✓ Foreign keys enforce relationships
+   ✓ Unique constraints prevent duplicates
+   ✓ Soft deletes preserve audit trail
+
+5. SCALABILITY
+   ✓ Indexes on frequently queried columns
+   ✓ Efficient joins
+   ✓ Transaction support for data consistency
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              STATUS SUMMARY                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+✅ COMPLETE:
+   • pr_tbl_deductions (exists in database)
+   • pr_tbl_income (exists in database)
+   • pr_tbl_payroll_profile (exists in database)
+   • pr_tbl_pay_pro_personnels (exists in database)
+
+⚠️  ACTION REQUIRED:
+   • pr_tbl_personnel_deductions (run setup_personnel_deductions.php)
+
+📋 FUTURE WORK:
+   • pr_tbl_personnel_income (Phase 2)
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                             QUICK ACTIONS                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+▶ Create Missing Table:
+  http://localhost/moh_hrms/payroll/setup_personnel_deductions.php
+
+▶ View Deductions:
+  http://localhost/moh_hrms/payroll/deductions.php
+
+▶ Assign Personnel Deductions:
+  http://localhost/moh_hrms/payroll/list_personnel_deductions.php?personnel_id=14
+
+▶ Documentation:
+  payroll/db/PAYROLL_SCHEMA_REFERENCE.md
+
+
+───────────────────────────────────────────────────────────────────────────────
+Created: October 20, 2025
+Version: 2.0 (Secure Edition)
+Status: Ready for Production (after table creation)
+───────────────────────────────────────────────────────────────────────────────
+```

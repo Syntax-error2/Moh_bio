@@ -1,0 +1,1 @@
+<small><?php echo date("l"); ?>, <?php echo date("M".". "."d".", "."Y"); ?></small>

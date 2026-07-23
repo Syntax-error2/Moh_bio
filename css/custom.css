@@ -1,0 +1,295 @@
+/* your styles go here */
+
+/* Personnel profile card header */
+.personnel-header-link {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.personnel-header-link:hover,
+.personnel-header-link:focus {
+	color: inherit;
+	text-decoration: none;
+}
+
+.personnel-summary {
+	min-height: 56px;
+	padding: 0.2rem 0;
+}
+
+.personnel-avatar {
+	border: 3px solid #28a745;
+	object-fit: cover;
+	flex: 0 0 auto;
+}
+
+.personnel-name {
+	line-height: 1.15;
+	letter-spacing: 0.01em;
+	color: #364150;
+}
+
+.personnel-meta-row {
+	line-height: 1.1;
+}
+
+.personnel-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.28rem;
+	font-size: 0.74rem;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	padding: 0.4rem 0.62rem;
+	line-height: 1;
+	border: 1px solid transparent;
+	border-radius: 999px;
+}
+
+.personnel-chip-id {
+	background-color: #f4f7fb;
+	border-color: #b9c8d6;
+	color: #233444;
+}
+
+.personnel-chip-image {
+	border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.personnel-chip-muted {
+	background-color: #eef2f6;
+	border-color: #c7d2de;
+	color: #405365;
+}
+
+.personnel-chip-ok {
+	background-color: #e8f8ee;
+	border-color: #8dd8a7;
+	color: #1f6d3a;
+}
+
+.personnel-chip-warn {
+	background-color: #fff4dc;
+	border-color: #ffd28a;
+	color: #7f4e00;
+}
+
+.personnel-chip-shift-name {
+	background-color: #e9f3ff;
+	border-color: #9cc6f6;
+	color: #124e87;
+}
+
+.personnel-chip-shift-regular {
+	background-color: #e8f8ee;
+	border-color: #8dd8a7;
+	color: #1f6d3a;
+}
+
+.personnel-chip-shift-night {
+	background-color: #e9ecff;
+	border-color: #aab5f5;
+	color: #2c3f90;
+}
+
+.personnel-chip-shift-24h {
+	background-color: #fff3db;
+	border-color: #ffcd7a;
+	color: #7c4a00;
+}
+
+.personnel-chip-shift-open {
+	background-color: #e8f7fb;
+	border-color: #9fd9eb;
+	color: #0f5d73;
+}
+
+.personnel-chip .fa {
+	font-size: 0.78rem;
+	opacity: 0.9;
+}
+
+@media (max-width: 575.98px) {
+	.personnel-avatar {
+		margin-right: 0 !important;
+		margin-bottom: 0.6rem;
+	}
+
+	.personnel-name {
+		font-size: 1.12rem;
+	}
+
+	.personnel-chip {
+		margin-bottom: 0.35rem;
+	}
+}
+
+/* Edit personnel form */
+.personnel-form-shell {
+	border: 1px solid #dbe2e8;
+	border-radius: 8px;
+	background-color: #f4f7fa;
+	padding: 0.9rem;
+}
+
+.personnel-form-body {
+	background-color: transparent;
+}
+
+.personnel-form-header {
+	background: linear-gradient(135deg, #f7fafc 0%, #edf3f7 100%);
+	border-bottom: 1px solid #dbe2e8;
+	border-radius: 6px;
+	padding: 0.9rem 1rem;
+}
+
+.personnel-form-header h4 {
+	font-weight: 700;
+	color: #2f3d4a;
+}
+
+.personnel-form-header p {
+	font-size: 0.9rem;
+	color: #5d6d7e;
+}
+
+.personnel-category-card {
+	border: 1px solid #cfdce8;
+	border-left: 4px solid #1fb45c;
+	border-radius: 7px;
+	box-shadow: 0 6px 18px rgba(35, 49, 63, 0.08);
+	background-color: #ffffff;
+	padding: 1rem;
+}
+
+.personnel-form-title {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #33475b;
+	margin-bottom: 0.9rem;
+	padding-bottom: 0.4rem;
+	border-bottom: 2px solid #e8eef4;
+}
+
+.personnel-form-section label {
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: #3f4f5e;
+	margin-bottom: 0.35rem;
+}
+
+.personnel-form-section .form-control,
+.personnel-form-section .custom-select,
+.personnel-form-section select {
+	border-color: #cad5df;
+	min-height: 40px;
+	box-shadow: none;
+}
+
+.personnel-form-section .form-control:focus,
+.personnel-form-section .custom-select:focus,
+.personnel-form-section select:focus {
+	border-color: #1fb45c;
+	box-shadow: 0 0 0 0.15rem rgba(31, 180, 92, 0.18);
+}
+
+.personnel-form-actions {
+	margin: 0.8rem 0 1rem;
+	padding: 0 0.15rem;
+}
+
+/* Global form consistency layer (main + payroll) */
+form {
+	background-color: transparent;
+}
+
+form .form-group {
+	margin-bottom: 0.9rem;
+}
+
+form label,
+form .col-form-label,
+form .form-text {
+	font-size: 0.82rem;
+}
+
+form label,
+form .col-form-label {
+	font-weight: 600;
+	color: #3f4f5e;
+	margin-bottom: 0.3rem;
+}
+
+form .form-text {
+	color: #6c7b88;
+	margin-top: 0.2rem;
+}
+
+form .form-control,
+form .custom-select,
+form select.form-control,
+form textarea.form-control {
+	border-color: #cad5df;
+	min-height: 38px;
+	border-radius: 4px;
+	box-shadow: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+form textarea.form-control {
+	min-height: 90px;
+}
+
+form .form-control:focus,
+form .custom-select:focus,
+form select.form-control:focus,
+form textarea.form-control:focus {
+	border-color: #1fb45c;
+	box-shadow: 0 0 0 0.15rem rgba(31, 180, 92, 0.16);
+}
+
+form .input-group .btn,
+form .btn {
+	border-radius: 4px;
+}
+
+form .input-group .form-control {
+	min-height: 38px;
+}
+
+/* Normalize card-like sections used by forms */
+.personnel-category-card,
+.form-section-card,
+.modal .card {
+	background-color: #fff;
+	border: 1px solid #d7e1ea;
+	border-radius: 7px;
+	box-shadow: 0 4px 14px rgba(35, 49, 63, 0.06);
+}
+
+/* Modal forms */
+.modal-content {
+	border: 1px solid #d6e0e8;
+	border-radius: 8px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+	background: linear-gradient(135deg, #f7fafc 0%, #edf3f7 100%);
+	border-bottom: 1px solid #dbe2e8;
+}
+
+.modal-title {
+	font-weight: 700;
+	color: #33475b;
+}
+
+.modal-body {
+	background-color: #fbfdff;
+}
+
+.modal-footer {
+	border-top: 1px solid #dbe2e8;
+	background-color: #f8fbfe;
+}
