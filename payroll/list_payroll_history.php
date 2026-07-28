@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Payroll History / Payroll Runs List
  * View all payroll runs with filtering and search
@@ -41,7 +41,7 @@ $page_title = "Payroll History";
         .stat-value {
             font-size: 2rem;
             font-weight: bold;
-            color: #667eea;
+            color: #33b35a;
         }
         .stat-label {
             color: #6c757d;

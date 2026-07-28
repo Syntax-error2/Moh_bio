@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Payroll Profile Management
  * Manage payroll templates for easy cloning and reuse
@@ -85,12 +85,12 @@ $page_title = "Payroll Profiles (Templates)";
             margin-bottom: 20px;
         }
         .default-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #33b35a;
             color: white;
             font-weight: 600;
         }
         .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #33b35a;
             color: white;
             padding: 20px;
             border-radius: 8px;
@@ -153,19 +153,19 @@ $page_title = "Payroll Profiles (Templates)";
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <div class="stats-card" style="background: #33b35a;">
                 <h3><?php echo $stats['active_profiles']; ?></h3>
                 <p><i class="fa fa-check-circle"></i> Active Profiles</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);">
+            <div class="stats-card" style="background: #33b35a;">
                 <h3><?php echo $stats['default_profiles']; ?></h3>
                 <p><i class="fa fa-star"></i> Default Profiles</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card" style="background: linear-gradient(135deg, #283c86 0%, #45a247 100%);">
+            <div class="stats-card" style="background: #33b35a;">
                 <h3><?php echo $stats['regular_count']; ?></h3>
                 <p><i class="fa fa-calendar"></i> Regular Payrolls</p>
             </div>

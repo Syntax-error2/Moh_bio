@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Generate Payroll from Profile
  * Creates a new payroll run based on a template/profile
@@ -77,7 +77,7 @@ $page_title = "Generate Payroll from Profile";
     
     <style>
         .profile-info-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #33b35a;
             color: white;
             padding: 25px;
             border-radius: 8px;
@@ -102,7 +102,7 @@ $page_title = "Generate Payroll from Profile";
         .item-count {
             font-size: 2rem;
             font-weight: bold;
-            color: #667eea;
+            color: #33b35a;
         }
         .generate-section {
             background: #fff3cd;

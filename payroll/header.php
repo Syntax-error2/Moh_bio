@@ -1,17 +1,16 @@
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>HRMS - Payroll System</title>
-    <meta name="description" content="MOH HRMS Payroll Management System" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="all,follow" />
-    
-    <!-- Favicon to prevent 404 errors -->
-    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKkSURBVFiFzZdNaBNBGIafmWw2u0mTNrFpbYwKihcPHjx4EfHgxYMHQRBE8OJBEAQRvHjw4EEQxYMHQRAEQRBBEEEQQRAEEQRBBEEQQRBBEEXwZ2vTpknTZjeb/TkYk5jdTdLY0PjCwuzMfN/zzjvfzHwjqKoqR6mrqysAXABOAy1ADagCH4H3wCugpKpqLVGhSALAMeAe0AEchFYGngMPgZ9xSuIC7gF3gJYkVf8Bz4C7QDkuwA6wQvKXA7gOrAKORImEBVwBriYrGIUrcBmwRwmEBVwEziav54dzwCW0w2giLOBcknpxOAsUwgJOJ6kVlyKQDws4kZROAhwPC2hPUicB7UAbgDMs4GiSOnFRVdWnqmo5u93eDrSGBRxJUqspDgO2qIDWlDQawm63twE0hwUcSkmjIVpbW1sBbFEBzcWN4HA4AFxRAbakdBrA6XQCWKMCDqWkEwrDMCzAfn5+XgU8UQH7UtIJxWAwAFABaowVFYBqVICWkk4oDMNwAs6ogEpKOqGoVqsOAFdUQDklnVBUKhUn4I4KKKakkxilUskN2KMCfqWkkxi/f/92A/aogB8p6STG9+/fPWhbqS8q4FtKOolRLBa9aN1wMSrgU0o6iVEsFn3AXlTA+5R0EuPt27c+YC8qYDUlncRYXV31AzVgNypgOSWdxFheXg4ANeB7VMCblHQS482bNwFgB1iKCnidkk5iLC4uBoEd4FVUQF5VVW+DdeLicrlcAWAHeB4V8AJ4maBiXLwEXgN1YCku4DnwIwHFuPgBPEHrftGJ0+0sAA+ARgQb4QEwA1SiAkASEeeBKbSeaJRWlmZVVfVG3USdSl3AJNqB4wCagRqwBXwB5oGXwF/gQOAviTmyDhjuYqQAAAAASUVORK5CYII=">
-    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKkSURBVFiFzZdNaBNBGIafmWw2u0mTNrFpbYwKihcPHjx4EfHgxYMHQRBE8OJBEAQRvHjw4EEQxYMHQRAEQRBBEEEQQRAEEQRBBEEQQRBBEEXwZ2vTpknTZjeb/TkYk5jdTdLY0PjCwuzMfN/zzjvfzHwjqKoqR6mrqysAXABOAy1ADagCH4H3wCugpKpqLVGhSALAMeAe0AEchFYGngMPgZ9xSuIC7gF3gJYkVf8Bz4C7QDkuwA6wQvKXA7gOrAKORImEBVwBriYrGIUrcBmwRwmEBVwEziav54dzwCW0w2giLOBcknpxOAsUwgJOJ6kVlyKQDws4kZROAhwPC2hPUicB7UAbgDMs4GiSOnFRVdWnqmo5u93eDrSGBRxJUqspDgO2qIDWlDQawm63twE0hwUcSkmjIVpbW1sBbFEBzcWN4HA4AFxRAbakdBrA6XQCWKMCDqWkEwrDMCzAfn5+XgU8UQH7UtIJxWAwAFABaowVFYBqVICWkk4oDMNwAs6ogEpKOqGoVqsOAFdUQDklnVBUKhUn4I4KKKakkxilUskN2KMCfqWkkxi/f/92A/aogB8p6STG9+/fPWhbqS8q4FtKOolRLBa9aN1wMSrgU0o6iVEsFn3AXlTA+5R0EuPt27c+YC8qYDUlncRYXV31AzVgNypgOSWdxFheXg4ANeB7VMCblHQS482bNwFgB1iKCnidkk5iLC4uBoEd4FVUQF5VVW+DdeLicrlcAWAHeB4V8AJ4maBiXLwEXgN1YCku4DnwIwHFuPgBPEHrftGJ0+0sAA+ARgQb4QEwA1SiAkASEeeBKbSeaJRWlmZVVfVG3USdSl3AJNqB4wCagRqwBXwB5oGXwF/gQOAviTmyDhjuYqQAAAAASUVORK5CYII="
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title><?php echo $sf_row['institution_name']; ?></title>
+    <meta name="description" content="RFID DTR">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="all,follow">
     
     <!-- data table -->
     <link rel="stylesheet" type="text/css" href="../DataTables/datatables.min.css"/>
+    
+    <!-- Select2 CSS for searchable dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
     <style>
     div.dataTables_wrapper {
@@ -37,7 +36,7 @@
       padding-top: 12px;
       padding-bottom: 12px;
       text-align: left;
-      background-color: #2b90d9;
+      background-color: #02c748;
       color: white;
     }
     
@@ -58,25 +57,25 @@
     </style>
      
     <!-- Bootstrap CSS-->
-    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css" />
     <!-- Font Awesome CSS-->
-    <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.min.css" />
     <!-- Fontastic Custom icon font-->
-    <link rel="stylesheet" href="../css/fontastic.css">
+    <link rel="stylesheet" href="../css/fontastic.css" />
     <!-- Google fonts - Roboto -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" />
     <!-- jQuery Circle-->
-    <link rel="stylesheet" href="../css/grasp_mobile_progress_circle-1.0.0.min.css">
+    <link rel="stylesheet" href="../css/grasp_mobile_progress_circle-1.0.0.min.css" />
     <!-- Custom Scrollbar-->
-    <link rel="stylesheet" href="../vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css">
+    <link rel="stylesheet" href="../vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css" />
     <!-- theme stylesheet-->
-    <link rel="stylesheet" href="../css/style.blue.css" id="theme-stylesheet">
+    <link rel="stylesheet" href="../css/style.default.css" id="theme-stylesheet" />
     <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="../css/custom.css">
+    <link rel="stylesheet" href="../css/custom.css" />
     
      
     <!-- Favicon-->
-    <link rel="shortcut icon" href="../img/<?php echo $sf_row['logo']; ?>">
+    <link rel="shortcut icon" href="../img/<?php echo $sf_row['logo']; ?>?v=<?php echo time(); ?>" type="image/jpeg" />
     <!-- Tweaks for older IEs--><!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->

@@ -95,6 +95,43 @@
               </ul>
             </li>
             
+            <li><a href="#payroll_dd" aria-expanded="false" data-toggle="collapse"> <i class="icon-bill"></i>Payroll System </a>
+              <ul id="payroll_dd" class="collapse list-unstyled ">
+                <li><a href="payroll/home.php"> <i class="icon-home"></i>Dashboard</a></li>
+                <li><a href="payroll/list_personnel.php?dept=All"> <i class="icon-user"></i>Personnels</a></li>
+                
+                <li><a href="#main_payroll_templates_dd" aria-expanded="false" data-toggle="collapse"> <i class="icon-bill"></i>Payroll Templates</a>
+                  <ul id="main_payroll_templates_dd" class="collapse list-unstyled" style="padding-left: 20px; font-size: 0.9em;">
+                    <li><a href="payroll/list_payroll_profiles.php"> <i class="fa fa-folder-open"></i>All Templates</a></li>
+                    <li><a href="payroll/list_payroll_profiles.php?type=regular"> <i class="fa fa-calendar"></i>Regular Payroll</a></li>
+                    <li><a href="payroll/list_payroll_profiles.php?type=13th_month"> <i class="fa fa-gift"></i>13th Month</a></li>
+                    <li><a href="payroll/list_payroll_profiles.php?type=bonus"> <i class="fa fa-star"></i>Bonus</a></li>
+                    <li><a href="payroll/list_payroll_profiles.php?type=special"> <i class="fa fa-certificate"></i>Special Payroll</a></li>
+                  </ul>
+                </li>
+                
+                <li><a href="#main_payroll_history_dd" aria-expanded="false" data-toggle="collapse"> <i class="icon-clock"></i>Payroll History</a>
+                  <ul id="main_payroll_history_dd" class="collapse list-unstyled" style="padding-left: 20px; font-size: 0.9em;">
+                    <li><a href="payroll/list_payroll_history.php"> <i class="fa fa-list"></i>All Payroll Runs</a></li>
+                    <li><a href="payroll/list_payroll_history.php?status=draft"> <i class="fa fa-pencil"></i>Draft Runs</a></li>
+                    <li><a href="payroll/list_payroll_history.php?status=pending"> <i class="fa fa-clock-o"></i>Pending Approval</a></li>
+                    <li><a href="payroll/list_payroll_history.php?status=completed"> <i class="fa fa-check-circle"></i>Completed Runs</a></li>
+                  </ul>
+                </li>
+                
+                <li><a href="#main_income_deductions_dd" aria-expanded="false" data-toggle="collapse"> <i class="fa fa-money"></i>Income & Deductions</a>
+                  <ul id="main_income_deductions_dd" class="collapse list-unstyled" style="padding-left: 20px; font-size: 0.9em;">
+                    <li><a href="payroll/list_personnel.php?dept=All"> <i class="fa fa-plus-circle"></i>Personnel Income</a></li>
+                    <li><a href="payroll/list_personnel.php?dept=All"> <i class="fa fa-minus-circle"></i>Personnel Deductions</a></li>
+                    <li><a href="payroll/income.php"> <i class="fa fa-list-alt"></i>Income Reference</a></li>
+                    <li><a href="payroll/deductions.php"> <i class="fa fa-list-alt"></i>Deduction Reference</a></li>
+                  </ul>
+                </li>
+                
+                <li><a href="payroll/printReports.php"> <i class="icon-page"></i>Reports</a></li>
+              </ul>
+            </li>
+            
             <li><a href="#others_dd" aria-expanded="false" data-toggle="collapse"> <i class="icon-screen"></i>Other Settings </a>
               <ul id="others_dd" class="collapse list-unstyled ">
                 

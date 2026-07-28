@@ -108,7 +108,7 @@ $page_title = $mode === 'edit' ? "Edit Payroll Profile" : "View Payroll Profile"
     
     <style>
         .profile-header-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #33b35a;
             color: white;
             padding: 30px;
             border-radius: 8px;
@@ -146,7 +146,7 @@ $page_title = $mode === 'edit' ? "Edit Payroll Profile" : "View Payroll Profile"
             color: #2c3e50;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #33b35a;
         }
         .info-row {
             padding: 12px 0;
@@ -205,8 +205,8 @@ $page_title = $mode === 'edit' ? "Edit Payroll Profile" : "View Payroll Profile"
             color: #856404;
         }
         .filter-card {
-            background: #e7f3ff;
-            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 10px;

@@ -1,0 +1,17 @@
+{
+    "tables": {
+        "pr_tbl_payroll_profiles": "4 rows",
+        "pr_tbl_payroll_profile_income": "3 rows",
+        "pr_tbl_payroll_profile_deductions": "3 rows",
+        "pr_tbl_payroll_profile_filters": "2 rows",
+        "pr_tbl_payroll_runs": "3 rows",
+        "pr_tbl_payroll_run_details": "2494 rows",
+        "pr_tbl_payroll_run_income": "3160 rows",
+        "pr_tbl_payroll_run_deductions": "2990 rows",
+        "pr_tbl_payroll_snapshots": "104 rows",
+        "pr_tbl_income": "3 rows",
+        "pr_tbl_deductions": "4 rows",
+        "pr_tbl_personnel_income": "1 rows",
+        "pr_tbl_personnel_deductions": "0 rows"
+    }
+}

@@ -59,9 +59,197 @@
     }
     ?>
     
-        <section class="statistics">
-         <div class="container-fluid">
-          <div class="row d-flex">
+    <style>
+    .dashboard-heading {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #1a4d2e;
+        border-left: 5px solid #28a745;
+        padding-left: 10px;
+        margin-bottom: 20px;
+        margin-top: 30px;
+    }
+    .bwd-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 24px;
+        border: none;
+        margin-bottom: 24px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .bwd-card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #1a4d2e;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .bwd-dept-head {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px 15px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .bwd-dept-head .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #d4edda;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    .bwd-dept-head-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .bwd-dept-head-label {
+        font-size: 0.7rem;
+        color: #6c757d;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .bwd-dept-head-name {
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: #dc3545;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .bwd-stats-row {
+        display: flex;
+        justify-content: space-between;
+        text-align: center;
+        margin-bottom: 15px;
+        margin-top: auto;
+    }
+    .bwd-stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 33%;
+    }
+    .bwd-stat-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1a4d2e;
+        line-height: 1.2;
+    }
+    .bwd-stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .bwd-stat-label i {
+        color: #28a745;
+    }
+    .bwd-progress-bar {
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 4px;
+        display: flex;
+        overflow: hidden;
+    }
+    .bwd-progress-male {
+        background: #1a4d2e;
+        height: 100%;
+    }
+    .bwd-progress-female {
+        background: #28a745;
+        height: 100%;
+    }
+    </style>
+
+    <div class="container-fluid mt-3">
+        <h3 class="dashboard-heading">System Overview</h3>
+        <div class="row">
+            <!-- Card 1: Registered Employees -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                 <div class="bwd-card pb-3">
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">Registered Employees</div>
+                     <h2 class="display-4" style="color: #28a745; font-weight: 700; margin-bottom: 20px;"><?php echo $perCtr_all; ?></h2>
+                     <div class="mt-auto">
+                         <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 1px dashed #e9ecef;">
+                             <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-male" style="color: #28a745; width: 16px; text-align: center;"></i> Male</span>
+                             <strong style="color: #28a745;"><?php echo $perCtrM_all; ?></strong>
+                         </div>
+                         <div class="d-flex justify-content-between">
+                             <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-female" style="color: #28a745; width: 16px; text-align: center;"></i> Female</span>
+                             <strong style="color: #28a745;"><?php echo $perCtrF_all; ?></strong>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Card 2: Active Job Status -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                 <div class="bwd-card pb-3">
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">Active Job Status</div>
+                     <div class="mt-2">
+                        <?php
+                        $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Active' ORDER BY emp_stat_name ASC");
+                        while ($empStat_row = $empStat_query->fetch()) {
+                            $empStatCtr_query = $conn->query("SELECT COUNT(*) FROM personnels WHERE empStat_id='".$empStat_row['empStat_id']."' AND separation_date IS NULL");
+                            $count = $empStatCtr_query->fetchColumn();
+                            ?>
+                            <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 1px dashed #e9ecef;">
+                                <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-circle" style="color: #28a745; font-size: 8px; vertical-align: middle; margin-right: 8px;"></i> <?php echo $empStat_row['emp_stat_name']; ?></span>
+                                <strong style="color: #28a745;"><?php echo $count; ?></strong>
+                            </div>
+                        <?php } ?>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Card 3: Separated Records -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                 <div class="bwd-card pb-3">
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">Separated Records</div>
+                     <div class="mt-2">
+                        <?php
+                        $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC");
+                        while ($empStat_row = $empStat_query->fetch()) {
+                            $empStatCtr_query = $conn->query("SELECT COUNT(*) FROM personnels WHERE empStat_id='".$empStat_row['empStat_id']."'");
+                            $count = $empStatCtr_query->fetchColumn();
+                            ?>
+                            <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 1px dashed #e9ecef;">
+                                <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-circle" style="color: #28a745; font-size: 8px; vertical-align: middle; margin-right: 8px;"></i> <?php echo $empStat_row['emp_stat_name']; ?></span>
+                                <strong style="color: #dc3545;"><?php echo $count; ?></strong>
+                            </div>
+                        <?php } ?>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Card 4: System Configurations -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                 <div class="bwd-card pb-3">
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">System Configurations</div>
+                     <div class="mt-2">
+                         <div class="d-flex justify-content-between mb-3 pb-3" style="border-bottom: 1px dashed #e9ecef;">
+                             <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-clock-o" style="color: #28a745; margin-right: 8px;"></i> Work Shifts Configured</span>
+                             <strong style="color: #28a745;"><?php echo $shiftTotalCtr ?? '0'; ?></strong>
+                         </div>
+                         <div class="d-flex justify-content-between mb-3 pb-3" style="border-bottom: 1px dashed #e9ecef;">
+                             <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-desktop" style="color: #28a745; margin-right: 8px;"></i> Registered Client CPUs</span>
+                             <strong style="color: #28a745;"><?php echo $client_computerTotalCtr ?? '0'; ?></strong>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+
+        <h3 class="dashboard-heading mt-2">Department Breakdown</h3>
+        <div class="row d-flex align-items-stretch">
              
             <?php
             $dept_off_query = $conn->query("SELECT * FROM dept_offices ORDER BY dept_office_name ASC");
@@ -81,69 +269,82 @@
             $female_per_ctr_count = (int)$female_per_ctr_stmt->fetchColumn();
             ?>
             
-            <div class="col-lg-4" style="margin-bottom: 16px;">
-              <!-- User Actibity-->
-              
-              <div class="card user-activity" style="border-bottom: 2px solid green; border-top: 1px solid green; border-left: 1px solid green; border-right: 1px solid green;">
-                <h2 class="display h4">
-                <button title="Click for Office/Dept options..." data-toggle="dropdown" type="button" class="btn btn-outline-primary btn-sm" style="margin-right: 12px;">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</button>
-                
-                <div class="dropdown-menu">
-                <a title="Click to print list of <?php echo $do_row['dept_office_name']; ?> personnels..." href="printPersonnelPerDept.php?do_id=<?php echo $do_row['do_id']; ?>" target="_blank" class="dropdown-item"><i class="fa fa-users"></i> List of Personnels</a>
-                </div>
-
-                  
-                <a href="list_personnel.php?dept=<?php echo $do_row['do_id']; ?>" style="text-decoration-line: none;" title="Proceed to <?php echo $do_row['dept_office_name']; ?> personnel's list..."><?php echo substr($do_row['dept_office_name'], 0, 15); ?> &raquo;</a></h2>
-                
-                <div class="page-statistics-left">
-                <span><a href="#" data-toggle="modal" data-target="#setDOHead<?php echo $do_row['do_id']; ?>" title="Set Department/Office Head"><i class="fa fa-pencil"></i></a>
-                 
-                 <small><strong>
-                 <?php
-                 $officeHead_stmt = $conn->prepare("SELECT * FROM personnels WHERE personnel_id = :personnel_id");
-                 $officeHead_stmt->execute([':personnel_id' => $do_row['officeHead_id']]);
-                 $oh_row=$officeHead_stmt->fetch();
-                 
-                    if (!empty($oh_row)){
-     
-                        if($oh_row['suffix']=="-")
-                        {
-                            
-                        echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname'];
-                        
-                        }else{
-                            
-                        echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname']." ".$oh_row['suffix'];
-                        
-                        } }else{
-                            echo "No Assigned Personnel";
-                        }
-                 ?>
-                 </strong></small></span><br />
-                 
-                <small>&nbsp;&nbsp;Department/Office Head</small>
+            <div class="col-lg-4 mb-4">
+              <div class="bwd-card">
+                <div class="bwd-card-title">
+                    <a href="list_personnel.php?dept=<?php echo $do_row['do_id']; ?>" style="text-decoration: none; color: #1a4d2e;" title="Proceed to <?php echo htmlspecialchars($do_row['dept_office_name']); ?> personnel's list...">
+                        <?php echo htmlspecialchars($do_row['dept_office_name']); ?>
+                    </a>
+                    
+                    <div class="dropdown">
+                        <button title="Click for Office/Dept options..." data-toggle="dropdown" type="button" class="btn btn-link text-secondary p-0" style="text-decoration: none; box-shadow: none;"><i class="fa fa-ellipsis-v"></i></button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a title="Click to print list of <?php echo htmlspecialchars($do_row['dept_office_name']); ?> personnels..." href="printPersonnelPerDept.php?do_id=<?php echo $do_row['do_id']; ?>" target="_blank" class="dropdown-item"><i class="fa fa-users"></i> List of Personnels</a>
+                            <a href="#" data-toggle="modal" data-target="#setDOHead<?php echo $do_row['do_id']; ?>" class="dropdown-item"><i class="fa fa-pencil"></i> Set Dept/Office Head</a>
+                        </div>
+                    </div>
                 </div>
                 
+                <div class="bwd-dept-head">
+                    <div class="avatar"></div>
+                    <div class="bwd-dept-head-info">
+                        <span class="bwd-dept-head-label">Department Head</span>
+                        <?php
+                         $officeHead_stmt = $conn->prepare("SELECT * FROM personnels WHERE personnel_id = :personnel_id");
+                         $officeHead_stmt->execute([':personnel_id' => $do_row['officeHead_id']]);
+                         $oh_row=$officeHead_stmt->fetch();
+                         
+                            if (!empty($oh_row)){
+                                $name_str = "";
+                                if($oh_row['suffix']=="-") {
+                                    $name_str = $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname'];
+                                } else {
+                                    $name_str = $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname']." ".$oh_row['suffix'];
+                                }
+                                echo '<span class="bwd-dept-head-name" style="color: #333;">'.htmlspecialchars($name_str).'</span>';
+                            } else {
+                                echo '<span class="bwd-dept-head-name">No Assigned Personnel</span>';
+                            }
+                        ?>
+                    </div>
+                </div>
                 
-               <div class="page-statistics d-flex justify-content-between">
-                  <div class="page-statistics-left"><span>Male</span><strong><?php echo $male_per_ctr_count; ?></strong></div>
-                  <div class="page-statistics-center"><span>Female</span><strong><?php echo $female_per_ctr_count; ?></strong></div>
-                  <div class="page-statistics-right"><span>Total</span><strong><?php echo $per_ctr_count; ?></strong></div>
+                <div class="bwd-stats-row">
+                    <div class="bwd-stat-item">
+                        <span class="bwd-stat-value" style="color: #28a745;"><?php echo $male_per_ctr_count; ?></span>
+                        <span class="bwd-stat-label"><i class="fa fa-male"></i> Male</span>
+                    </div>
+                    <div class="bwd-stat-item">
+                        <span class="bwd-stat-value" style="color: #333;"><?php echo $per_ctr_count; ?></span>
+                        <span class="bwd-stat-label"><i class="fa fa-users" style="color: #6c757d;"></i> Total</span>
+                    </div>
+                    <div class="bwd-stat-item">
+                        <span class="bwd-stat-value" style="color: #28a745;"><?php echo $female_per_ctr_count; ?></span>
+                        <span class="bwd-stat-label"><i class="fa fa-female"></i> Female</span>
+                    </div>
+                </div>
+                
+                <?php 
+                $male_pct = 0; $female_pct = 0;
+                if ($per_ctr_count > 0) {
+                    $male_pct = ($male_per_ctr_count / $per_ctr_count) * 100;
+                    $female_pct = ($female_per_ctr_count / $per_ctr_count) * 100;
+                }
+                ?>
+                <div class="bwd-progress-bar mt-2">
+                    <div class="bwd-progress-male" style="width: <?php echo $male_pct; ?>%;"></div>
+                    <div class="bwd-progress-female" style="width: <?php echo $female_pct; ?>%;"></div>
                 </div>
                 
               </div>
             </div>
             
-            
             <?php include('setDOHead_modal.php'); ?>
-            
-            
             
             <?php } ?>
             
-          </div>
         </div>
-      </section>
+    </div>
       
       
       

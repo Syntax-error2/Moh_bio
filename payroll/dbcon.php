@@ -44,37 +44,22 @@ try {
     die("Database connection failed. Please contact the system administrator.");
 }
 
-// Fetch school preferences with specific columns for better performance
 try {
-    $sf_query = $conn->prepare("SELECT deped_id, region, division, schoolName, logo, address, contact FROM school_preferences LIMIT 1");
+    $sf_query = $conn->prepare("SELECT * FROM institution_preferences LIMIT 1");
     $sf_query->execute();
     $sf_row = $sf_query->fetch();
     
-    // Initialize default values if no preferences found
-    if (!$sf_row) {
-        $sf_row = [
-            'deped_id' => '',
-            'region' => '',
-            'division' => '',
-            'schoolName' => 'MOH HRMS',
-            'logo' => 'favicon.ico',
-            'address' => '',
-            'contact' => ''
-        ];
-    }
-} catch (PDOException $e) {
-    error_log("Error fetching school preferences: " . $e->getMessage());
+    $zip_code = $sf_row['zip_code'];
+    $region = $sf_row['region'];
+    $division = $sf_row['division'];
+    $institution_name = $sf_row['institution_name'];
     
-    // Set default values on error
-    $sf_row = [
-        'deped_id' => '',
-        'region' => '',
-        'division' => '',
-        'schoolName' => 'MOH HRMS',
-        'logo' => 'favicon.ico',
-        'address' => '',
-        'contact' => ''
-    ];
+    // Legacy variable names for backward compatibility
+    $deped_id = $zip_code;
+    $schoolName = $institution_name;
+    
+} catch (PDOException $e) {
+    error_log("Error fetching institution preferences: " . $e->getMessage());
 }
 ?>
 

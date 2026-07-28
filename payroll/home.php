@@ -59,7 +59,7 @@ try {
         transform: translateY(-2px);
     }
     .quick-link-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #33b35a;
         color: white;
         border-radius: 8px;
         padding: 25px;
@@ -69,11 +69,14 @@ try {
         transition: all 0.3s ease;
         border: none;
         text-decoration: none;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 160px;
     }
     .quick-link-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 6px 20px rgba(51, 179, 90, 0.4);
         color: white;
         text-decoration: none;
     }
@@ -105,7 +108,7 @@ try {
     .stat-box h3 {
         font-size: 2.5rem;
         margin: 0;
-        color: #667eea;
+        color: #33b35a;
         font-weight: bold;
     }
     .stat-box p {
@@ -115,13 +118,13 @@ try {
     }
     .guide-step {
         background: #f8f9fa;
-        border-left: 4px solid #667eea;
+        border: 1px solid #ddd;
         padding: 15px;
         margin-bottom: 15px;
         border-radius: 4px;
     }
     .guide-step h5 {
-        color: #667eea;
+        color: #33b35a;
         margin: 0 0 10px 0;
         font-weight: 600;
     }
@@ -130,7 +133,7 @@ try {
         color: #495057;
     }
     .welcome-banner {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #33b35a;
         color: white;
         padding: 30px;
         border-radius: 8px;
@@ -152,7 +155,7 @@ try {
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .menu-category h4 {
-        color: #667eea;
+        color: #33b35a;
         margin: 0 0 15px 0;
         padding-bottom: 10px;
         border-bottom: 2px solid #f8f9fa;
@@ -168,7 +171,7 @@ try {
         text-decoration: none;
     }
     .menu-item:hover {
-        background: #667eea;
+        background: #33b35a;
         color: white;
         text-decoration: none;
         transform: translateX(5px);
@@ -260,7 +263,7 @@ if($session_access == "User") { ?>
             
             <!-- Generate Payroll -->
             <div class="col-md-3">
-                <a href="list_payroll_profiles.php" class="quick-link-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <a href="list_payroll_profiles.php" class="quick-link-card">
                     <i class="fa fa-cogs"></i>
                     <h4>Generate Payroll</h4>
                     <p>Create new payroll run</p>
@@ -269,7 +272,7 @@ if($session_access == "User") { ?>
             
             <!-- Payroll History -->
             <div class="col-md-3">
-                <a href="list_payroll_history.php" class="quick-link-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <a href="list_payroll_history.php" class="quick-link-card">
                     <i class="icon-clock"></i>
                     <h4>Payroll History</h4>
                     <p>View all payroll runs</p>
@@ -278,7 +281,7 @@ if($session_access == "User") { ?>
             
             <!-- Personnel -->
             <div class="col-md-3">
-                <a href="list_personnel.php?dept=All" class="quick-link-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <a href="list_personnel.php?dept=All" class="quick-link-card">
                     <i class="icon-user"></i>
                     <h4>Personnel</h4>
                     <p>Manage personnel data</p>
@@ -289,7 +292,7 @@ if($session_access == "User") { ?>
         <div class="row">
             <!-- Income Reference -->
             <div class="col-md-3">
-                <a href="income.php" class="quick-link-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <a href="income.php" class="quick-link-card">
                     <i class="fa fa-money"></i>
                     <h4>Income Reference</h4>
                     <p>Manage income types</p>
@@ -298,7 +301,7 @@ if($session_access == "User") { ?>
             
             <!-- Deduction Reference -->
             <div class="col-md-3">
-                <a href="deductions.php" class="quick-link-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <a href="deductions.php" class="quick-link-card">
                     <i class="fa fa-minus-circle"></i>
                     <h4>Deduction Reference</h4>
                     <p>Manage deduction types</p>
@@ -307,7 +310,7 @@ if($session_access == "User") { ?>
             
             <!-- Reports -->
             <div class="col-md-3">
-                <a href="printReports.php" class="quick-link-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <a href="printReports.php" class="quick-link-card">
                     <i class="icon-page"></i>
                     <h4>Reports</h4>
                     <p>Generate reports</p>
@@ -319,7 +322,7 @@ if($session_access == "User") { ?>
         <div class="row mt-4">
             <div class="col-md-6">
                 <div class="dashboard-card">
-                    <h4 style="color: #667eea; margin-bottom: 20px;">
+                    <h4 style="color: #33b35a; margin-bottom: 20px;">
                         <i class="fa fa-book"></i> Quick Start Guide
                     </h4>
                     
@@ -359,39 +362,39 @@ if($session_access == "User") { ?>
 
             <div class="col-md-6">
                 <div class="dashboard-card">
-                    <h4 style="color: #667eea; margin-bottom: 20px;">
+                    <h4 style="color: #33b35a; margin-bottom: 20px;">
                         <i class="fa fa-map"></i> Payroll Workflow
                     </h4>
                     
                     <div style="text-align: center; padding: 20px;">
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                            <i class="icon-bill" style="font-size: 2rem; color: #667eea;"></i>
+                            <i class="icon-bill" style="font-size: 2rem; color: #33b35a;"></i>
                             <h5 style="margin: 10px 0 5px 0;">Create Template</h5>
                             <p style="margin: 0; font-size: 0.85rem; color: #6c757d;">Define income & deduction items</p>
                         </div>
                         
                         <div style="text-align: center; margin: 10px 0;">
-                            <i class="fa fa-arrow-down" style="font-size: 1.5rem; color: #667eea;"></i>
+                            <i class="fa fa-arrow-down" style="font-size: 1.5rem; color: #33b35a;"></i>
                         </div>
                         
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                            <i class="icon-user" style="font-size: 2rem; color: #667eea;"></i>
+                            <i class="icon-user" style="font-size: 2rem; color: #33b35a;"></i>
                             <h5 style="margin: 10px 0 5px 0;">Configure Personnel</h5>
                             <p style="margin: 0; font-size: 0.85rem; color: #6c757d;">Set individual amounts</p>
                         </div>
                         
                         <div style="text-align: center; margin: 10px 0;">
-                            <i class="fa fa-arrow-down" style="font-size: 1.5rem; color: #667eea;"></i>
+                            <i class="fa fa-arrow-down" style="font-size: 1.5rem; color: #33b35a;"></i>
                         </div>
                         
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                            <i class="fa fa-cogs" style="font-size: 2rem; color: #667eea;"></i>
+                            <i class="fa fa-cogs" style="font-size: 2rem; color: #33b35a;"></i>
                             <h5 style="margin: 10px 0 5px 0;">Generate Payroll Run</h5>
                             <p style="margin: 0; font-size: 0.85rem; color: #6c757d;">Process payroll automatically</p>
                         </div>
                         
                         <div style="text-align: center; margin: 10px 0;">
-                            <i class="fa fa-arrow-down" style="font-size: 1.5rem; color: #667eea;"></i>
+                            <i class="fa fa-arrow-down" style="font-size: 1.5rem; color: #33b35a;"></i>
                         </div>
                         
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
@@ -501,7 +504,7 @@ if($session_access == "User") { ?>
         <!-- Help & Support -->
         <div class="row mt-4">
             <div class="col-md-12">
-                <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="dashboard-card" style="background: #33b35a; color: white;">
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h4 style="color: white; margin: 0 0 10px 0;">
