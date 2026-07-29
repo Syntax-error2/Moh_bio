@@ -45,29 +45,37 @@
           <div class="row">
             <div class="col-lg-12 col-md-12">
               
-                <div class="tab">
+                <div class="d-flex flex-wrap justify-content-center pb-3 pt-3 px-3" style="gap: 8px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px;">
                 
-                <?php if($_GET['dept'] == 'All'){ ?>
-                <a title="Search personnels..." href="list_personnel.php?dept=All" class="tablinks active" style="font-weight: bolder;">All</a>
-                <?php }else{?>
-                <a title="Search personnels..." href="list_personnel.php?dept=All" class="tablinks">All</a>
-                <?php } ?>
+                <?php 
+                $isAllActive = ($_GET['dept'] ?? '') == 'All';
+                $allBtnStyle = $isAllActive ? 'background-color: #28a745; color: white; border: 1px solid #28a745; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);' : 'background-color: white; color: #495057; border: 1px solid #ced4da;';
+                ?>
+                <a href="list_personnel.php?dept=All" 
+                   class="btn btn-sm" 
+                   style="border-radius: 20px; font-weight: 500; font-size: 0.85rem; padding: 5px 15px; margin: 2px; transition: all 0.2s ease; <?php echo $allBtnStyle; ?>"
+                   onmouseover="if(!<?php echo $isAllActive ? 'true' : 'false'; ?>) { this.style.backgroundColor='#e2e6ea'; }"
+                   onmouseout="if(!<?php echo $isAllActive ? 'true' : 'false'; ?>) { this.style.backgroundColor='white'; }">
+                   All
+                </a>
                 
                 <?php
                 $dept_off_query = $conn->prepare("SELECT * FROM dept_offices ORDER BY dept_office_name ASC");
                 $dept_off_query->execute();
                 while ($do_row = $dept_off_query->fetch()) 
-                {  ?>
+                {  
+                    $isActive = ($_GET['dept'] ?? '') == $do_row['do_id'];
+                    $btnStyle = $isActive ? 'background-color: #28a745; color: white; border: 1px solid #28a745; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);' : 'background-color: white; color: #495057; border: 1px solid #ced4da;';
+                ?>
                 
+                <a href="list_personnel.php?dept=<?php echo $do_row['do_id']; ?>" 
+                   class="btn btn-sm" 
+                   style="border-radius: 20px; font-weight: 500; font-size: 0.85rem; padding: 5px 15px; margin: 2px; transition: all 0.2s ease; <?php echo $btnStyle; ?>"
+                   onmouseover="if(!<?php echo $isActive ? 'true' : 'false'; ?>) { this.style.backgroundColor='#e2e6ea'; }"
+                   onmouseout="if(!<?php echo $isActive ? 'true' : 'false'; ?>) { this.style.backgroundColor='white'; }">
+                   <?php echo $do_row['dept_office_name']; ?>
+                </a>
                 
-                
-                <?php if($_GET['dept']==$do_row['do_id']){ ?>
-                <a title="List of personnel in the <?php echo $do_row['dept_office_name']; ?>" href="list_personnel.php?dept=<?php echo $do_row['do_id']; ?>" class="tablinks active" style="font-weight: bolder;"><?php echo $do_row['dept_office_name']; ?></a>
-                <?php }else{?>
-                <a title="List of personnel in the <?php echo $do_row['dept_office_name']; ?>" href="list_personnel.php?dept=<?php echo $do_row['do_id']; ?>" class="tablinks"><?php echo $do_row['dept_office_name']; ?></a>
-                <?php } ?>
-                
-           
                 <?php } ?>
                 </div>
                 

@@ -30,7 +30,7 @@
     <script>
         window.location = 'list_personnel_individual_details.php?dept=<?php echo $user_dept; ?>&personnel_id=<?php echo $user_personnel_id; ?>';
     </script>
-    <?php }elseif($session_access==='Administrator'){
+    <?php }elseif($session_access==='Admin'){
     
     include('quick_count.php');
     
@@ -38,7 +38,7 @@
     
     <?php if($session_access==='User'){ ?>
     
-    <?php }elseif($session_access==='Administrator'){  ?>
+    <?php }elseif($session_access==='Admin'){  ?>
     
     <?php 
     // Display notification if monthly leave credits were just processed

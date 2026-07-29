@@ -195,9 +195,9 @@ if($session_access == "User") { ?>
     <script>
         window.location = 'list_personnel_individual_details.php?dept=<?php echo $user_dept; ?>&personnel_id=<?php echo $user_personnel_id; ?>';
     </script>
-<?php } elseif($session_access == "Administrator") { } ?>
+<?php } elseif($session_access == "Admin") { } ?>
 
-<?php if($session_access == "Administrator") { ?>
+<?php if($session_access == "Admin") { ?>
 
 <section class="dashboard" style="padding: 20px;">
     <div class="container-fluid">

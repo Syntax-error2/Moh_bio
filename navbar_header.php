@@ -14,7 +14,7 @@
               
               <?php if($session_access==='User'){ ?>
               
-                <?php }elseif($session_access==='Administrator'){
+                <?php }elseif($session_access==='Admin'){
                     
                     $mm= date("m"); //month
                     $dd=date("d"); //day

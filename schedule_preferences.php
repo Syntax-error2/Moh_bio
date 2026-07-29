@@ -50,7 +50,7 @@
             $schedType_row=$schedType_query->fetch();
             ?>
             
-            <li class="breadcrumb-item active">Schedule Preferences - <?php echo $don_row['dept_office_name']; ?></li>
+            <li class="breadcrumb-item active">Schedule Preferences - <?php echo isset($don_row['dept_office_name']) ? $don_row['dept_office_name'] : ''; ?></li>
  
           </ul>
           
@@ -108,27 +108,22 @@
                 
                 <div id="updates-boxContacts" role="tabpanel" class="collapse show">
                 
-                <div style="margin-bottom: 3px;" class="tab">
-                
-                
+                <div class="d-flex flex-wrap justify-content-center pb-3 pt-3 px-3" style="gap: 8px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px;">
                 <?php
                 $do_id_off_query = $conn->query("SELECT * FROM dept_offices ORDER BY dept_office_name ASC");
                 while ($do_row = $do_id_off_query->fetch()) 
-                {  ?>
-                
-                
-                
-                <?php if($_GET['do_id']==$do_row['do_id']){ ?>
-                <a title="List of schedules of <?php echo $do_row['dept_office_name']; ?>" href="schedule_preferences.php?do_id=<?php echo $do_row['do_id']; ?>&shift_id=&shift=&type=" class="tablinks active" style="font-weight: bolder;"><?php echo $do_row['dept_office_name']; ?></a>
-                <?php }else{?>
-                <a title="List of schedules of <?php echo $do_row['dept_office_name']; ?>" href="schedule_preferences.php?do_id=<?php echo $do_row['do_id']; ?>&shift_id=&shift=&type=" class="tablinks"><?php echo $do_row['dept_office_name']; ?></a>
+                { 
+                    $isActive = ($_GET['do_id'] ?? '') == $do_row['do_id'];
+                    $btnStyle = $isActive ? 'background-color: #28a745; color: white; border: 1px solid #28a745; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);' : 'background-color: white; color: #495057; border: 1px solid #ced4da;';
+                ?>
+                <a href="schedule_preferences.php?do_id=<?php echo $do_row['do_id']; ?>&shift_id=&shift=&type=" 
+                   class="btn btn-sm"
+                   style="border-radius: 20px; font-weight: 500; font-size: 0.85rem; padding: 5px 15px; margin: 2px; transition: all 0.2s ease; <?php echo $btnStyle; ?>"
+                   onmouseover="if(!<?php echo $isActive ? 'true' : 'false'; ?>) { this.style.backgroundColor='#e2e6ea'; }"
+                   onmouseout="if(!<?php echo $isActive ? 'true' : 'false'; ?>) { this.style.backgroundColor='white'; }">
+                   <?php echo $do_row['dept_office_name']; ?>
+                </a>
                 <?php } ?>
-                
-           
-                <?php } ?>
-                
-              
-                
                 </div>
                 
                 <?php if($_GET['do_id']!=""){ ?>
@@ -201,7 +196,7 @@
                 <?php } ?>
                 
              
-                <h3 style="margin: 16px 16px 16px 16px;"><?php echo $don_row['dept_office_name']; ?></h3>
+                <h3 style="margin: 16px 16px 16px 16px;"><?php echo isset($don_row['dept_office_name']) ? $don_row['dept_office_name'] : ''; ?></h3>
                
                   
                 <?php include('list_sched.php'); ?>

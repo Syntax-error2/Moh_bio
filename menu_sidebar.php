@@ -30,7 +30,7 @@
         
         
         
-        <?php if($session_access==='User') { ?>
+        <?php if(!in_array('hris', $_SESSION['allowed_modules'])) { ?>
         <div class="main-menu">
           <h5 class="sidenav-heading">MENU</h5>
           <ul id="side-main-menu" class="side-menu list-unstyled">
@@ -39,7 +39,7 @@
             <li><a href="list_news_users.php"> <i class="icon-bill"></i>News &amp; Announcements</a></li>
           </ul>
         </div>
-        <?php }elseif($session_access==='Administrator'){ ?>
+        <?php } else { ?>
             
         
         <!-- 1 Sidebar Navigation Menus-->
@@ -95,6 +95,7 @@
               </ul>
             </li>
             
+            <?php if(in_array('payroll', $_SESSION['allowed_modules'])) { ?>
             <li><a href="#payroll_dd" aria-expanded="false" data-toggle="collapse"> <i class="icon-bill"></i>Payroll System </a>
               <ul id="payroll_dd" class="collapse list-unstyled ">
                 <li><a href="payroll/home.php"> <i class="icon-home"></i>Dashboard</a></li>
@@ -121,8 +122,8 @@
                 
                 <li><a href="#main_income_deductions_dd" aria-expanded="false" data-toggle="collapse"> <i class="fa fa-money"></i>Income & Deductions</a>
                   <ul id="main_income_deductions_dd" class="collapse list-unstyled" style="padding-left: 20px; font-size: 0.9em;">
-                    <li><a href="payroll/list_personnel.php?dept=All"> <i class="fa fa-plus-circle"></i>Personnel Income</a></li>
-                    <li><a href="payroll/list_personnel.php?dept=All"> <i class="fa fa-minus-circle"></i>Personnel Deductions</a></li>
+                    <li><a href="payroll/list_personnel_income.php?dept=All"> <i class="fa fa-plus-circle"></i>Personnel Income</a></li>
+                    <li><a href="payroll/list_personnel_deductions.php?dept=All"> <i class="fa fa-minus-circle"></i>Personnel Deductions</a></li>
                     <li><a href="payroll/income.php"> <i class="fa fa-list-alt"></i>Income Reference</a></li>
                     <li><a href="payroll/deductions.php"> <i class="fa fa-list-alt"></i>Deduction Reference</a></li>
                   </ul>
@@ -131,6 +132,7 @@
                 <li><a href="payroll/printReports.php"> <i class="icon-page"></i>Reports</a></li>
               </ul>
             </li>
+            <?php } ?>
             
             <li><a href="#others_dd" aria-expanded="false" data-toggle="collapse"> <i class="icon-screen"></i>Other Settings </a>
               <ul id="others_dd" class="collapse list-unstyled ">
@@ -141,9 +143,11 @@
                 <li><a href="list_slides.php"> <i class="icon-picture"></i>Slides</a></li>
                 
                 <li><a href="csvFile_import.php"> <i class="fa fa-file-excel-o"></i>CSV Files</a></li>
-                
                 <li><a href="list_dbFiles_manager.php"> <i class="fa fa-database"></i>DB Files</a></li>
-                
+                <?php if ($session_access === 'Admin') { ?>
+                <li><a href="manage_users.php"> <i class="fa fa-users"></i>Manage Users</a></li>
+                <li><a href="audit_logs.php"> <i class="fa fa-history"></i>Audit Trail</a></li>
+                <?php } ?>
               </ul>
             </li>
             
@@ -157,6 +161,36 @@
         
         <?php } ?>
         
-        
       </div>
     </nav>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var currentPath = window.location.pathname;
+        if (currentPath.endsWith('/')) currentPath += 'index.php';
+
+        var links = document.querySelectorAll('#side-main-menu a');
+        
+        links.forEach(function(link) {
+            var href = link.getAttribute('href');
+            if (!href || href.startsWith('#')) return;
+            
+            try {
+                var linkUrl = new URL(link.href); // link.href gets the absolute resolved URL
+                if (linkUrl.pathname === currentPath) {
+                    link.parentElement.classList.add('active');
+                    
+                    var dropdown = link.closest('ul.collapse');
+                    if (dropdown) {
+                        dropdown.classList.add('show');
+                        var parentLink = dropdown.previousElementSibling;
+                        if (parentLink) {
+                            parentLink.setAttribute('aria-expanded', 'true');
+                            parentLink.parentElement.classList.add('active');
+                        }
+                    }
+                }
+            } catch(e) {}
+        });
+    });
+    </script>

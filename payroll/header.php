@@ -75,7 +75,7 @@
     
      
     <!-- Favicon-->
-    <link rel="shortcut icon" href="../img/<?php echo $sf_row['logo']; ?>?v=<?php echo time(); ?>" type="image/jpeg" />
+    <link rel="shortcut icon" href="../img/<?php echo $sf_row['logo']; ?>" />
     <!-- Tweaks for older IEs--><!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->

@@ -57,6 +57,19 @@ $user_query = $conn->prepare('SELECT * FROM useraccount WHERE user_id = :user_id
 $user_query->execute(['user_id' => $session_id]);
 $user_row = $user_query->fetch();
 
+if ($user_row) {
+    // Override stale session access with fresh DB access (e.g. migrating 'Administrator' to 'Admin')
+    $session_access = $user_row['access'];
+    $_SESSION['useraccess'] = $user_row['access'];
+    
+    if ($user_row['access'] === 'Admin') {
+        $_SESSION['allowed_modules'] = ['hris', 'payroll']; // Admin gets everything
+    } else {
+        $_SESSION['allowed_modules'] = explode(',', (string)($user_row['module_access'] ?? ''));
+    }
+} else {
+    $_SESSION['allowed_modules'] = [];
+}
 
 $user_personnel_id=$user_row['personnel_id'];
 $user_dept=$user_row['do_id'];
@@ -88,7 +101,7 @@ $perCtrF_all=$perCtrFemale_query->rowCount();
 $check_pass = $user_row['password'];
 
 // Auto-process monthly leave credits when Administrator logs in
-if ($session_access === 'Administrator') {
+if ($session_access === 'Admin') {
     require_once('process_monthly_leave_credits.php');
     checkAndProcessMonthlyCredits($conn, $session_id);
 }

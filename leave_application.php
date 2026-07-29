@@ -33,7 +33,7 @@
     
     // Get department/office name for leave application
     $dept_name = 'Department of Health - Region X'; // Default value
-    $is_administrator = ($session_access === 'Administrator');
+    $is_administrator = ($session_access === 'Admin');
     if (!empty($staff_row['do_id'])) {
         $dept_query = $conn->prepare("SELECT dept_office_name FROM dept_offices WHERE do_id = :do_id LIMIT 1");
         $dept_query->execute([':do_id' => $staff_row['do_id']]);

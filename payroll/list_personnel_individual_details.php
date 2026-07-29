@@ -43,7 +43,7 @@
           <ul class="breadcrumb">
             <li style="color: blue"><strong style="margin-right: 4px;"><?php echo $schoolName; ?> | </strong></li>
             <li class="breadcrumb-item"><a href="home.php">Home</a></li>
-            <?php if($session_access == 'Administrator') { ?>
+            <?php if($session_access == 'Admin') { ?>
             <li class="breadcrumb-item"><a href="list_personnel.php?dept=<?php echo $_GET['dept']; ?>">List of Personnel</a></li>
             <?php } ?>
             <li class="breadcrumb-item active">Personnel Profile</li>

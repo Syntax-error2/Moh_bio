@@ -221,7 +221,7 @@ if (basename($_SERVER['PHP_SELF']) == 'process_monthly_leave_credits.php') {
     session_start();
     
     // Check if user is admin
-    if (!isset($_SESSION['id']) || $_SESSION['useraccess'] !== 'Administrator') {
+    if (!isset($_SESSION['id']) || $_SESSION['useraccess'] !== 'Admin') {
         die(json_encode(['success' => false, 'message' => 'Unauthorized access']));
     }
     
