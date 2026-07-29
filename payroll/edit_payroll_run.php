@@ -42,7 +42,7 @@ try {
 
 $page_title = "Edit Payroll Run";
 include('header.php');
-include('menu.php');
+include('menu_sidebar.php');
 ?>
 
 <div class="page">
@@ -154,14 +154,6 @@ include('menu.php');
             <div class="card">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fa fa-users"></i> Personnel Payroll Details</h5>
-                    <div>
-                        <button type="button" class="btn btn-light btn-sm" onclick="recalculateAll()">
-                            <i class="fa fa-refresh"></i> Recalculate All
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm" onclick="saveAllChanges()">
-                            <i class="fa fa-save"></i> Save All Changes
-                        </button>
-                    </div>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -178,9 +170,9 @@ include('menu.php');
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Department</th>
-                                    <th class="text-right">Gross Pay</th>
-                                    <th class="text-right">Deductions</th>
-                                    <th class="text-right">Net Pay</th>
+                                    <th class="money-col">Gross Pay</th>
+                                    <th class="money-col">Deductions</th>
+                                    <th class="money-col">Net Pay</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -209,13 +201,13 @@ include('menu.php');
                                     <td><?php echo htmlspecialchars($detail['personnel_id']); ?></td>
                                     <td><?php echo $full_name; ?></td>
                                     <td><?php echo htmlspecialchars($detail['dept_office_name'] ?? 'N/A'); ?></td>
-                                    <td class="text-right">
+                                    <td class="money-col">
                                         <span class="gross-display">₱<?php echo number_format($detail['gross_pay'], 2); ?></span>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="money-col">
                                         <span class="deduction-display">₱<?php echo number_format($detail['total_deductions'], 2); ?></span>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="money-col">
                                         <strong class="net-display">₱<?php echo number_format($detail['net_pay'], 2); ?></strong>
                                     </td>
                                     <td>
@@ -240,17 +232,27 @@ include('menu.php');
                         </table>
                     </div>
                     
-                    <div class="mt-3">
-                        <strong>Selected: <span id="selectedCount">0</span> personnel</strong>
-                        <div class="btn-group ml-3">
-                            <button class="btn btn-sm btn-warning" onclick="bulkUpdateStatus('pending')">
-                                Set to Pending
+                    <div class="mt-3 sticky-action-bar d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Selected: <span id="selectedCount">0</span> personnel</strong>
+                            <div class="btn-group ml-3">
+                                <button class="btn btn-sm btn-warning" onclick="bulkUpdateStatus('pending')">
+                                    Set to Pending
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="bulkUpdateStatus('paid')">
+                                    Set to Paid
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="bulkUpdateStatus('hold')">
+                                    Set to Hold
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-light btn-sm mr-2" onclick="recalculateAll()">
+                                <i class="fa fa-refresh"></i> Recalculate All
                             </button>
-                            <button class="btn btn-sm btn-success" onclick="bulkUpdateStatus('paid')">
-                                Set to Paid
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="bulkUpdateStatus('hold')">
-                                Set to Hold
+                            <button type="button" class="btn btn-info btn-sm" onclick="saveAllChanges()">
+                                <i class="fa fa-save"></i> Save All Changes
                             </button>
                         </div>
                     </div>

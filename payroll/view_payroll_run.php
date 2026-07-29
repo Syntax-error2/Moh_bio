@@ -197,23 +197,23 @@ include('menu_sidebar.php');
                             <table class="table table-sm">
                                 <tr>
                                     <td><strong>Total Personnel:</strong></td>
-                                    <td class="text-right"><h4><?php echo number_format($run['total_personnel']); ?></h4></td>
+                                    <td class="money-col"><h4><?php echo number_format($run['total_personnel']); ?></h4></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Gross Pay:</strong></td>
-                                    <td class="text-right text-success"><h5>₱<?php echo number_format($run['total_gross'], 2); ?></h5></td>
+                                    <td class="money-col text-success"><h5>₱<?php echo number_format($run['total_gross'], 2); ?></h5></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Deductions:</strong></td>
-                                    <td class="text-right text-danger">₱<?php echo number_format($run['total_deductions'], 2); ?></td>
+                                    <td class="money-col text-danger">₱<?php echo number_format($run['total_deductions'], 2); ?></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Employer Share:</strong></td>
-                                    <td class="text-right text-info">₱<?php echo number_format($run['total_employer_share'], 2); ?></td>
+                                    <td class="money-col text-info">₱<?php echo number_format($run['total_employer_share'], 2); ?></td>
                                 </tr>
                                 <tr class="table-active">
                                     <td><strong>Net Pay:</strong></td>
-                                    <td class="text-right"><h4 class="text-primary">₱<?php echo number_format($run['total_net_pay'], 2); ?></h4></td>
+                                    <td class="money-col"><h4 class="text-primary">₱<?php echo number_format($run['total_net_pay'], 2); ?></h4></td>
                                 </tr>
                             </table>
                         </div>
@@ -261,9 +261,9 @@ include('menu_sidebar.php');
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Department</th>
-                                    <th class="text-right">Gross Pay</th>
-                                    <th class="text-right">Deductions</th>
-                                    <th class="text-right">Net Pay</th>
+                                    <th class="money-col">Gross Pay</th>
+                                    <th class="money-col">Deductions</th>
+                                    <th class="money-col">Net Pay</th>
                                     <th>Payment Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -289,9 +289,9 @@ include('menu_sidebar.php');
                                     <td><?php echo htmlspecialchars($detail['personnel_id']); ?></td>
                                     <td><?php echo $full_name; ?></td>
                                     <td><?php echo htmlspecialchars($detail['dept_office_name'] ?? 'N/A'); ?></td>
-                                    <td class="text-right">₱<?php echo number_format($detail['gross_pay'], 2); ?></td>
-                                    <td class="text-right">₱<?php echo number_format($detail['total_deductions'], 2); ?></td>
-                                    <td class="text-right"><strong>₱<?php echo number_format($detail['net_pay'], 2); ?></strong></td>
+                                    <td class="money-col">₱<?php echo number_format($detail['gross_pay'], 2); ?></td>
+                                    <td class="money-col">₱<?php echo number_format($detail['total_deductions'], 2); ?></td>
+                                    <td class="money-col"><strong>₱<?php echo number_format($detail['net_pay'], 2); ?></strong></td>
                                     <td>
                                         <span class="badge badge-<?php 
                                             echo $detail['payment_status'] === 'paid' ? 'success' : 

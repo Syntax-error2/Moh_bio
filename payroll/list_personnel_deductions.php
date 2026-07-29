@@ -104,11 +104,10 @@
             <div class="col-lg-12 col-md-12">
             
               <!-- kinder 1     -->
-              <div id="new-updates" class="card updates recent-updated">
-                <div id="updates-header" class="card-header d-flex justify-content-between align-items-center">
-                  <h2 class="h5 display">
-                  <a data-toggle="collapse" data-parent="#new-updates" href="#updates-boxKinder" aria-expanded="true" aria-controls="updates-boxKinder">
-                  <h4>
+              <div id="new-updates" class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">
+                    <i class="fa fa-user"></i>
                     <?php
                       // Display personnel name
                       $full_name = htmlspecialchars($staff_row['fname']) . " " . 
@@ -122,15 +121,10 @@
                       echo $full_name;
  
                     ?>
-              
-                  </h4>
-                  </a>
-                  </h2>
-                  
-                  <a data-toggle="collapse" data-parent="#new-updates" href="#updates-boxKinder" aria-expanded="true" aria-controls="updates-boxKinder"><i class="fa fa-angle-down"></i></a>
+                  </h5>
                 </div>
                 
-                <div id="updates-boxKinder" role="tabpanel" class="collapse show">
+                <div id="updates-boxKinder" class="card-body">
                 
                  
                 
@@ -274,8 +268,8 @@
                       <thead class="thead-dark">
                         <tr>
                           <th style="width: 40%;">Deduction Details</th>
-                          <th style="width: 30%; text-align: right;">Employer Amount per Pay</th>
-                          <th style="width: 30%; text-align: right;">Employee Amount per Pay</th>
+                          <th style="width: 30%;" class="money-col">Employer Amount per Pay</th>
+                          <th style="width: 30%;" class="money-col">Employee Amount per Pay</th>
                         </tr>
                       </thead>
                       <tbody>

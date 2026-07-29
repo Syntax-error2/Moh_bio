@@ -50,9 +50,9 @@ try {
         background: white;
         border-radius: 8px;
         padding: 20px;
-        margin-bottom: 20px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
+        height: 100%;
     }
     .dashboard-card:hover {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -100,28 +100,36 @@ try {
     }
     .stat-box {
         text-align: center;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 6px;
-        margin-bottom: 10px;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .stat-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
     }
     .stat-box h3 {
         font-size: 2.5rem;
         margin: 0;
         color: #33b35a;
-        font-weight: bold;
+        font-weight: 700;
     }
     .stat-box p {
         margin: 5px 0 0 0;
         color: #6c757d;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        font-weight: 500;
     }
     .guide-step {
         background: #f8f9fa;
-        border: 1px solid #ddd;
-        padding: 15px;
+        border: 1px solid #e9ecef;
+        padding: 20px;
         margin-bottom: 15px;
-        border-radius: 4px;
+        border-radius: 8px;
     }
     .guide-step h5 {
         color: #33b35a;
@@ -133,19 +141,22 @@ try {
         color: #495057;
     }
     .welcome-banner {
-        background: #33b35a;
+        background: linear-gradient(135deg, #33b35a 0%, #218838 100%);
         color: white;
-        padding: 30px;
-        border-radius: 8px;
-        margin-bottom: 25px;
+        padding: 35px 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 6px 20px rgba(51, 179, 90, 0.3);
     }
     .welcome-banner h2 {
         margin: 0 0 10px 0;
-        font-size: 2rem;
+        font-size: 2.2rem;
+        font-weight: 700;
     }
     .welcome-banner p {
         margin: 0;
-        opacity: 0.9;
+        opacity: 0.95;
+        font-size: 1.1rem;
     }
     .menu-category {
         background: white;
@@ -320,7 +331,7 @@ if($session_access == "User") { ?>
 
         <!-- User Guide Section -->
         <div class="row mt-4">
-            <div class="col-md-6">
+                <div class="col-md-6 mb-4">
                 <div class="dashboard-card">
                     <h4 style="color: #33b35a; margin-bottom: 20px;">
                         <i class="fa fa-book"></i> Quick Start Guide
@@ -328,39 +339,39 @@ if($session_access == "User") { ?>
                     
                     <div class="guide-step">
                         <h5><i class="fa fa-check"></i> Step 1: Set Up Templates</h5>
-                        <p>Create payroll templates with income and deduction items. Templates can be reused for recurring payroll processing.</p>
-                        <a href="list_payroll_profiles.php" class="btn btn-sm btn-primary mt-2">
+                        <p class="mb-3">Create payroll templates with income and deduction items. Templates can be reused for recurring payroll processing.</p>
+                        <a href="list_payroll_profiles.php" class="btn btn-sm btn-primary btn-block">
                             <i class="fa fa-arrow-right"></i> Go to Templates
                         </a>
                     </div>
                     
                     <div class="guide-step">
                         <h5><i class="fa fa-check"></i> Step 2: Configure Personnel</h5>
-                        <p>Set up individual income and deductions for each personnel member.</p>
-                        <a href="list_personnel.php?dept=All" class="btn btn-sm btn-primary mt-2">
+                        <p class="mb-3">Set up individual income and deductions for each personnel member.</p>
+                        <a href="list_personnel.php?dept=All" class="btn btn-sm btn-primary btn-block">
                             <i class="fa fa-arrow-right"></i> View Personnel
                         </a>
                     </div>
                     
                     <div class="guide-step">
                         <h5><i class="fa fa-check"></i> Step 3: Generate Payroll</h5>
-                        <p>Select a template, choose personnel, configure dates, and generate the payroll run.</p>
-                        <a href="list_payroll_profiles.php" class="btn btn-sm btn-success mt-2">
+                        <p class="mb-3">Select a template, choose personnel, configure dates, and generate the payroll run.</p>
+                        <a href="list_payroll_profiles.php" class="btn btn-sm btn-success btn-block">
                             <i class="fa fa-cogs"></i> Generate Now
                         </a>
                     </div>
                     
                     <div class="guide-step">
                         <h5><i class="fa fa-check"></i> Step 4: Review & Process</h5>
-                        <p>Review generated payroll, make adjustments if needed, and mark as completed.</p>
-                        <a href="list_payroll_history.php" class="btn btn-sm btn-info mt-2">
+                        <p class="mb-3">Review generated payroll, make adjustments if needed, and mark as completed.</p>
+                        <a href="list_payroll_history.php" class="btn btn-sm btn-info btn-block">
                             <i class="fa fa-eye"></i> View History
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6 mb-4">
                 <div class="dashboard-card">
                     <h4 style="color: #33b35a; margin-bottom: 20px;">
                         <i class="fa fa-map"></i> Payroll Workflow

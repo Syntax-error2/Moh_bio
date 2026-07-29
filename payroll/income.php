@@ -86,27 +86,26 @@
             <!-- END ADD PAYROLL PROFILE MODAL -->
             
             <!-- kinder 1 -->
-              <div id="new-updates" class="card updates recent-updated">
-                <div id="updates-header" class="card-header d-flex justify-content-between align-items-center">
-                  <h2 class="h5 display">
-                  
-                  <a style="color: white !important;" data-toggle="modal" data-target="#add_income_reference" href="#" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i></a>
-                  
-                  &nbsp;&nbsp;<a style="font-weight: bold;" data-toggle="collapse" data-parent="#new-updates" href="#updates-boxKinder" aria-expanded="true" aria-controls="updates-boxKinder">INCOME REFERENCE</a>
-                  
-                  </h2><a data-toggle="collapse" data-parent="#new-updates" href="#updates-boxKinder" aria-expanded="true" aria-controls="updates-boxKinder"><i class="fa fa-angle-down"></i></a>
+              <div id="new-updates" class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">
+                      <i class="fa fa-money"></i> INCOME REFERENCE
+                  </h5>
+                  <button data-toggle="modal" data-target="#add_income_reference" class="btn btn-light btn-sm text-primary">
+                      <i class="fa fa-plus"></i> Add Income
+                  </button>
                 </div>
-                <div id="updates-boxKinder" role="tabpanel" class="collapse show">
+                <div id="updates-boxKinder" class="card-body">
                
                     <div class="col-lg-12">
-                    <div class="table-responsive" style="margin-top: 12px;">
-                    <table id="" class="display" style="width:100%">
-                 
-                      <thead>
+                    <div class="table-responsive">
+                    <table id="example" class="table table-striped table-hover" style="width:100%">
+                  
+                      <thead class="thead-dark">
                         <tr>
                           <th>Income Type</th>
                           <th>Income Title</th>
-                          <th>Action</th>
+                          <th style="width: 100px;">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -126,8 +125,10 @@
                       <td><?php echo htmlspecialchars($income_row['income_title']); ?></td>
                       
                       <td>
-                      <button type="button" data-toggle="modal" data-target="#edit_income<?php echo $income_row['income_id']; ?>" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>
-                      <button type="button" data-toggle="modal" data-target="#del_income<?php echo $income_row['income_id']; ?>" class="btn btn-danger btn-sm"><i class="fa fa-times"></i></button>
+                          <div style="display: flex; gap: 5px;">
+                              <button type="button" data-toggle="modal" data-target="#edit_income<?php echo $income_row['income_id']; ?>" class="btn btn-warning btn-sm" title="Edit"><i class="fa fa-pencil"></i></button>
+                              <button type="button" data-toggle="modal" data-target="#del_income<?php echo $income_row['income_id']; ?>" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button>
+                          </div>
                       </td>
                       
                       </tr>

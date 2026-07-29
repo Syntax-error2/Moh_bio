@@ -12,13 +12,22 @@
     <!-- Select2 CSS for searchable dropdowns -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
+    <!-- Google Fonts: Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
+    body {
+        font-family: 'Montserrat', sans-serif !important;
+    }
+    
     div.dataTables_wrapper {
         margin-bottom: 3em;
     }
     
     table.display {
-      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      font-family: 'Montserrat', sans-serif;
       border-collapse: collapse;
       width: 100%;
     }
@@ -42,7 +51,7 @@
     
     
     table {
-      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      font-family: 'Montserrat', sans-serif;
       border-collapse: collapse;
       width: 100%;
     }
@@ -52,8 +61,34 @@
       padding: 8px;
     }
     
+    table tr:nth-child(even){background-color: #f2f2f2;}
     
-
+    table tr:hover {background-color: #ddd;}
+    
+    table th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #02c748;
+      color: white;
+    }
+    
+    /* UX Upgrades */
+    .money-col {
+        text-align: right !important;
+        font-variant-numeric: tabular-nums;
+    }
+    
+    .sticky-action-bar {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 1000;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
+    }
     </style>
      
     <!-- Bootstrap CSS-->

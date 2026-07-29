@@ -27,9 +27,11 @@ $page_title = "Payroll Profiles (Templates)";
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
             transition: all 0.3s ease;
             background: #fff;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .profile-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -77,6 +79,8 @@ $page_title = "Payroll Profiles (Templates)";
             display: flex;
             gap: 5px;
             flex-wrap: wrap;
+            margin-top: auto !important;
+            padding-top: 15px;
         }
         .filter-section {
             background: #f8f9fa;
@@ -94,7 +98,11 @@ $page_title = "Payroll Profiles (Templates)";
             color: white;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         .stats-card h3 {
             font-size: 2rem;
@@ -146,25 +154,25 @@ $page_title = "Payroll Profiles (Templates)";
         $stats = $stats_query->fetch(PDO::FETCH_ASSOC);
     ?>
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3 mb-4">
             <div class="stats-card">
                 <h3><?php echo $stats['total_profiles']; ?></h3>
                 <p><i class="fa fa-folder-open"></i> Total Profiles</p>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-4">
             <div class="stats-card" style="background: #33b35a;">
                 <h3><?php echo $stats['active_profiles']; ?></h3>
                 <p><i class="fa fa-check-circle"></i> Active Profiles</p>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-4">
             <div class="stats-card" style="background: #33b35a;">
                 <h3><?php echo $stats['default_profiles']; ?></h3>
                 <p><i class="fa fa-star"></i> Default Profiles</p>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-4">
             <div class="stats-card" style="background: #33b35a;">
                 <h3><?php echo $stats['regular_count']; ?></h3>
                 <p><i class="fa fa-calendar"></i> Regular Payrolls</p>
@@ -273,7 +281,7 @@ $page_title = "Payroll Profiles (Templates)";
                 $frequency_label = $frequency_labels[$profile['pay_frequency']] ?? $profile['pay_frequency'];
                 ?>
                 
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4 mb-4">
                     <div class="profile-card">
                         <div class="profile-header">
                             <div>

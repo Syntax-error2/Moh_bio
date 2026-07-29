@@ -37,6 +37,10 @@ $page_title = "Payroll History";
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .stat-value {
             font-size: 2rem;
@@ -112,25 +116,25 @@ $page_title = "Payroll History";
         $stats = $stats_query->fetch(PDO::FETCH_ASSOC);
     ?>
     <div class="row stats-row">
-        <div class="col-md-2">
+        <div class="col-md-2 mb-4">
             <div class="stat-card">
                 <div class="stat-value"><?php echo $stats['total_runs'] ?? 0; ?></div>
                 <div class="stat-label">Total Runs</div>
             </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 mb-4">
             <div class="stat-card">
                 <div class="stat-value" style="color: #28a745;"><?php echo $stats['completed_runs'] ?? 0; ?></div>
                 <div class="stat-label">Completed</div>
             </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 mb-4">
             <div class="stat-card">
                 <div class="stat-value" style="color: #ffc107;"><?php echo $stats['draft_runs'] ?? 0; ?></div>
                 <div class="stat-label">Drafts</div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-4">
             <div class="stat-card">
                 <div class="stat-value" style="color: #17a2b8; font-size: 1.5rem;">
                     ₱<?php echo number_format($stats['total_paid'] ?? 0, 2); ?>
@@ -138,7 +142,7 @@ $page_title = "Payroll History";
                 <div class="stat-label">Total Paid</div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-4">
             <div class="stat-card">
                 <div class="stat-value" style="color: #6610f2;"><?php echo number_format($stats['total_processed'] ?? 0); ?></div>
                 <div class="stat-label">Personnel Processed</div>
@@ -213,9 +217,9 @@ $page_title = "Payroll History";
                             <th>Type</th>
                             <th>Pay Period</th>
                             <th>Personnel</th>
-                            <th>Gross Pay</th>
-                            <th>Deductions</th>
-                            <th>Net Pay</th>
+                            <th class="money-col">Gross Pay</th>
+                            <th class="money-col">Deductions</th>
+                            <th class="money-col">Net Pay</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -298,33 +302,35 @@ $page_title = "Payroll History";
                                         </small>
                                     </td>
                                     <td class="text-center"><strong><?php echo number_format($run['total_personnel']); ?></strong></td>
-                                    <td class="text-right text-success">₱<?php echo number_format($run['total_gross'], 2); ?></td>
-                                    <td class="text-right text-danger">₱<?php echo number_format($run['total_deductions'], 2); ?></td>
-                                    <td class="text-right"><strong>₱<?php echo number_format($run['total_net_pay'], 2); ?></strong></td>
+                                    <td class="money-col text-success">₱<?php echo number_format($run['total_gross'], 2); ?></td>
+                                    <td class="money-col text-danger">₱<?php echo number_format($run['total_deductions'], 2); ?></td>
+                                    <td class="money-col"><strong>₱<?php echo number_format($run['total_net_pay'], 2); ?></strong></td>
                                     <td>
                                         <span class="status-badge badge-<?php echo $status_color; ?>">
                                             <?php echo strtoupper($run['run_status']); ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="view_payroll_run.php?run_id=<?php echo $run['run_id']; ?>" 
-                                           class="btn btn-sm btn-info table-action-btn" title="View Details">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
-                                        <?php if ($run['run_status'] === 'draft'): ?>
-                                            <a href="edit_payroll_run.php?run_id=<?php echo $run['run_id']; ?>" 
-                                               class="btn btn-sm btn-warning table-action-btn" title="Edit">
-                                                <i class="fa fa-pencil"></i>
+                                        <div style="display: flex; gap: 5px; flex-wrap: nowrap;">
+                                            <a href="view_payroll_run.php?run_id=<?php echo $run['run_id']; ?>" 
+                                               class="btn btn-sm btn-info table-action-btn" title="View Details">
+                                                <i class="fa fa-eye"></i>
                                             </a>
-                                            <button onclick="deletePayrollRun(<?php echo $run['run_id']; ?>, '<?php echo addslashes($run['run_name']); ?>')" 
-                                                    class="btn btn-sm btn-danger table-action-btn" title="Delete Draft">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        <?php endif; ?>
-                                        <a href="print_payroll_run.php?run_id=<?php echo $run['run_id']; ?>" 
-                                           class="btn btn-sm btn-secondary table-action-btn" title="Print" target="_blank">
-                                            <i class="fa fa-print"></i>
-                                        </a>
+                                            <?php if ($run['run_status'] === 'draft'): ?>
+                                                <a href="edit_payroll_run.php?run_id=<?php echo $run['run_id']; ?>" 
+                                                   class="btn btn-sm btn-warning table-action-btn" title="Edit">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                                <button onclick="deletePayrollRun(<?php echo $run['run_id']; ?>, '<?php echo addslashes($run['run_name']); ?>')" 
+                                                        class="btn btn-sm btn-danger table-action-btn" title="Delete Draft">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                            <a href="print_payroll_run.php?run_id=<?php echo $run['run_id']; ?>" 
+                                               class="btn btn-sm btn-secondary table-action-btn" title="Print" target="_blank">
+                                                <i class="fa fa-print"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php
