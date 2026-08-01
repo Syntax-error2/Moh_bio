@@ -99,12 +99,15 @@ include('menu_sidebar.php');
                         </div>
                         <div class="btn-group mr-2">
                             <?php if ($run['run_status'] === 'draft'): ?>
-                                <a href="edit_payroll_run.php?run_id=<?php echo $run_id; ?>" class="btn btn-primary">
+                                <a href="edit_payroll_run.php?run_id=<?php echo $run_id; ?>" class="btn btn-success">
                                     <i class="fa fa-edit"></i> Edit Run
                                 </a>
                             <?php endif; ?>
                             <a href="print_payroll_run.php?run_id=<?php echo $run_id; ?>" target="_blank" class="btn btn-info">
-                                <i class="fa fa-print"></i> Print
+                                <i class="fa fa-print"></i> Print Summary
+                            </a>
+                            <a href="configure_registry.php?run_id=<?php echo $run_id; ?>" class="btn btn-success">
+                                <i class="fa fa-file-text-o"></i> Print Official Registry
                             </a>
                             <button type="button" class="btn btn-success" onclick="exportToExcel()">
                                 <i class="fa fa-file-excel-o"></i> Export Excel

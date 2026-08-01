@@ -126,13 +126,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_payroll'])) 
         $where_sql = !empty($personnel_where) ? "AND " . implode(" AND ", $personnel_where) : "";
         
         $personnel_query = $conn->prepare("
-            SELECT p.personnel_id
+            SELECT p.personnel_id, p.rate_per_day
             FROM personnels p
             WHERE 1=1 $where_sql
             ORDER BY p.lname, p.fname
         ");
         $personnel_query->execute($personnel_params);
-        $personnel_list = $personnel_query->fetchAll(PDO::FETCH_COLUMN);
+        $personnel_list = $personnel_query->fetchAll(PDO::FETCH_ASSOC);
         
         if (empty($personnel_list)) {
             throw new Exception('No personnel found matching the selected criteria');
@@ -218,8 +218,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_payroll'])) 
                  :employee_amount, :employer_amount, NOW())
         ");
         
-        foreach ($personnel_list as $personnel_id) {
-            $personnel_gross = 0;
+        foreach ($personnel_list as $row) {
+            $personnel_id = $row['personnel_id'];
+            $rate_per_day = floatval($row['rate_per_day']);
+            
+            // The rate_per_day is treated as the base salary/gross pay according to the schema fixes
+            $personnel_gross = $rate_per_day;
             $personnel_deductions = 0;
             $personnel_employer_share = 0;
             
