@@ -38,14 +38,8 @@ include('header_print.php');
                           
                         <?php
                         $personCtr=0;
-                        $studData_query = $conn->query("SELECT * FROM personnels WHERE (separation_date IS NULL) AND sex='Male' ORDER BY lname, fname ASC") or die(mysql_error());
+                        $studData_query = $conn->query("SELECT personnels.*, dept_offices.dept_office_name, emp_status.emp_stat_name FROM personnels LEFT JOIN dept_offices ON dept_offices.do_id = personnels.do_id LEFT JOIN emp_status ON emp_status.empStat_id = personnels.empStat_id WHERE personnels.separation_date IS NULL AND personnels.sex='Male' ORDER BY personnels.lname, personnels.fname ASC") or die(mysql_error());
                         while($staff_row=$studData_query->fetch()){
-                        
-                        $dept_off_query = $conn->query("SELECT * FROM dept_offices WHERE do_id='$staff_row[do_id]'") or die(mysql_error());
-                        $do_row = $dept_off_query->fetch();
-
-                        $empStat_query = $conn->query("SELECT emp_stat_name FROM emp_status WHERE empStat_id='$staff_row[empStat_id]'") or die(mysql_error());
-                        $empStat_row=$empStat_query->fetch();
                         
                         $personCtr+=1;
                         
@@ -87,12 +81,10 @@ include('header_print.php');
                           
                           <td><?php echo $staff_row['conPerson_lname'].', '.$staff_row['conPerson_fname'].'<br />'.$staff_row['emergency_pnum']; ?></td>
                           <td>
-                          <strong><?php echo $do_row['dept_office_name']; ?></strong><br />
-                          <?php echo $empStat_row['emp_stat_name']; ?>
+                            <strong><?php echo $staff_row['dept_office_name'] ?? 'Unassigned Office'; ?></strong><br />
+                            <?php echo $staff_row['emp_stat_name'] ?? 'No Employment Status'; ?>
                           </td>
                           </tr>
-                      
-                     
                              <?php }  ?>
                             </tbody>
                         </table> 
@@ -135,14 +127,8 @@ include('header_print.php');
                           
                         <?php
                         $personCtr=0;
-                        $studData_query = $conn->query("SELECT * FROM personnels WHERE (separation_date IS NULL) AND sex='Male' ORDER BY lname, fname ASC") or die(mysql_error());
+                        $studData_query = $conn->query("SELECT personnels.*, dept_offices.dept_office_name, emp_status.emp_stat_name FROM personnels LEFT JOIN dept_offices ON dept_offices.do_id = personnels.do_id LEFT JOIN emp_status ON emp_status.empStat_id = personnels.empStat_id WHERE personnels.separation_date IS NULL AND personnels.sex='Male' ORDER BY personnels.lname, personnels.fname ASC") or die(mysql_error());
                         while($staff_row=$studData_query->fetch()){
-                        
-                        $dept_off_query = $conn->query("SELECT * FROM dept_offices WHERE do_id='$staff_row[do_id]'") or die(mysql_error());
-                        $do_row = $dept_off_query->fetch();
-                        
-                        $empStat_query = $conn->query("SELECT emp_stat_name FROM emp_status WHERE empStat_id='$staff_row[empStat_id]'") or die(mysql_error());
-                        $empStat_row=$empStat_query->fetch();
                         
                         $personCtr+=1;
                         
@@ -184,12 +170,10 @@ include('header_print.php');
                           
                           <td><?php echo $staff_row['conPerson_lname'].', '.$staff_row['conPerson_fname'].'<br />'.$staff_row['emergency_pnum']; ?></td>
                           <td>
-                          <strong><?php echo $do_row['dept_office_name']; ?></strong><br />
-                          <?php echo $empStat_row['emp_stat_name']; ?>
+                            <strong><?php echo $staff_row['dept_office_name'] ?? 'Unassigned Office'; ?></strong><br />
+                            <?php echo $staff_row['emp_stat_name'] ?? 'No Employment Status'; ?>
                           </td>
                           </tr>
-                      
-                     
                              <?php }  ?>
                             </tbody>
                         </table> 
