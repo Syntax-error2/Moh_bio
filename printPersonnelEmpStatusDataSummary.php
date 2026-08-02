@@ -55,22 +55,23 @@ include('header_print.php');
                             $finalExManLevelCtr=0;
                             $finalThirdLevelCtr=0;
                             
-                            $empStatCtr_query = $conn->query("SELECT gass_id FROM personnels WHERE empStat_id='$printES_row[empStat_id]'") or die(mysql_error());
+                            $empStatCtr_query = $conn->query("SELECT gass_id FROM personnels WHERE empStat_id='$printES_row[empStat_id]' AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')") or die(mysql_error());
                             while($lvlCtr_row=$empStatCtr_query->fetch()){
                                 
                                 
                                     $LevelCtr_query = $conn->query("SELECT level FROM gass WHERE gass_id='$lvlCtr_row[gass_id]'") or die(mysql_error());
                                     $levelCtr_row=$LevelCtr_query->fetch();
                                    
-                                    
-                                    if($levelCtr_row['level']==="First Level"){
-                                        $finalFirstLevelCtr=$finalFirstLevelCtr+1;
-                                    }elseif($levelCtr_row['level']==="Second Level"){
-                                        $finalSecondLevelCtr=$finalSecondLevelCtr+1;
-                                    }elseif($levelCtr_row['level']==="Executive / Managerial"){
-                                        $finalExManLevelCtr=$finalExManLevelCtr+1;
-                                    }elseif($levelCtr_row['level']==="Third Level"){
-                                        $finalThirdLevelCtr=$finalThirdLevelCtr+1;
+                                    if ($levelCtr_row) {
+                                        if($levelCtr_row['level']==="First Level"){
+                                            $finalFirstLevelCtr=$finalFirstLevelCtr+1;
+                                        }elseif($levelCtr_row['level']==="Second Level"){
+                                            $finalSecondLevelCtr=$finalSecondLevelCtr+1;
+                                        }elseif($levelCtr_row['level']==="Executive / Managerial"){
+                                            $finalExManLevelCtr=$finalExManLevelCtr+1;
+                                        }elseif($levelCtr_row['level']==="Third Level"){
+                                            $finalThirdLevelCtr=$finalThirdLevelCtr+1;
+                                        }
                                     }
                             
                             } 

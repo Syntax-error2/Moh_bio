@@ -32,7 +32,7 @@
     </script>
     <?php }elseif($session_access==='Admin'){
     
-    include('quick_count.php');
+    // quick_count removed as per user request to clean up layout
     
     } ?>
     
@@ -175,7 +175,10 @@
             <!-- Card 1: Registered Employees -->
             <div class="col-lg-3 col-md-6 mb-4">
                  <div class="bwd-card pb-3">
-                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">Registered Employees</div>
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">
+                         Registered Employees
+                         <a href="print_all_personnel.php" target="_blank" title="Click to print all employees..." class="text-secondary" style="font-size: 1.2em; text-decoration: none;"><i class="fa fa-print" style="color: #28a745;"></i></a>
+                     </div>
                      <h2 class="display-4" style="color: #28a745; font-weight: 700; margin-bottom: 20px;"><?php echo $perCtr_all; ?></h2>
                      <div class="mt-auto">
                          <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 1px dashed #e9ecef;">
@@ -193,18 +196,58 @@
             <!-- Card 2: Active Job Status -->
             <div class="col-lg-3 col-md-6 mb-4">
                  <div class="bwd-card pb-3">
-                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">Active Job Status</div>
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">
+                         Active Job Status
+                         <a href="printPersonnelEmpStatusDataSummary.php" target="_blank" title="Print personnels appointment summary..." class="text-secondary" style="font-size: 1.2em; text-decoration: none;"><i class="fa fa-print" style="color: #28a745;"></i></a>
+                     </div>
                      <div class="mt-2">
                         <?php
                         $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Active' ORDER BY emp_stat_name ASC");
                         while ($empStat_row = $empStat_query->fetch()) {
-                            $empStatCtr_query = $conn->query("SELECT COUNT(*) FROM personnels WHERE empStat_id='".$empStat_row['empStat_id']."' AND separation_date IS NULL");
+                            $empStatCtr_query = $conn->query("SELECT COUNT(*) FROM personnels WHERE empStat_id='".$empStat_row['empStat_id']."' AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')");
                             $count = $empStatCtr_query->fetchColumn();
                             ?>
                             <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 1px dashed #e9ecef;">
-                                <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-circle" style="color: #28a745; font-size: 8px; vertical-align: middle; margin-right: 8px;"></i> <?php echo $empStat_row['emp_stat_name']; ?></span>
+                                <span style="color: #6c757d; font-size: 0.9rem;">
+                                    <a data-toggle="modal" data-target="#print_emp_status<?php echo $empStat_row['empStat_id']; ?>" href="#" title="Print list of <?php echo $empStat_row['emp_stat_name']; ?> personnels..." style="text-decoration: none; color: inherit;">
+                                        <i class="fa fa-print" style="color: #28a745; margin-right: 8px;"></i> <?php echo $empStat_row['emp_stat_name']; ?>
+                                    </a>
+                                </span>
                                 <strong style="color: #28a745;"><?php echo $count; ?></strong>
                             </div>
+                            
+                            <!-- report filter Modal -->
+                            <div id="print_emp_status<?php echo $empStat_row['empStat_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
+                                <div role="document" class="modal-dialog">
+                                    <div class="modal-content">
+                                    <form action="checkReportFilter.php?empStat_id=<?php echo $empStat_row['empStat_id']; ?>" method="POST">
+                                        <div class="modal-header">
+                                            <h5 id="exampleModalLabel" class="modal-title">PRINT JOB STATUS: <?php echo strtoupper($empStat_row['emp_stat_name']); ?></h5>
+                                            <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true" class="fa fa-times"></span></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 form-control-label">Print Output:</label>
+                                                <div class="col-sm-8">
+                                                    <select name="print_output" class="form-control">
+                                                        <option>Male Only</option>
+                                                        <option>Female Only</option>
+                                                        <option>Male-Female</option>
+                                                        <option>All-Mixed</option>
+                                                    </select>
+                                                </div>
+                                            </div> 
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a href="" data-dismiss="modal" class="btn btn-secondary">Cancel</a>
+                                            <button name="print_filter_emp_status" type="submit" class="btn btn-primary">Print</button>
+                                        </div>
+                                    </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end report filter Modal -->
+                            
                         <?php } ?>
                      </div>
                  </div>
@@ -213,7 +256,10 @@
             <!-- Card 3: Separated Records -->
             <div class="col-lg-3 col-md-6 mb-4">
                  <div class="bwd-card pb-3">
-                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">Separated Records</div>
+                     <div class="bwd-card-title text-uppercase" style="color: #6c757d; font-size: 0.8rem; letter-spacing: 0.5px;">
+                         Separated Records
+                         <a href="printPersonnelEmpStatusDataSummarySeparated.php" target="_blank" title="Print separated personnels appointment summary..." class="text-secondary" style="font-size: 1.2em; text-decoration: none;"><i class="fa fa-print" style="color: #dc3545;"></i></a>
+                     </div>
                      <div class="mt-2">
                         <?php
                         $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC");
@@ -222,7 +268,11 @@
                             $count = $empStatCtr_query->fetchColumn();
                             ?>
                             <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 1px dashed #e9ecef;">
-                                <span style="color: #6c757d; font-size: 0.9rem;"><i class="fa fa-circle" style="color: #28a745; font-size: 8px; vertical-align: middle; margin-right: 8px;"></i> <?php echo $empStat_row['emp_stat_name']; ?></span>
+                                <span style="color: #6c757d; font-size: 0.9rem;">
+                                    <a href="printPersonnelEmpStatusDataSeparated.php?empStat_id=<?php echo $empStat_row['empStat_id']; ?>" target="_blank" title="Print list of <?php echo $empStat_row['emp_stat_name']; ?> personnels..." style="text-decoration: none; color: inherit;">
+                                        <i class="fa fa-print" style="color: #dc3545; margin-right: 8px;"></i> <?php echo $empStat_row['emp_stat_name']; ?>
+                                    </a>
+                                </span>
                                 <strong style="color: #dc3545;"><?php echo $count; ?></strong>
                             </div>
                         <?php } ?>
@@ -256,15 +306,15 @@
             while ($do_row = $dept_off_query->fetch()) 
             { 
             
-            $per_ctr_stmt = $conn->prepare("SELECT COUNT(*) FROM personnels WHERE do_id = :do_id AND separation_date IS NULL");
+            $per_ctr_stmt = $conn->prepare("SELECT COUNT(*) FROM personnels WHERE do_id = :do_id AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')");
             $per_ctr_stmt->execute([':do_id' => $do_row['do_id']]);
             $per_ctr_count = (int)$per_ctr_stmt->fetchColumn();
 
-            $male_per_ctr_stmt = $conn->prepare("SELECT COUNT(*) FROM personnels WHERE do_id = :do_id AND sex = 'Male' AND separation_date IS NULL");
+            $male_per_ctr_stmt = $conn->prepare("SELECT COUNT(*) FROM personnels WHERE do_id = :do_id AND sex = 'Male' AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')");
             $male_per_ctr_stmt->execute([':do_id' => $do_row['do_id']]);
             $male_per_ctr_count = (int)$male_per_ctr_stmt->fetchColumn();
 
-            $female_per_ctr_stmt = $conn->prepare("SELECT COUNT(*) FROM personnels WHERE do_id = :do_id AND sex = 'Female' AND separation_date IS NULL");
+            $female_per_ctr_stmt = $conn->prepare("SELECT COUNT(*) FROM personnels WHERE do_id = :do_id AND sex = 'Female' AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')");
             $female_per_ctr_stmt->execute([':do_id' => $do_row['do_id']]);
             $female_per_ctr_count = (int)$female_per_ctr_stmt->fetchColumn();
             ?>
