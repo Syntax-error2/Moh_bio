@@ -20,15 +20,15 @@
                                           <div class="col-md-12">
                                           
                      
-                                            <input type="text" class="form-control" name="RFTag_id" placeholder="Search personnel fullname" list="perDataList" id="boxx1" required="true" />
+                                            <input type="text" class="form-control" name="personnel_id_code" placeholder="Search personnel by ID code" list="perDataList" id="boxx1" required="true" />
                                   
                                             <datalist id="perDataList">
                                                 <?php
                                                 
-                                                $fnameList_query = $conn->query("SELECT DISTINCT RFTag_id, lname, fname, mname FROM personnels");
+                                                $fnameList_query = $conn->query("SELECT DISTINCT personnel_id_code, lname, fname, mname FROM personnels WHERE personnel_id_code IS NOT NULL AND personnel_id_code != '' ORDER BY lname, fname, mname ASC");
                                                 while($fnlq_row = $fnameList_query->fetch()){ ?>
                                                 
-                                                <option value="<?php echo $fnlq_row['RFTag_id'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?>"><?php echo $fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?></small></option>
+                                                <option value="<?php echo htmlspecialchars($fnlq_row['personnel_id_code'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($fnlq_row['personnel_id_code'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname'], ENT_QUOTES, 'UTF-8'); ?></option>
                                                 
                                                 <?php } ?>
                                             </datalist>

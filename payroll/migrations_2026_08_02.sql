@@ -487,21 +487,6 @@ CREATE TABLE IF NOT EXISTS `pr_tbl_signatory_templates` (
 -- Dump completed on 2026-08-01 18:57:38
   
 -- Official Registry Signatory Templates
-CREATE TABLE IF NOT EXISTS IF NOT EXISTS pr_tbl_signatory_templates (
-    template_id INT AUTO_INCREMENT PRIMARY KEY,
-    template_name VARCHAR(100),
-    is_default TINYINT(1) DEFAULT 0,
-    created_at DATETIME
-);
-
-CREATE TABLE IF NOT EXISTS IF NOT EXISTS pr_tbl_signatory_items (
-    item_id INT AUTO_INCREMENT PRIMARY KEY,
-    template_id INT,
-    role_title VARCHAR(150),
-    person_name VARCHAR(150),
-    display_order INT
-);
-
 -- Check if default template exists to avoid duplicates
 SET @existing = (SELECT COUNT(*) FROM pr_tbl_signatory_templates WHERE template_name = 'Standard Official Registry');
 

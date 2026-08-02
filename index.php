@@ -34,10 +34,9 @@
               <span style="letter-spacing: 2px; font-size: 1.1rem; color: #555; font-weight: 500;">MUNICIPALITY OF</span><br/>
               <strong class="text-primary" style="font-size: 2rem; letter-spacing: 1px;">HINOBA-AN</strong>
             </div>
-            <p><strong>HUMAN RESOURCE MANAGEMENT SYSTEM</strong> [ ver. 1.0 ]
             
-           
-            </p>
+            <p><strong>HUMAN RESOURCE INFORMATION SYSTEM</strong> [build 1.0.0]</p>
+
             <form method="POST" action="login.php" class="text-left form-validate">
               <div class="form-group-material">
                 <input id="login-username" type="text" name="username" required data-msg="Please enter your username" class="input-material">
@@ -55,7 +54,7 @@
             </form><a data-toggle="modal" data-target="#fua" href="#" class="forgot-pass">Forgot login data?</a><small>Account Setup? Click</small> <a href="sign_up_one.php" class="signup"><strong>here</strong></a>.
           </div>
           <div class="copyrights text-center">
-            <p>Developed by <a href="https://web.facebook.com/aqsijmel" class="external">Emiloi</a></p>
+            <p>Developed by <a href="https://www.facebook.com/people/Aqura-Information-Technology-Solutions/61592685632481/" class="external">Aqura Information Technology Solutions</a></p>
             <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
           </div>
         </div>
