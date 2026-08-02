@@ -62,7 +62,7 @@ if ($user_row) {
     $session_access = $user_row['access'];
     $_SESSION['useraccess'] = $user_row['access'];
     
-    if ($user_row['access'] === 'Admin') {
+    if ($user_row['access'] === 'Admin' || $user_row['access'] === 'Administrator') {
         $_SESSION['allowed_modules'] = ['hris', 'payroll']; // Admin gets everything
     } else {
         $_SESSION['allowed_modules'] = explode(',', (string)($user_row['module_access'] ?? ''));
@@ -101,7 +101,7 @@ $perCtrF_all=$perCtrFemale_query->rowCount();
 $check_pass = $user_row['password'];
 
 // Auto-process monthly leave credits when Administrator logs in
-if ($session_access === 'Admin') {
+if ($session_access === 'Admin' || $session_access === 'Administrator') {
     require_once('process_monthly_leave_credits.php');
     checkAndProcessMonthlyCredits($conn, $session_id);
 }
