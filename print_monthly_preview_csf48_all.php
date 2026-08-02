@@ -599,11 +599,11 @@ $studData_row=$studData_query->fetch();
     if($SC_query3->rowCount()>0){
         
     ?>
-    <td rowspan="2"><?php echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1); ?></td>
+    <td rowspan="2"><?php echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60); ?></td>
     
     <td rowspan="2"><?php echo ($dailyLate+$dailyUTime)-($dailyFinalHR*60); ?></td>
   <?php }else{?>
-    <td><?php echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1); ?></td>
+    <td><?php echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60); ?></td>
     
     <td><?php echo ($dailyLate+$dailyUTime)-($dailyFinalHR*60); ?></td>
     <?php } ?>
@@ -651,41 +651,22 @@ $studData_row=$studData_query->fetch();
 
 <?php
 
-$grandTotalLateMin=$grandTotalamLateMin+$grandTotalpmLateMin;
-$final_lateHr=$grandTotalLateMin/60;
-$final_lateHr=substr($grandTotalLateMin/60, 0,1);
-
-$final_lateMin=substr($grandTotalLateMin/60, 1)/100*60;
-$final_lateMin=number_format($final_lateMin, 2, '.', '');
-
-$final_lateMin=substr($final_lateMin, 2);
+$grandTotalLateMin = (int)round((float)$grandTotalamLateMin + (float)$grandTotalpmLateMin);
+$final_lateHr = (int)floor($grandTotalLateMin / 60);
+$final_lateMin = (int)($grandTotalLateMin % 60);
  
 
 
-$grandTotalUTimeMin=$grandTotalamUTimeMin+$grandTotalpmUTimeMin;
-$final_uTimeHr=$grandTotalUTimeMin/60;
-$final_uTimeHr=substr($grandTotalUTimeMin/60, 0,1);
-
-$final_uTimeMin=substr($grandTotalUTimeMin/60, 1)/100*60;
-$final_uTimeMin=number_format($final_uTimeMin, 2, '.', '');
-$final_uTimeMin=substr($final_uTimeMin, 2);
+$grandTotalUTimeMin = (int)round((float)$grandTotalamUTimeMin + (float)$grandTotalpmUTimeMin);
+$final_uTimeHr = (int)floor($grandTotalUTimeMin / 60);
+$final_uTimeMin = (int)($grandTotalUTimeMin % 60);
  
  
  
  
-$finalTotalLateUTimeMin=$grandTotalLateMin+$grandTotalUTimeMin;
-$final_TLUHr=$finalTotalLateUTimeMin/60;
-
-if($final_TLUHr<=1){
-    $final_TLUHr=substr($final_TLUHr, 0, 1);
-}else{
-    $final_TLUHr=substr($final_TLUHr, 0, 2);
-}
-
-$final_TLUMin=substr($finalTotalLateUTimeMin/60, 2)/100*60;
-$final_TLUMin=number_format($final_TLUMin, 2, '.', '');
-
-$final_TLUMin=substr($final_TLUMin, 2);
+$finalTotalLateUTimeMin = (int)round($grandTotalLateMin + $grandTotalUTimeMin);
+$final_TLUHr = (int)floor($finalTotalLateUTimeMin / 60);
+$final_TLUMin = (int)($finalTotalLateUTimeMin % 60);
 
 
 ?>

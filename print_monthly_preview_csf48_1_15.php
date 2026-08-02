@@ -564,11 +564,11 @@ $RFTag_id=$studData_row['RFTag_id'];
     if($SC_query3->rowCount()>0){
         
     ?>
-    <td rowspan="2"><?php echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1); ?></td>
+    <td rowspan="2"><?php echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60); ?></td>
     
     <td rowspan="2"><?php echo ($dailyLate+$dailyUTime)-($dailyFinalHR*60); ?></td>
   <?php }else{?>
-    <td><?php echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1); ?></td>
+    <td><?php echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60); ?></td>
     
     <td><?php echo ($dailyLate+$dailyUTime)-($dailyFinalHR*60); ?></td>
     <?php } ?>
