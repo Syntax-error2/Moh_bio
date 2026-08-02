@@ -68,11 +68,18 @@
                 <div id="updates-boxKinder" role="tabpanel" class="collapse show">
                
                     <div class="col-lg-12">
+                    <form action="save_add_dept_des_gass.php" method="POST" id="bulkDeleteGassForm" class="mb-2 d-flex justify-content-end">
+                      <div id="bulkDeleteGassIds"></div>
+                      <button type="submit" name="bulkDeleteGASS" id="bulkDeleteGassBtn" class="btn btn-danger btn-sm" disabled>
+                        <i class="fa fa-trash"></i> Delete Selected
+                      </button>
+                    </form>
                     <div class="table-responsive" style="margin-top: 12px;">
                     <table id="gassTable" class="display" style="width:100%">
                     
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;"><input type="checkbox" id="checkAllGass" title="Check/Uncheck All" /></th>
                          
                           <th>Salary Grade</th>
                           <th>Level</th>
@@ -90,6 +97,7 @@
                             {  ?>
            
                         <tr>
+                          <td style="text-align: center;"><input type="checkbox" class="gass-row-checkbox" value="<?php echo (int)$subjK_row['gass_id']; ?>" /></td>
                         
                           <td><?php echo $subjK_row['gass_name']; ?></td>
                           <td><?php echo $subjK_row['level']; ?></td>
@@ -222,6 +230,86 @@
     </div>
     
     <?php include('scripts_files.php'); ?>
+
+    <script>
+    (function () {
+      var checkAll = document.getElementById('checkAllGass');
+      var bulkDeleteBtn = document.getElementById('bulkDeleteGassBtn');
+      var bulkDeleteForm = document.getElementById('bulkDeleteGassForm');
+      var hiddenIdsWrap = document.getElementById('bulkDeleteGassIds');
+
+      if (!bulkDeleteBtn || !bulkDeleteForm || !hiddenIdsWrap) {
+        return;
+      }
+
+      function getRowCheckboxes() {
+        return document.querySelectorAll('.gass-row-checkbox');
+      }
+
+      function getCheckedValues() {
+        var values = [];
+        getRowCheckboxes().forEach(function (cb) {
+          if (cb.checked) {
+            values.push(cb.value);
+          }
+        });
+        return values;
+      }
+
+      function updateBulkDeleteState() {
+        var rowCheckboxes = getRowCheckboxes();
+        var checkedValues = getCheckedValues();
+        bulkDeleteBtn.disabled = checkedValues.length === 0;
+        if (checkAll) {
+          checkAll.checked = rowCheckboxes.length > 0 && checkedValues.length === rowCheckboxes.length;
+        }
+      }
+
+      function rebuildHiddenInputs() {
+        hiddenIdsWrap.innerHTML = '';
+        getCheckedValues().forEach(function (id) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'gass_ids[]';
+          input.value = id;
+          hiddenIdsWrap.appendChild(input);
+        });
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', function () {
+          getRowCheckboxes().forEach(function (cb) {
+            cb.checked = checkAll.checked;
+          });
+          updateBulkDeleteState();
+        });
+      }
+
+      document.addEventListener('change', function (event) {
+        if (event.target && event.target.classList.contains('gass-row-checkbox')) {
+          updateBulkDeleteState();
+        }
+      });
+
+      bulkDeleteForm.addEventListener('submit', function (event) {
+        var selected = getCheckedValues().length;
+        if (selected === 0) {
+          event.preventDefault();
+          window.alert('Please select at least one salary grade entry to delete.');
+          return;
+        }
+
+        if (!window.confirm('Delete ' + selected + ' selected salary grade record(s)?')) {
+          event.preventDefault();
+          return;
+        }
+
+        rebuildHiddenInputs();
+      });
+
+      updateBulkDeleteState();
+    })();
+    </script>
     
   </body>
 </html>

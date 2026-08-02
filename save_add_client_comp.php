@@ -63,3 +63,28 @@ if(isset($_POST['deleteClient']))
 <?php } ?>
 
 
+<?php
+
+if (isset($_POST['bulkDeleteClients']))
+{
+    $client_ids = $_POST['client_ids'] ?? [];
+
+    if (is_array($client_ids) && count($client_ids) > 0) {
+        $client_ids = array_values(array_filter(array_map('intval', $client_ids), function ($id) {
+            return $id > 0;
+        }));
+
+        if (count($client_ids) > 0) {
+            $placeholders = implode(',', array_fill(0, count($client_ids), '?'));
+            $deleteStmt = $conn->prepare("DELETE FROM client_computer WHERE client_id IN ($placeholders)");
+            $deleteStmt->execute($client_ids);
+        }
+    }
+
+?>
+
+<script> window.location='list_client_comp.php'; </script>
+
+<?php } ?>
+
+

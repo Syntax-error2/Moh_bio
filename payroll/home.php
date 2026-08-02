@@ -204,7 +204,7 @@ try {
 
 if($session_access == "User") { ?>
     <script>
-        window.location = 'list_personnel_individual_details.php?dept=<?php echo $user_dept; ?>&personnel_id=<?php echo $user_personnel_id; ?>';
+        window.location = 'list_personnel_income.php?dept=<?php echo $user_dept; ?>&personnel_id=<?php echo $user_personnel_id; ?>';
     </script>
 <?php } elseif($session_access == "Admin") { } ?>
 

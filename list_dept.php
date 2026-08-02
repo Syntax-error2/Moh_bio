@@ -68,11 +68,18 @@
                 <div id="updates-boxKinder" role="tabpanel" class="collapse show">
                
                     <div class="col-lg-12">
+                    <form action="save_add_dept_des_gass.php" method="POST" id="bulkDeleteDeptForm" class="mb-2 d-flex justify-content-end">
+                      <div id="bulkDeleteDeptIds"></div>
+                      <button type="submit" name="bulkDeleteDept" id="bulkDeleteDeptBtn" class="btn btn-danger btn-sm" disabled>
+                        <i class="fa fa-trash"></i> Delete Selected
+                      </button>
+                    </form>
                     <div class="table-responsive" style="margin-top: 12px;">
                     <table id="" class="display" style="width:100%">
                     
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;"><input type="checkbox" id="checkAllDept" title="Check/Uncheck All" /></th>
                          
                           <th>Department / Office</th>
                           <th>Action</th>
@@ -87,6 +94,7 @@
                             {  ?>
            
                         <tr>
+                          <td style="text-align: center;"><input type="checkbox" class="dept-row-checkbox" value="<?php echo (int)$subjK_row['do_id']; ?>" /></td>
                         
                           <td><?php echo $subjK_row['dept_office_name']; ?></td>
                     
@@ -196,6 +204,86 @@
     </div>
     
     <?php include('scripts_files.php'); ?>
+
+    <script>
+    (function () {
+      var checkAll = document.getElementById('checkAllDept');
+      var bulkDeleteBtn = document.getElementById('bulkDeleteDeptBtn');
+      var bulkDeleteForm = document.getElementById('bulkDeleteDeptForm');
+      var hiddenIdsWrap = document.getElementById('bulkDeleteDeptIds');
+
+      if (!bulkDeleteBtn || !bulkDeleteForm || !hiddenIdsWrap) {
+        return;
+      }
+
+      function getRowCheckboxes() {
+        return document.querySelectorAll('.dept-row-checkbox');
+      }
+
+      function getCheckedValues() {
+        var values = [];
+        getRowCheckboxes().forEach(function (cb) {
+          if (cb.checked) {
+            values.push(cb.value);
+          }
+        });
+        return values;
+      }
+
+      function updateBulkDeleteState() {
+        var rowCheckboxes = getRowCheckboxes();
+        var checkedValues = getCheckedValues();
+        bulkDeleteBtn.disabled = checkedValues.length === 0;
+        if (checkAll) {
+          checkAll.checked = rowCheckboxes.length > 0 && checkedValues.length === rowCheckboxes.length;
+        }
+      }
+
+      function rebuildHiddenInputs() {
+        hiddenIdsWrap.innerHTML = '';
+        getCheckedValues().forEach(function (id) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'do_ids[]';
+          input.value = id;
+          hiddenIdsWrap.appendChild(input);
+        });
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', function () {
+          getRowCheckboxes().forEach(function (cb) {
+            cb.checked = checkAll.checked;
+          });
+          updateBulkDeleteState();
+        });
+      }
+
+      document.addEventListener('change', function (event) {
+        if (event.target && event.target.classList.contains('dept-row-checkbox')) {
+          updateBulkDeleteState();
+        }
+      });
+
+      bulkDeleteForm.addEventListener('submit', function (event) {
+        var selected = getCheckedValues().length;
+        if (selected === 0) {
+          event.preventDefault();
+          window.alert('Please select at least one department/office to delete.');
+          return;
+        }
+
+        if (!window.confirm('Delete ' + selected + ' selected department/office record(s)?')) {
+          event.preventDefault();
+          return;
+        }
+
+        rebuildHiddenInputs();
+      });
+
+      updateBulkDeleteState();
+    })();
+    </script>
     
   </body>
 </html>

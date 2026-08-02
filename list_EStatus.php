@@ -68,10 +68,19 @@
                 <div id="updates-boxKinder" role="tabpanel" class="collapse show">
                
                     <div class="col-lg-12">
+                    <form action="save_add_dept_des_gass.php" method="POST" id="bulkDeleteEmpStatusForm" class="mb-2 d-flex justify-content-end">
+                      <div id="bulkDeleteEmpStatusIds"></div>
+                      <button type="submit" name="bulkDeleteEmpStatus" id="bulkDeleteEmpStatusBtn" class="btn btn-danger btn-sm" disabled>
+                        <i class="fa fa-trash"></i> Delete Selected
+                      </button>
+                    </form>
                     <div class="table-responsive" style="margin-top: 12px;">
                     <table id="" class="display" style="width:100%">
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;">
+                            <input type="checkbox" id="checkAllEmpStatus" title="Check/Uncheck All" />
+                          </th>
                           <th>Appointment Status</th>
                           <th>Position Class</th>
                           <th>Type</th>
@@ -87,6 +96,9 @@
                             {  ?>
            
                         <tr>
+                          <td style="text-align: center;">
+                            <input type="checkbox" class="empstatus-row-checkbox" value="<?php echo (int)$subjK_row['empStat_id']; ?>" />
+                          </td>
                         
                           <td <?php if($subjK_row['status']==='Active'){ ?> style="color: green;" <?php }else{ ?> style="color: red;" <?php } ?>><?php echo $subjK_row['emp_stat_name']; ?></td>
                           
@@ -222,6 +234,87 @@
     </div>
     
     <?php include('scripts_files.php'); ?>
+
+    <script>
+    (function () {
+      var checkAll = document.getElementById('checkAllEmpStatus');
+      var bulkDeleteBtn = document.getElementById('bulkDeleteEmpStatusBtn');
+      var bulkDeleteForm = document.getElementById('bulkDeleteEmpStatusForm');
+      var hiddenIdsWrap = document.getElementById('bulkDeleteEmpStatusIds');
+
+      if (!bulkDeleteBtn || !bulkDeleteForm || !hiddenIdsWrap) {
+        return;
+      }
+
+      function getRowCheckboxes() {
+        return document.querySelectorAll('.empstatus-row-checkbox');
+      }
+
+      function getCheckedValues() {
+        var values = [];
+        getRowCheckboxes().forEach(function (cb) {
+          if (cb.checked) {
+            values.push(cb.value);
+          }
+        });
+        return values;
+      }
+
+      function updateBulkDeleteState() {
+        var rowCheckboxes = getRowCheckboxes();
+        var checkedValues = getCheckedValues();
+        bulkDeleteBtn.disabled = checkedValues.length === 0;
+
+        if (checkAll) {
+          checkAll.checked = rowCheckboxes.length > 0 && checkedValues.length === rowCheckboxes.length;
+        }
+      }
+
+      function rebuildHiddenInputs() {
+        hiddenIdsWrap.innerHTML = '';
+        getCheckedValues().forEach(function (id) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'empStat_ids[]';
+          input.value = id;
+          hiddenIdsWrap.appendChild(input);
+        });
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', function () {
+          getRowCheckboxes().forEach(function (cb) {
+            cb.checked = checkAll.checked;
+          });
+          updateBulkDeleteState();
+        });
+      }
+
+      document.addEventListener('change', function (event) {
+        if (event.target && event.target.classList.contains('empstatus-row-checkbox')) {
+          updateBulkDeleteState();
+        }
+      });
+
+      bulkDeleteForm.addEventListener('submit', function (event) {
+        var selected = getCheckedValues().length;
+        if (selected === 0) {
+          event.preventDefault();
+          window.alert('Please select at least one employment status to delete.');
+          return;
+        }
+
+        if (!window.confirm('Delete ' + selected + ' selected employment status record(s)?')) {
+          event.preventDefault();
+          return;
+        }
+
+        rebuildHiddenInputs();
+      });
+
+      updateBulkDeleteState();
+    })();
+    </script>
     
   </body>
 </html>

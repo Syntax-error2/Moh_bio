@@ -27,7 +27,7 @@
                         <tr>
                         
                             <td style="vertical-align: middle;">
-                            <a title="View complete personnel data..." style="color: white !important; margin-top: 3px;" href="list_personnel_individual_details.php?dept=<?php echo $staff_row['do_id']; ?>&personnel_id=<?php echo $personnel_id; ?>" class="btn btn-info btn-sm"><i class="fa fa-info-circle"></i> View Details</a>
+                            <a title="View payroll personnel records..." style="color: white !important; margin-top: 3px;" href="list_personnel_income.php?dept=<?php echo $staff_row['do_id']; ?>&personnel_id=<?php echo $personnel_id; ?>" class="btn btn-info btn-sm"><i class="fa fa-info-circle"></i> View Details</a>
                             </td>
                             
                             <td style="text-align: center;">

@@ -129,10 +129,10 @@
                  
                 
                 <div class="col-lg-12 mt-2 mb-2">
-                <a class="btn btn-secondary" href="list_personnel_individual_details.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>"> PERSONNEL PROFILE</a>
+                <a class="btn btn-secondary" href="../list_personnel_individual_details.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>"> HRIS PROFILE</a>
                 <a class="btn btn-secondary" href="list_personnel_income.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>"> INCOME</a>
                 <a class="btn btn-primary" style="color: white; font-weight: bold;" href="list_personnel_deductions.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>"> DEDUCTIONS</a> 
-                <a class="btn btn-secondary" href="list_personnel_individual_details_SR.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>"> PAY HISTORY</a>
+                <a class="btn btn-secondary" href="list_personnel_pay_history.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>"> PAY HISTORY</a>
                 <a class="btn btn-info" style="color: white;" title="Print personnel data sheet..." href="printPersonnelDataSheet_detailed.php?dept=<?php echo urlencode($get_dept); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>&pDataReportType=PERSONAL INFORMATION" target="_blank"><i class="fa fa-print"></i></a>  
                 </div>      
                 

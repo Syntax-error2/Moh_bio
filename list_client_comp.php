@@ -71,11 +71,20 @@
              
                 
                     <div class="col-lg-12">
+                    <form action="save_add_client_comp.php" method="POST" id="bulkDeleteClientCompForm">
+                    <div class="d-flex justify-content-end mb-2">
+                      <button type="submit" name="bulkDeleteClients" id="bulkDeleteClientsBtn" class="btn btn-danger btn-sm" disabled>
+                        <i class="fa fa-trash"></i> Delete Selected
+                      </button>
+                    </div>
                     <div class="table-responsive" style="margin-top: 12px;">
                     <table id="" class="display" style="width:100%">
                     
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;">
+                            <input type="checkbox" id="checkAllClients" title="Check/Uncheck All" />
+                          </th>
                          
                           <th>IP Address - Computer Name</th>
                            
@@ -96,6 +105,9 @@
                                 ?>
            
                         <tr>
+                          <td style="text-align: center;">
+                            <input type="checkbox" class="client-row-checkbox" name="client_ids[]" value="<?php echo (int)$client_id; ?>" />
+                          </td>
                           
                           <td><?php echo $subjK_row['ipAddress']." - ".$subjK_row['compName']; ?></td>
                           
@@ -121,6 +133,7 @@
                       </tbody>
                     </table>
                     </div>
+                    </form>
                     </div>
                   
                 </div>
@@ -144,6 +157,70 @@
     </div>
     
     <?php include('scripts_files.php'); ?>
+
+    <script>
+    (function () {
+      var checkAll = document.getElementById('checkAllClients');
+      var bulkDeleteBtn = document.getElementById('bulkDeleteClientsBtn');
+      var bulkForm = document.getElementById('bulkDeleteClientCompForm');
+
+      if (!bulkForm || !bulkDeleteBtn) {
+        return;
+      }
+
+      function getRowCheckboxes() {
+        return document.querySelectorAll('.client-row-checkbox');
+      }
+
+      function updateBulkDeleteState() {
+        var rowCheckboxes = getRowCheckboxes();
+        var checkedCount = 0;
+
+        rowCheckboxes.forEach(function (cb) {
+          if (cb.checked) {
+            checkedCount += 1;
+          }
+        });
+
+        bulkDeleteBtn.disabled = checkedCount === 0;
+
+        if (checkAll) {
+          checkAll.checked = rowCheckboxes.length > 0 && checkedCount === rowCheckboxes.length;
+        }
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', function () {
+          var rowCheckboxes = getRowCheckboxes();
+          rowCheckboxes.forEach(function (cb) {
+            cb.checked = checkAll.checked;
+          });
+          updateBulkDeleteState();
+        });
+      }
+
+      document.addEventListener('change', function (event) {
+        if (event.target && event.target.classList.contains('client-row-checkbox')) {
+          updateBulkDeleteState();
+        }
+      });
+
+      bulkForm.addEventListener('submit', function (event) {
+        var selected = document.querySelectorAll('.client-row-checkbox:checked').length;
+        if (selected === 0) {
+          event.preventDefault();
+          window.alert('Please select at least one client computer to delete.');
+          return;
+        }
+
+        if (!window.confirm('Delete ' + selected + ' selected client computer(s)?')) {
+          event.preventDefault();
+        }
+      });
+
+      updateBulkDeleteState();
+    })();
+    </script>
 
      
     
