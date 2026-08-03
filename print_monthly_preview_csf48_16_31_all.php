@@ -592,10 +592,10 @@ $studData_row=$studData_query->fetch();
     if($SC_query3->rowCount()>0){
         
     ?>
-    <td rowspan="2"><?php echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1); ?></td>
+    <td rowspan="2"><?php echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60); ?></td>
     <td rowspan="2"><?php echo ($dailyLate+$dailyUTime)-($dailyFinalHR*60); ?></td>
     <?php }else{?>
-    <td><?php echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1); ?></td>
+    <td><?php echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60); ?></td>
     <td><?php echo ($dailyLate+$dailyUTime)-($dailyFinalHR*60); ?></td>
     <?php } ?>
   
@@ -642,41 +642,22 @@ $studData_row=$studData_query->fetch();
 
 <?php
 
-$grandTotalLateMin=$grandTotalamLateMin+$grandTotalpmLateMin;
-$final_lateHr=$grandTotalLateMin/60;
-$final_lateHr=substr($grandTotalLateMin/60, 0,1);
-
-$final_lateMin=substr($grandTotalLateMin/60, 1)/100*60;
-$final_lateMin=number_format($final_lateMin, 2, '.', '');
-
-$final_lateMin=substr($final_lateMin, 2);
+$grandTotalLateMin = (int)round((float)$grandTotalamLateMin + (float)$grandTotalpmLateMin);
+$final_lateHr = (int)floor($grandTotalLateMin / 60);
+$final_lateMin = (int)($grandTotalLateMin % 60);
  
 
 
-$grandTotalUTimeMin=$grandTotalamUTimeMin+$grandTotalpmUTimeMin;
-$final_uTimeHr=$grandTotalUTimeMin/60;
-$final_uTimeHr=substr($grandTotalUTimeMin/60, 0,1);
-
-$final_uTimeMin=substr($grandTotalUTimeMin/60, 1)/100*60;
-$final_uTimeMin=number_format($final_uTimeMin, 2, '.', '');
-$final_uTimeMin=substr($final_uTimeMin, 2);
+$grandTotalUTimeMin = (int)round((float)$grandTotalamUTimeMin + (float)$grandTotalpmUTimeMin);
+$final_uTimeHr = (int)floor($grandTotalUTimeMin / 60);
+$final_uTimeMin = (int)($grandTotalUTimeMin % 60);
  
  
  
  
-$finalTotalLateUTimeMin=$grandTotalLateMin+$grandTotalUTimeMin;
-$final_TLUHr=$finalTotalLateUTimeMin/60;
-
-if($final_TLUHr<=1){
-    $final_TLUHr=substr($final_TLUHr, 0, 1);
-}else{
-    $final_TLUHr=substr($final_TLUHr, 0, 2);
-}
-
-$final_TLUMin=substr($finalTotalLateUTimeMin/60, 2)/100*60;
-$final_TLUMin=number_format($final_TLUMin, 2, '.', '');
-
-$final_TLUMin=substr($final_TLUMin, 2);
+$finalTotalLateUTimeMin = (int)round($grandTotalLateMin + $grandTotalUTimeMin);
+$final_TLUHr = (int)floor($finalTotalLateUTimeMin / 60);
+$final_TLUMin = (int)($finalTotalLateUTimeMin % 60);
 
 
 ?>
@@ -733,31 +714,34 @@ Verified as to the prescribed office hours. <br />
 
   <p style="float: right; text-decoration-line: underline; font-size: 18px; font-variant: all-petite-caps; margin: 0px;">
   <?php
-  
+    $office_head_display = 'NO ASSIGNED OFFICE HEAD';
+
     $adminData_stmt = $conn->prepare("SELECT do_id FROM personnels WHERE RFTag_id = :RFTag_id");
     $adminData_stmt->execute([':RFTag_id' => $printALL_row['RFTag_id']]);
-    $adminData_row=$adminData_stmt->fetch();
-    
-    
-    $dept_off_stmt = $conn->prepare("SELECT officeHead_id FROM dept_offices WHERE do_id = :do_id");
-    $dept_off_stmt->execute([':do_id' => $adminData_row['do_id']]);
-    $do_row = $dept_off_stmt->fetch(); 
-    
-    
-    $officeHead_stmt = $conn->prepare("SELECT lname, fname, mname, suffix FROM personnels WHERE personnel_id = :personnel_id");
-    $officeHead_stmt->execute([':personnel_id' => $do_row['officeHead_id']]);
-    $oh_row=$officeHead_stmt->fetch();
-                 
-                                    if($oh_row['suffix']=="-")
-                                    {
-                                        
-                                    echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname'];
-                                    
-                                    }else{
-                                        
-                                    echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname']." ".$oh_row['suffix'];
-                                    
-                                    }  
+    $adminData_row = $adminData_stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!empty($adminData_row['do_id'])) {
+        $dept_off_stmt = $conn->prepare("SELECT officeHead_id FROM dept_offices WHERE do_id = :do_id");
+        $dept_off_stmt->execute([':do_id' => $adminData_row['do_id']]);
+        $do_row = $dept_off_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!empty($do_row['officeHead_id'])) {
+            $officeHead_stmt = $conn->prepare("SELECT lname, fname, mname, suffix FROM personnels WHERE personnel_id = :personnel_id");
+            $officeHead_stmt->execute([':personnel_id' => $do_row['officeHead_id']]);
+            $oh_row = $officeHead_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!empty($oh_row)) {
+                $mname_initial = !empty($oh_row['mname']) ? substr($oh_row['mname'], 0, 1) . ". " : '';
+                if (($oh_row['suffix'] ?? '-') === "-") {
+                    $office_head_display = $oh_row['fname'] . " " . $mname_initial . $oh_row['lname'];
+                } else {
+                    $office_head_display = $oh_row['fname'] . " " . $mname_initial . $oh_row['lname'] . " " . $oh_row['suffix'];
+                }
+            }
+        }
+    }
+
+    echo htmlspecialchars(trim($office_head_display), ENT_QUOTES, 'UTF-8');
     ?>
   
   </p> <br /> <br /> 

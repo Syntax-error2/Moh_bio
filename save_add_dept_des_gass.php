@@ -452,6 +452,32 @@ window.location='list_dept.php';
 <?php } ?>
 
 
+<?php
+
+if(isset($_POST['bulkDeleteDept']))
+{
+    $do_ids = $_POST['do_ids'] ?? [];
+
+    if (is_array($do_ids) && count($do_ids) > 0) {
+        $do_ids = array_values(array_filter(array_map('intval', $do_ids), function ($id) {
+            return $id > 0;
+        }));
+
+        if (count($do_ids) > 0) {
+            $placeholders = implode(',', array_fill(0, count($do_ids), '?'));
+            $delete_stmt = $conn->prepare("DELETE FROM dept_offices WHERE do_id IN ($placeholders)");
+            $delete_stmt->execute($do_ids);
+        }
+    }
+?>
+
+<script>
+window.location='list_dept.php';
+</script>
+
+<?php } ?>
+
+
 
 
 
@@ -514,6 +540,32 @@ if(isset($_POST['deleteDes']))
 
 <script>
 window.alert('Designation: <?php echo $des_name; ?> successfully deleted...');
+window.location='list_designation.php';
+</script>
+
+<?php } ?>
+
+
+<?php
+
+if(isset($_POST['bulkDeleteDes']))
+{
+    $des_ids = $_POST['des_ids'] ?? [];
+
+    if (is_array($des_ids) && count($des_ids) > 0) {
+        $des_ids = array_values(array_filter(array_map('intval', $des_ids), function ($id) {
+            return $id > 0;
+        }));
+
+        if (count($des_ids) > 0) {
+            $placeholders = implode(',', array_fill(0, count($des_ids), '?'));
+            $delete_stmt = $conn->prepare("DELETE FROM designation WHERE des_id IN ($placeholders)");
+            $delete_stmt->execute($des_ids);
+        }
+    }
+?>
+
+<script>
 window.location='list_designation.php';
 </script>
 
@@ -653,6 +705,32 @@ window.location='list_gass.php';
 </script>
 
 <?php } ?>
+
+
+<?php
+
+if(isset($_POST['bulkDeleteGASS']))
+{
+    $gass_ids = $_POST['gass_ids'] ?? [];
+
+    if (is_array($gass_ids) && count($gass_ids) > 0) {
+        $gass_ids = array_values(array_filter(array_map('intval', $gass_ids), function ($id) {
+            return $id > 0;
+        }));
+
+        if (count($gass_ids) > 0) {
+            $placeholders = implode(',', array_fill(0, count($gass_ids), '?'));
+            $delete_stmt = $conn->prepare("DELETE FROM gass WHERE gass_id IN ($placeholders)");
+            $delete_stmt->execute($gass_ids);
+        }
+    }
+?>
+
+<script>
+window.location='list_gass.php';
+</script>
+
+<?php } ?>
  
 
 
@@ -718,6 +796,32 @@ if(isset($_POST['deleteShift']))
 
 <script>
 window.alert('Shift: <?php echo $shift_name; ?> successfully deleted...');
+window.location='list_shift.php';
+</script>
+
+<?php } ?>
+
+
+<?php
+
+if(isset($_POST['bulkDeleteShift']))
+{
+    $shift_ids = $_POST['shift_ids'] ?? [];
+
+    if (is_array($shift_ids) && count($shift_ids) > 0) {
+        $shift_ids = array_values(array_filter(array_map('intval', $shift_ids), function ($id) {
+            return $id > 0;
+        }));
+
+        if (count($shift_ids) > 0) {
+            $placeholders = implode(',', array_fill(0, count($shift_ids), '?'));
+            $delete_stmt = $conn->prepare("DELETE FROM shifts WHERE shift_id IN ($placeholders)");
+            $delete_stmt->execute($shift_ids);
+        }
+    }
+?>
+
+<script>
 window.location='list_shift.php';
 </script>
 
@@ -795,6 +899,32 @@ if(isset($_POST['deleteEmpStatus']))
 
 <script>
 window.alert('Appointment status: <?php echo $subjK_row['emp_stat_name']; ?> | Class: <?php echo $subjK_row['position_class']; ?> | Type: <?php echo $subjK_row['status']; ?> successfully deleted...');
+window.location='list_EStatus.php';
+</script>
+
+<?php } ?>
+
+
+<?php
+
+if(isset($_POST['bulkDeleteEmpStatus']))
+{
+    $empStat_ids = $_POST['empStat_ids'] ?? [];
+
+    if (is_array($empStat_ids) && count($empStat_ids) > 0) {
+        $empStat_ids = array_values(array_filter(array_map('intval', $empStat_ids), function ($id) {
+            return $id > 0;
+        }));
+
+        if (count($empStat_ids) > 0) {
+            $placeholders = implode(',', array_fill(0, count($empStat_ids), '?'));
+            $delete_stmt = $conn->prepare("DELETE FROM emp_status WHERE empStat_id IN ($placeholders)");
+            $delete_stmt->execute($empStat_ids);
+        }
+    }
+?>
+
+<script>
 window.location='list_EStatus.php';
 </script>
 

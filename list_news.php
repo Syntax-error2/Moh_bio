@@ -72,12 +72,15 @@ include('header.php');
                     <?php
                     $subjK_query = $conn->query("SELECT * FROM news ORDER BY news_id DESC") or die(mysql_error());
                     while ($subjK_row = $subjK_query->fetch()) {
-                      $client_query = $conn->query("SELECT * FROM client_computer WHERE ipAddress='$subjK_row[ipAddress]'") or die(mysql_error());
-                      $client_row = $client_query->fetch();
+                      $client_stmt = $conn->prepare("SELECT description, ipAddress FROM client_computer WHERE ipAddress = :ipAddress LIMIT 1");
+                      $client_stmt->execute([':ipAddress' => $subjK_row['ipAddress']]);
+                      $client_row = $client_stmt->fetch(PDO::FETCH_ASSOC);
+                      $client_description = $client_row['description'] ?? 'Unknown Client';
+                      $client_ip = $client_row['ipAddress'] ?? ($subjK_row['ipAddress'] ?? 'N/A');
                       $news_id = $subjK_row['news_id'];
                     ?>
                     <tr>
-                      <td><?php echo $client_row['description'] . '<br /><small>' . $client_row['ipAddress'] . '</small>'; ?></td>
+                      <td><?php echo htmlspecialchars($client_description, ENT_QUOTES, 'UTF-8') . '<br /><small>' . htmlspecialchars($client_ip, ENT_QUOTES, 'UTF-8') . '</small>'; ?></td>
                       <td style="max-width: 350px;"><?php echo "<strong>" . $subjK_row['news_title'] . "</strong><br /><p style='word-break: break-all; cursor: help;' title='" . $subjK_row['news_contents'] . "'>" . substr($subjK_row['news_contents'], 0, 100) . "...</p>"; ?></td>
                       <td><?php echo $subjK_row['posted_by'] . ' - ' . $subjK_row['dateTime']; ?></td>
                       <td>

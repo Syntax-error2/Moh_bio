@@ -365,12 +365,12 @@
                         <span class="bwd-stat-label"><i class="fa fa-male"></i> Male</span>
                     </div>
                     <div class="bwd-stat-item">
-                        <span class="bwd-stat-value" style="color: #333;"><?php echo $per_ctr_count; ?></span>
-                        <span class="bwd-stat-label"><i class="fa fa-users" style="color: #6c757d;"></i> Total</span>
-                    </div>
-                    <div class="bwd-stat-item">
                         <span class="bwd-stat-value" style="color: #28a745;"><?php echo $female_per_ctr_count; ?></span>
                         <span class="bwd-stat-label"><i class="fa fa-female"></i> Female</span>
+                    </div>
+                    <div class="bwd-stat-item">
+                        <span class="bwd-stat-value" style="color: #333;"><?php echo $per_ctr_count; ?></span>
+                        <span class="bwd-stat-label"><i class="fa fa-users" style="color: #6c757d;"></i> Total</span>
                     </div>
                 </div>
                 

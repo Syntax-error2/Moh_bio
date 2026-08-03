@@ -55,6 +55,256 @@ function getLeaveCardBalances($conn, $personnel_id) {
 }
 
 // ====================================
+// HELPER: Limited leave rules per calendar year
+// ====================================
+function getLimitedLeaveRule($leave_type, $other_leave_specification = null) {
+    $leave_type_lc = strtolower(trim((string)$leave_type));
+    $other_spec_lc = strtolower(trim((string)$other_leave_specification));
+
+    if (
+        $leave_type_lc === 'mandatory/forced leave' ||
+        strpos($leave_type_lc, 'mandatory leave') !== false ||
+        strpos($leave_type_lc, 'forced leave') !== false
+    ) {
+        return ['key' => 'mandatory', 'label' => 'Mandatory Leave', 'limit' => 5.0];
+    }
+
+    if (
+        $leave_type_lc === 'special privilege leave' ||
+        $leave_type_lc === 'special leave' ||
+        ($leave_type_lc === 'others' && strpos($other_spec_lc, 'special leave') !== false)
+    ) {
+        return ['key' => 'special', 'label' => 'Special Leave', 'limit' => 3.0];
+    }
+
+    if (
+        $leave_type_lc === 'wellness leave' ||
+        ($leave_type_lc === 'others' && strpos($other_spec_lc, 'wellness leave') !== false)
+    ) {
+        return ['key' => 'wellness', 'label' => 'Wellness Leave', 'limit' => 5.0];
+    }
+
+    return null;
+}
+
+function getYearlyLeaveUsageByRule($conn, $personnel_id, $rule_key, $year, $exclude_leave_application_id = null) {
+    if ($rule_key === 'mandatory') {
+        return getMandatoryEquivalentUsedDays($conn, $personnel_id, $year, $exclude_leave_application_id, false);
+    }
+
+    $type_condition = "1=0";
+
+    if ($rule_key === 'special') {
+        $type_condition = "(
+            LOWER(TRIM(COALESCE(leave_type, ''))) IN ('special privilege leave', 'special leave')
+            OR (
+                LOWER(TRIM(COALESCE(leave_type, ''))) = 'others'
+                AND LOWER(TRIM(COALESCE(other_leave_specification, ''))) LIKE '%special leave%'
+            )
+        )";
+    } elseif ($rule_key === 'wellness') {
+        $type_condition = "(
+            LOWER(TRIM(COALESCE(leave_type, ''))) = 'wellness leave'
+            OR (
+                LOWER(TRIM(COALESCE(leave_type, ''))) = 'others'
+                AND LOWER(TRIM(COALESCE(other_leave_specification, ''))) LIKE '%wellness leave%'
+            )
+        )";
+    }
+
+    $sql = "SELECT COALESCE(SUM(COALESCE(number_of_days, 0)), 0) AS used_days
+            FROM leave_applications
+            WHERE personnel_id = :personnel_id
+              AND YEAR(COALESCE(inclusive_date_from, application_date)) = :year
+                            AND LOWER(COALESCE(status, 'pending')) IN ('pending', 'approved')
+              AND $type_condition";
+
+    if (!empty($exclude_leave_application_id)) {
+        $sql .= " AND id != :exclude_id";
+    }
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(':personnel_id', $personnel_id);
+    $stmt->bindValue(':year', (int)$year, PDO::PARAM_INT);
+
+    if (!empty($exclude_leave_application_id)) {
+        $stmt->bindValue(':exclude_id', (int)$exclude_leave_application_id, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return round(floatval($row['used_days'] ?? 0), 3);
+}
+
+function getMandatoryEquivalentUsedDays($conn, $personnel_id, $year, $exclude_leave_application_id = null, $approved_only = false) {
+    $status_condition = $approved_only
+        ? "LOWER(COALESCE(status, 'pending')) = 'approved'"
+        : "LOWER(COALESCE(status, 'pending')) IN ('pending', 'approved')";
+
+    $exclude_clause = '';
+    if (!empty($exclude_leave_application_id)) {
+        $exclude_clause = " AND id != :exclude_id";
+    }
+
+    $base_sql = "FROM leave_applications
+                 WHERE personnel_id = :personnel_id
+                   AND YEAR(COALESCE(inclusive_date_from, application_date)) = :year
+                   AND $status_condition" . $exclude_clause;
+
+    $mandatory_sql = "SELECT COALESCE(SUM(COALESCE(number_of_days, 0)), 0) AS used_days
+                      $base_sql
+                        AND (
+                            LOWER(COALESCE(leave_type, '')) LIKE '%mandatory%'
+                            OR LOWER(COALESCE(leave_type, '')) LIKE '%forced%'
+                        )";
+
+    $mandatory_stmt = $conn->prepare($mandatory_sql);
+    $mandatory_stmt->bindValue(':personnel_id', $personnel_id);
+    $mandatory_stmt->bindValue(':year', (int)$year, PDO::PARAM_INT);
+    if (!empty($exclude_leave_application_id)) {
+        $mandatory_stmt->bindValue(':exclude_id', (int)$exclude_leave_application_id, PDO::PARAM_INT);
+    }
+    $mandatory_stmt->execute();
+    $mandatory_row = $mandatory_stmt->fetch(PDO::FETCH_ASSOC);
+    $mandatory_used = round(floatval($mandatory_row['used_days'] ?? 0), 3);
+
+    $vacation_sql = "SELECT COALESCE(SUM(COALESCE(number_of_days, 0)), 0) AS used_days
+                     $base_sql
+                       AND LOWER(COALESCE(leave_type, '')) LIKE '%vacation%'
+                       AND LOWER(COALESCE(leave_type, '')) NOT LIKE '%monetized%'
+                       AND LOWER(COALESCE(other_leave_specification, '')) NOT LIKE '%monetized%'";
+
+    $vacation_stmt = $conn->prepare($vacation_sql);
+    $vacation_stmt->bindValue(':personnel_id', $personnel_id);
+    $vacation_stmt->bindValue(':year', (int)$year, PDO::PARAM_INT);
+    if (!empty($exclude_leave_application_id)) {
+        $vacation_stmt->bindValue(':exclude_id', (int)$exclude_leave_application_id, PDO::PARAM_INT);
+    }
+    $vacation_stmt->execute();
+    $vacation_row = $vacation_stmt->fetch(PDO::FETCH_ASSOC);
+    $vacation_used = round(floatval($vacation_row['used_days'] ?? 0), 3);
+
+    // Mandatory compliance can be covered by valid vacation leaves up to 5 days.
+    $equivalent_used = $mandatory_used + min($vacation_used, 5.0);
+
+    // Annual mandatory bucket is capped at 5 days.
+    return round(min($equivalent_used, 5.0), 3);
+}
+
+function applyYearEndMandatoryShortfallDeduction($conn, $personnel_id, $year) {
+    $year = (int)$year;
+    if ($year <= 0) {
+        return;
+    }
+
+    // Only apply after the target year has ended.
+    $target_year_end = new DateTime($year . '-12-31');
+    $today = new DateTime(date('Y-m-d'));
+    if ($today <= $target_year_end) {
+        return;
+    }
+
+    $remarks_key = 'AUTO_UNUSED_MANDATORY_' . $year;
+
+    // Idempotency guard: skip when the auto-deduction entry already exists.
+    $existing_stmt = $conn->prepare("SELECT id FROM leave_card WHERE personnel_id = :personnel_id AND remarks = :remarks LIMIT 1");
+    $existing_stmt->execute([
+        ':personnel_id' => $personnel_id,
+        ':remarks' => $remarks_key
+    ]);
+    if ($existing_stmt->fetch(PDO::FETCH_ASSOC)) {
+        return;
+    }
+
+    $mandatory_equivalent_used = getMandatoryEquivalentUsedDays($conn, $personnel_id, $year, null, true);
+    $shortfall = round(max(5.0 - $mandatory_equivalent_used, 0), 3);
+
+    if ($shortfall <= 0) {
+        return;
+    }
+
+    $period_from = $year . '-12-01';
+    $period_to = $year . '-12-31';
+
+    $insert_stmt = $conn->prepare("INSERT INTO leave_card (
+        personnel_id,
+        period_from,
+        period_to,
+        particulars,
+        vl_earned,
+        vl_with_pay,
+        vl_without_pay,
+        sl_earned,
+        sl_with_pay,
+        sl_without_pay,
+        remarks,
+        is_special_leave,
+        created_from_application,
+        date_from,
+        date_to,
+        number_of_days
+    ) VALUES (
+        :personnel_id,
+        :period_from,
+        :period_to,
+        'Unused Mandatory Leave Deduction',
+        0,
+        :vl_with_pay,
+        0,
+        0,
+        0,
+        0,
+        :remarks,
+        0,
+        0,
+        :date_from,
+        :date_to,
+        :number_of_days
+    )");
+
+    $insert_stmt->execute([
+        ':personnel_id' => $personnel_id,
+        ':period_from' => $period_from,
+        ':period_to' => $period_to,
+        ':vl_with_pay' => $shortfall,
+        ':remarks' => $remarks_key,
+        ':date_from' => $period_from,
+        ':date_to' => $period_to,
+        ':number_of_days' => $shortfall
+    ]);
+}
+
+function validateYearlyLimitedLeave($conn, $personnel_id, $leave_type, $other_leave_specification, $number_of_days, $inclusive_date_from, $application_date, $exclude_leave_application_id = null) {
+    $rule = getLimitedLeaveRule($leave_type, $other_leave_specification);
+    if (!$rule) {
+        return null;
+    }
+
+    $requested_days = round(floatval($number_of_days), 3);
+    $basis_date = !empty($inclusive_date_from) ? $inclusive_date_from : $application_date;
+    $year = (int)date('Y', strtotime($basis_date));
+
+    if ($year <= 0) {
+        $year = (int)date('Y');
+    }
+
+    $used_days = getYearlyLeaveUsageByRule($conn, $personnel_id, $rule['key'], $year, $exclude_leave_application_id);
+    $projected_days = round($used_days + $requested_days, 3);
+
+    if ($projected_days > $rule['limit'] + 0.0001) {
+        $remaining_days = round(max($rule['limit'] - $used_days, 0), 3);
+        return $rule['label'] . " yearly limit exceeded for " . $year . ". Limit: " .
+               number_format($rule['limit'], 3) .
+               " day(s), already used: " . number_format($used_days, 3) .
+               " day(s), requested: " . number_format($requested_days, 3) .
+               " day(s), remaining: " . number_format($remaining_days, 3) . " day(s).";
+    }
+
+    return null;
+}
+
+// ====================================
 // SAVE NEW LEAVE APPLICATION
 // ====================================
 if (isset($_POST['save_leave_application'])) {
@@ -73,6 +323,39 @@ if (isset($_POST['save_leave_application'])) {
         $number_of_days = $_POST['number_of_days'];
         $commutation = $_POST['commutation'];
         $as_of_date = $_POST['as_of_date'] ?? null;
+
+        // Apply previous-year mandatory shortfall deduction, if applicable.
+        applyYearEndMandatoryShortfallDeduction($conn, $personnel_id, (int)date('Y') - 1);
+
+        $yearly_limit_error = validateYearlyLimitedLeave(
+            $conn,
+            $personnel_id,
+            $leave_type,
+            $other_leave_specification,
+            $number_of_days,
+            $inclusive_date_from,
+            $application_date,
+            null
+        );
+
+        if (!empty($yearly_limit_error)) {
+            $_SESSION['error'] = $yearly_limit_error;
+
+            $redirect_url = $_POST['redirect_url'] ?? '';
+            if (!empty($redirect_url)) {
+                header("Location: " . $redirect_url);
+            } else {
+                $do_id = $_POST['do_id'] ?? null;
+                $session_access = $_SESSION['access'] ?? '';
+                if (!empty($do_id) && $session_access !== 'User') {
+                    header("Location: list_personnel.php?dept=" . $do_id);
+                } else {
+                    $dept = $_POST['dept'] ?? '';
+                    header("Location: leave_application.php?dept=" . urlencode($dept) . "&personnel_id=" . $personnel_id);
+                }
+            }
+            exit();
+        }
         
         // Fetch ACTUAL current leave balances from leave_card
         $current_balances = getLeaveCardBalances($conn, $personnel_id);
@@ -365,6 +648,27 @@ if (isset($_POST['update_leave_application'])) {
         $number_of_days = $_POST['number_of_days'];
         $commutation = $_POST['commutation'];
         $as_of_date = $_POST['as_of_date'] ?? null;
+
+        // Apply previous-year mandatory shortfall deduction, if applicable.
+        applyYearEndMandatoryShortfallDeduction($conn, $personnel_id, (int)date('Y') - 1);
+
+        $yearly_limit_error = validateYearlyLimitedLeave(
+            $conn,
+            $personnel_id,
+            $leave_type,
+            $other_leave_specification,
+            $number_of_days,
+            $inclusive_date_from,
+            $application_date,
+            $leave_application_id
+        );
+
+        if (!empty($yearly_limit_error)) {
+            $_SESSION['error'] = $yearly_limit_error;
+            $dept = isset($_POST['dept']) ? $_POST['dept'] : '';
+            header("Location: leave_application.php?dept=" . urlencode($dept) . "&personnel_id=" . $personnel_id);
+            exit();
+        }
         
         // Get less_application values from form
         $less_application_vl = floatval($_POST['less_application_vl'] ?? 0);

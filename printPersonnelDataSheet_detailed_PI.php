@@ -134,25 +134,28 @@ $studData_row=$studData_query->fetch();
                           <tr><td colspan="4" style="font-size: smaller; padding: 8px; border: none;"></td></tr>
                           
                           <?php
-                           
-                           $emp_stat_query = $conn->query("SELECT * from dept_offices WHERE do_id='$staff_row[do_id]'");
-                           $es_row=$emp_stat_query->fetch();
-                           
-                           $emp_stat_query2 = $conn->query("SELECT * from designation WHERE des_id='$staff_row[des_id]'");
-                           $es_row2=$emp_stat_query2->fetch();
-                           
-                           $emp_stat_query3 = $conn->query("SELECT * from gass WHERE gass_id='$staff_row[gass_id]'");
-                           $es_row3=$emp_stat_query3->fetch();
-                           
-                           $emp_stat_query4 = $conn->query("SELECT * from emp_status WHERE empStat_id='$staff_row[empStat_id]'");
-                           $es_row4=$emp_stat_query4->fetch();
+                           $emp_stat_stmt = $conn->prepare("SELECT dept_office_name FROM dept_offices WHERE do_id = :do_id");
+                           $emp_stat_stmt->execute([':do_id' => $staff_row['do_id']]);
+                           $es_row = $emp_stat_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+                           $designation_stmt = $conn->prepare("SELECT des_name FROM designation WHERE des_id = :des_id");
+                           $designation_stmt->execute([':des_id' => $staff_row['des_id']]);
+                           $es_row2 = $designation_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+                           $gass_stmt = $conn->prepare("SELECT gass_name, step, level, ratePerDay FROM gass WHERE gass_id = :gass_id");
+                           $gass_stmt->execute([':gass_id' => $staff_row['gass_id']]);
+                           $es_row3 = $gass_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+                           $emp_status_stmt = $conn->prepare("SELECT emp_stat_name, position_class, status FROM emp_status WHERE empStat_id = :empStat_id");
+                           $emp_status_stmt->execute([':empStat_id' => $staff_row['empStat_id']]);
+                           $es_row4 = $emp_status_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
                            
                            ?>
                            
                           <tr>
                         
-                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><?php echo $es_row['dept_office_name']; ?></td>
-                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><?php echo $es_row2['des_name']; ?></td>
+                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><?php echo !empty($es_row['dept_office_name']) ? $es_row['dept_office_name'] : 'Not Set'; ?></td>
+                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><?php echo !empty($es_row2['des_name']) ? $es_row2['des_name'] : 'Not Set'; ?></td>
                           </tr>
                           
                           <tr>
@@ -164,8 +167,8 @@ $studData_row=$studData_query->fetch();
                           <tr><td colspan="4" style="font-size: smaller; padding: 8px; border: none;"></td></tr>
                           
                           <tr>
-                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><strong style="font-weight: bolder;"><?php echo $es_row3['gass_name']; ?></strong>/<?php echo $es_row3['step']; ?> | <strong style="font-weight: bolder;"><?php echo $es_row3['level']; ?></strong> | <strong style="font-weight: bolder;"><?php echo $es_row3['ratePerDay']; ?></strong></td>
-                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><strong style="font-weight: bolder;"><?php echo $es_row4['emp_stat_name']; ?></strong> | <strong style="font-weight: bolder;"><?php echo $es_row4['position_class']; ?></strong> | <strong style="font-weight: bolder;"><?php echo $es_row4['status']; ?></strong></td>
+                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><strong style="font-weight: bolder;"><?php echo !empty($es_row3['gass_name']) ? $es_row3['gass_name'] : 'Not Set'; ?></strong>/<?php echo !empty($es_row3['step']) ? $es_row3['step'] : 'Not Set'; ?> | <strong style="font-weight: bolder;"><?php echo !empty($es_row3['level']) ? $es_row3['level'] : 'Not Set'; ?></strong> | <strong style="font-weight: bolder;"><?php echo !empty($es_row3['ratePerDay']) ? $es_row3['ratePerDay'] : 'Not Set'; ?></strong></td>
+                          <td colspan="2" style="padding: 0px; border: none; font-size: medium;"><strong style="font-weight: bolder;"><?php echo !empty($es_row4['emp_stat_name']) ? $es_row4['emp_stat_name'] : 'Not Set'; ?></strong> | <strong style="font-weight: bolder;"><?php echo !empty($es_row4['position_class']) ? $es_row4['position_class'] : 'Not Set'; ?></strong> | <strong style="font-weight: bolder;"><?php echo !empty($es_row4['status']) ? $es_row4['status'] : 'Not Set'; ?></strong></td>
                           </tr>
                           
                           <tr>

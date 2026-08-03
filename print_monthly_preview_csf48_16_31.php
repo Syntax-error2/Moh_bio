@@ -603,7 +603,7 @@ $studData_row=$studData_query->fetch();
 
         
     }else{
-        echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1);
+        echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60);
     }
     ?>
     </td>
@@ -628,7 +628,7 @@ $studData_row=$studData_query->fetch();
 
         
     }else{
-        echo $dailyFinalHR=substr(($dailyLate+$dailyUTime)/60, 0, 1);
+        echo $dailyFinalHR = (int)floor(((float)$dailyLate + (float)$dailyUTime) / 60);
     }
     ?>
     </td>

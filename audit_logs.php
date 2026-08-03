@@ -9,6 +9,32 @@ if ($session_access !== 'Admin') {
 }
 
 $active_audit_logs = "active";
+
+$audit_table_notice = '';
+$logs = [];
+
+try {
+  // Ensure audit_trail table exists before reading logs.
+  $conn->exec("CREATE TABLE IF NOT EXISTS audit_trail (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    user_id INT(11) DEFAULT NULL,
+    user_name VARCHAR(150) DEFAULT NULL,
+    action VARCHAR(150) DEFAULT NULL,
+    module VARCHAR(150) DEFAULT NULL,
+    details TEXT DEFAULT NULL,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_timestamp (timestamp),
+    KEY idx_user_id (user_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+
+  $logs_stmt = $conn->prepare("SELECT * FROM audit_trail ORDER BY timestamp DESC");
+  $logs_stmt->execute();
+  $logs = $logs_stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+  // Keep page usable even if audit table is unavailable.
+  $audit_table_notice = 'Audit logs are temporarily unavailable. ' . $e->getMessage();
+}
 ?>
 <body>
     <!-- Side Navbar -->
@@ -43,6 +69,11 @@ $active_audit_logs = "active";
                   <h4>System Audit Trail</h4>
                 </div>
                 <div class="card-body">
+                  <?php if (!empty($audit_table_notice)) { ?>
+                    <div class="alert alert-warning" role="alert">
+                      <?php echo htmlspecialchars($audit_table_notice, ENT_QUOTES, 'UTF-8'); ?>
+                    </div>
+                  <?php } ?>
                   <div class="table-responsive">
                     <table class="table table-striped table-hover" id="auditTable">
                       <thead>
@@ -56,15 +87,14 @@ $active_audit_logs = "active";
                       </thead>
                       <tbody>
                         <?php
-                        $logs = $conn->query("SELECT * FROM audit_trail ORDER BY timestamp DESC")->fetchAll();
                         foreach ($logs as $log) {
-                            $time = date('M d, Y h:i A', strtotime($log['timestamp']));
+                          $time = !empty($log['timestamp']) ? date('M d, Y h:i A', strtotime($log['timestamp'])) : '-';
                             echo "<tr>
-                                <td>{$time}</td>
-                                <td><strong>{$log['user_name']}</strong></td>
-                                <td><span class='badge badge-info'>{$log['module']}</span></td>
-                                <td>{$log['action']}</td>
-                                <td>{$log['details']}</td>
+                            <td>" . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . "</td>
+                            <td><strong>" . htmlspecialchars($log['user_name'] ?? '-', ENT_QUOTES, 'UTF-8') . "</strong></td>
+                            <td><span class='badge badge-info'>" . htmlspecialchars($log['module'] ?? '-', ENT_QUOTES, 'UTF-8') . "</span></td>
+                            <td>" . htmlspecialchars($log['action'] ?? '-', ENT_QUOTES, 'UTF-8') . "</td>
+                            <td>" . htmlspecialchars($log['details'] ?? '-', ENT_QUOTES, 'UTF-8') . "</td>
                             </tr>";
                         }
                         ?>

@@ -69,6 +69,13 @@
                 <div id="updates-boxKinder" role="tabpanel" class="collapse show">
                
                     <div class="col-lg-12">
+
+                    <form action="save_add_dept_des_gass.php" method="POST" id="bulkDeleteShiftForm" class="mb-2 d-flex justify-content-end">
+                      <div id="bulkDeleteShiftIds"></div>
+                      <button type="submit" name="bulkDeleteShift" id="bulkDeleteShiftBtn" class="btn btn-danger btn-sm" disabled>
+                        <i class="fa fa-trash"></i> Delete Selected
+                      </button>
+                    </form>
                     
                     <div class="tab">
                       <a class="tablinks" onclick="openCity(event, 'London')">REGULAR</a>
@@ -84,6 +91,7 @@
                     
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;"><input type="checkbox" id="checkAllShifts" title="Check/Uncheck All" /></th>
                          
                           <th>Shift</th>
                           <th>Time Scope</th>
@@ -104,6 +112,7 @@
                             
                             ?>
                         <tr>
+                          <td style="text-align: center;"><input type="checkbox" class="shift-row-checkbox" value="<?php echo (int)$subjK_row['shift_id']; ?>" /></td>
                         
                           <td><?php echo $subjK_row['shift_name']; ?></td>
                           <td><?php echo $subjK_row['type']; ?></td>
@@ -230,6 +239,7 @@
                     
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;"><input type="checkbox" class="check-all-shifts-clone" title="Check/Uncheck All" /></th>
                          
                           <th>Shift</th>
                           <th>Time Scope</th>
@@ -250,6 +260,7 @@
                             
                             ?>
                         <tr>
+                          <td style="text-align: center;"><input type="checkbox" class="shift-row-checkbox" value="<?php echo (int)$subjK_row['shift_id']; ?>" /></td>
                         
                           <td><?php echo $subjK_row['shift_name']; ?></td>
                           <td><?php echo $subjK_row['type']; ?></td>
@@ -376,6 +387,7 @@
                     
                       <thead>
                         <tr>
+                          <th style="width: 48px; text-align: center;"><input type="checkbox" class="check-all-shifts-clone" title="Check/Uncheck All" /></th>
                          
                           <th>Shift</th>
                           <th>Time Scope</th>
@@ -396,6 +408,7 @@
                             
                             ?>
                         <tr>
+                          <td style="text-align: center;"><input type="checkbox" class="shift-row-checkbox" value="<?php echo (int)$subjK_row['shift_id']; ?>" /></td>
                         
                           <td><?php echo $subjK_row['shift_name']; ?></td>
                           <td><?php echo $subjK_row['type']; ?></td>
@@ -535,6 +548,106 @@
     </div>
     
     <?php include('scripts_files.php'); ?>
+
+    <script>
+    (function () {
+      var primaryCheckAll = document.getElementById('checkAllShifts');
+      var cloneCheckAll = document.querySelectorAll('.check-all-shifts-clone');
+      var bulkDeleteBtn = document.getElementById('bulkDeleteShiftBtn');
+      var bulkDeleteForm = document.getElementById('bulkDeleteShiftForm');
+      var hiddenIdsWrap = document.getElementById('bulkDeleteShiftIds');
+
+      if (!bulkDeleteBtn || !bulkDeleteForm || !hiddenIdsWrap) {
+        return;
+      }
+
+      function getRowCheckboxes() {
+        return document.querySelectorAll('.shift-row-checkbox');
+      }
+
+      function getCheckedValues() {
+        var values = [];
+        getRowCheckboxes().forEach(function (cb) {
+          if (cb.checked) {
+            values.push(cb.value);
+          }
+        });
+        return values;
+      }
+
+      function setAllCheckAllState(checked) {
+        if (primaryCheckAll) {
+          primaryCheckAll.checked = checked;
+        }
+        cloneCheckAll.forEach(function (cb) {
+          cb.checked = checked;
+        });
+      }
+
+      function updateBulkDeleteState() {
+        var rowCheckboxes = getRowCheckboxes();
+        var checkedValues = getCheckedValues();
+        bulkDeleteBtn.disabled = checkedValues.length === 0;
+
+        var allChecked = rowCheckboxes.length > 0 && checkedValues.length === rowCheckboxes.length;
+        setAllCheckAllState(allChecked);
+      }
+
+      function rebuildHiddenInputs() {
+        hiddenIdsWrap.innerHTML = '';
+        getCheckedValues().forEach(function (id) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'shift_ids[]';
+          input.value = id;
+          hiddenIdsWrap.appendChild(input);
+        });
+      }
+
+      function toggleAllRows(checked) {
+        getRowCheckboxes().forEach(function (cb) {
+          cb.checked = checked;
+        });
+        updateBulkDeleteState();
+      }
+
+      if (primaryCheckAll) {
+        primaryCheckAll.addEventListener('change', function () {
+          toggleAllRows(primaryCheckAll.checked);
+        });
+      }
+
+      cloneCheckAll.forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          toggleAllRows(cb.checked);
+        });
+      });
+
+      document.addEventListener('change', function (event) {
+        if (event.target && event.target.classList.contains('shift-row-checkbox')) {
+          updateBulkDeleteState();
+        }
+      });
+
+      bulkDeleteForm.addEventListener('submit', function (event) {
+        var selected = getCheckedValues().length;
+        if (selected === 0) {
+          event.preventDefault();
+          window.alert('Please select at least one shift to delete.');
+          return;
+        }
+
+        if (!window.confirm('Delete ' + selected + ' selected shift record(s)?')) {
+          event.preventDefault();
+          return;
+        }
+
+        rebuildHiddenInputs();
+      });
+
+      updateBulkDeleteState();
+    })();
+    </script>
     
   </body>
 </html>
