@@ -145,6 +145,143 @@
               </div>
               <!-- kinder End-->
               
+              <!-- Custom Personnel Report -->
+              <div id="custom-reports" class="card updates recent-updated mt-4">
+                <div id="updates-header-custom" class="card-header d-flex justify-content-between align-items-center">
+                  <h2 class="h5 display">
+                  <a data-toggle="collapse" data-parent="#custom-reports" href="#updates-boxCustom" aria-expanded="true" aria-controls="updates-boxCustom"><strong style="font-weight: bold !important; color: #1a4d2e;">CUSTOM PERSONNEL REPORT</strong></a>
+                  </h2><a data-toggle="collapse" data-parent="#custom-reports" href="#updates-boxCustom" aria-expanded="true" aria-controls="updates-boxCustom"><i class="fa fa-angle-down"></i></a>
+                </div>
+                <div id="updates-boxCustom" role="tabpanel" class="collapse show">
+                    
+                <form action="printPersonnelCustomReport.php" method="POST" target="_blank">
+                
+                <div style="margin: 20px;" class="row">
+                    <div class="col-lg-12">
+                        <h4 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Report Configuration</h4>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label><strong>Group By:</strong></label>
+                        <select name="group_by" class="form-control">
+                            <option value="alphabetical">Mixed (Alphabetical)</option>
+                            <option value="male_only">Male Only</option>
+                            <option value="female_only">Female Only</option>
+                            <option value="department">By Department</option>
+                            <option value="employment_status">By Employment Status</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12 mt-3">
+                        <label><strong>Select Columns to Display:</strong></label>
+                        <div class="row mt-2" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="col_fullname" checked disabled>
+                                    <input type="hidden" name="cols[]" value="fullname">
+                                    <label class="custom-control-label text-success" for="col_fullname"><strong>Fullname (Default)</strong></label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="sex" class="custom-control-input" id="col_sex">
+                                    <label class="custom-control-label" for="col_sex">Sex</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="age" class="custom-control-input" id="col_age">
+                                    <label class="custom-control-label" for="col_age">Age</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="dob" class="custom-control-input" id="col_dob">
+                                    <label class="custom-control-label" for="col_dob">Date of Birth</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="pob" class="custom-control-input" id="col_pob">
+                                    <label class="custom-control-label" for="col_pob">Place of Birth</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="address" class="custom-control-input" id="col_address">
+                                    <label class="custom-control-label" for="col_address">Home Address</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="contact" class="custom-control-input" id="col_contact">
+                                    <label class="custom-control-label" for="col_contact">Contact Number</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="email" class="custom-control-input" id="col_email">
+                                    <label class="custom-control-label" for="col_email">Email</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="civil_status" class="custom-control-input" id="col_civil">
+                                    <label class="custom-control-label" for="col_civil">Civil Status</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="department" class="custom-control-input" id="col_dept">
+                                    <label class="custom-control-label" for="col_dept">Department / Office</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="designation" class="custom-control-input" id="col_desig">
+                                    <label class="custom-control-label" for="col_desig">Designation</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="emp_status" class="custom-control-input" id="col_stat">
+                                    <label class="custom-control-label" for="col_stat">Employment Status</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="date_hired" class="custom-control-input" id="col_hired">
+                                    <label class="custom-control-label" for="col_hired">Date Hired</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="sal_grade" class="custom-control-input" id="col_sg">
+                                    <label class="custom-control-label" for="col_sg">Salary Grade/Step</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="cols[]" value="monthly_salary" class="custom-control-input" id="col_salary">
+                                    <label class="custom-control-label" for="col_salary">Monthly Salary</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer" style="border-top: none; padding: 20px;">
+                <button type="button" class="btn btn-outline-secondary" onclick="document.querySelectorAll('#updates-boxCustom input[type=checkbox]:not(:disabled)').forEach(cb => cb.checked = true);">Select All Columns</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="document.querySelectorAll('#updates-boxCustom input[type=checkbox]:not(:disabled)').forEach(cb => cb.checked = false);">Deselect All Columns</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-print"></i> Generate Custom Report</button>
+                </div>
+                </form>
+                
+                 
+                </div>
+              </div>
+              <!-- Custom Reports End -->
+              
               
               
             </div>
