@@ -1,5 +1,6 @@
 <?php
 include('dbcon.php');
+include('auto_update_stats.php');
 //Start session
  session_start();
 //Check whether the session variable SESS_MEMBER_ID is present or not
