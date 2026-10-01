@@ -7,8 +7,6 @@
 include('session.php');  
 //error_reporting(0);
 
-include('dbcon.php');
-
  
   $selectedMM=substr($_GET['dateFrom'], 5,2);
   $selectedYYYY=substr($_GET['dateFrom'], 0,4);
@@ -121,14 +119,7 @@ include('header_print.php');
 
 <body>
 
-<table style="width: 100%;">
-<tr>
-<td align="left" style="width: 100%; border: none;">
 <?php include('header_print_letterHead.php'); ?>
-</td>
- 
-</tr>
-</table>
 
 <hr />
 
@@ -139,9 +130,7 @@ include('header_print.php');
 <hr />
 <?php
 
-$printAll_Data_stmt = $conn->prepare("SELECT * FROM personnels ORDER BY lname, fname ASC");
-$printAll_Data_stmt->execute();
-$printAll_Data_query = $printAll_Data_stmt;
+$printAll_Data_query = $conn->query("select * FROM personnels ORDER BY lname, fname ASC");
 while($printALL_row=$printAll_Data_query->fetch()){
  
 
@@ -167,9 +156,7 @@ while($printALL_row=$printAll_Data_query->fetch()){
     <div class="row">
     
     <?php
-    $LV_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logDate = :logDate");
-    $LV_stmt->execute([':RFTag_id' => $printALL_row['RFTag_id'], ':logDate' => $logDateCtr]);
-    $LV_query = $LV_stmt;
+    $LV_query = $conn->query("select * FROM personnel_logs WHERE personnel_id='$printALL_row[personnel_id]' AND logDate='$logDateCtr'");
     while($LV_row=$LV_query->fetch()){
     
     if($LV_row['mname']=='')
@@ -189,15 +176,11 @@ while($printALL_row=$printAll_Data_query->fetch()){
         <div class="col-md-3">
         <table style="border: none;">
         <tr>
-        <td style="border: none;">
-        <center>
+        <td style="border: none; text-align: center;">
         <a href="#" data-toggle="modal" data-target="#zoom_snap<?php echo $LV_row['log_id']; ?>" style="cursor: move;" title="Click to zoom image..."><img src="upload/<?php echo $LV_row['captured_img']; ?>" width="100" height="75" class="img-fluid rounded" /></a>
-        </center>
         </td>
-        <td style="border: none;">
-        <center>
+        <td style="border: none; text-align: center;">
         <img src="<?php echo $LV_row['img']; ?>" width="60" height="75" class="img-fluid rounded" />
-        </center>
         </td>
         </tr>
         

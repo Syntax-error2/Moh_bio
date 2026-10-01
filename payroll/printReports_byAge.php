@@ -251,13 +251,13 @@
                       
                       if($empStat_id>0){
                         
-                        //$printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE sex='Male' AND (age BETWEEN '$ageFrom' AND '$ageTo') AND (separation_date IS NULL) AND empStat_id='$empStat_id' ORDER BY age, lname, fname ASC") or die(mysql_error());
-                        $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN '$ageFrom' AND '$ageTo') AND (separation_date IS NULL) AND empStat_id='$empStat_id' ORDER BY age, lname, fname ASC") or die(mysql_error());
+                        //$printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE sex='Male' AND (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) AND empStat_id='$empStat_id' ORDER BY age, lname, fname ASC") or die(mysql_error());
+                        $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) AND empStat_id='$empStat_id' ORDER BY age, lname, fname ASC") or die(mysql_error());
                       
                       }else{
                         
-                        //$printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE sex='Male' AND (age BETWEEN '$ageFrom' AND '$ageTo') AND (separation_date IS NULL) ORDER BY age, lname, fname ASC") or die(mysql_error());
-                        $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN '$ageFrom' AND '$ageTo') AND (separation_date IS NULL) ORDER BY age, lname, fname ASC") or die(mysql_error());
+                        //$printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE sex='Male' AND (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY age, lname, fname ASC") or die(mysql_error());
+                        $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY age, lname, fname ASC") or die(mysql_error());
                       
                       }
                       

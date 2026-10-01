@@ -16,6 +16,10 @@ include('session.php');
   
   $grandTotalamUTimeMin=0;
   $grandTotalpmUTimeMin=0;
+  $amLateCtr = 0;
+  $amPresentCtr = 0;
+  $pmLateCtr = 0;
+  $pmPresentCtr = 0;
   
   
   
@@ -311,7 +315,9 @@ Verified as to the prescribed office hours. <br />
  
 </table>
 
+<?php include_once('universal_excel_export.php'); ?>
 </body>
 </html>
        
             
+

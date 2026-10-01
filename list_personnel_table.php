@@ -17,7 +17,7 @@
                             <?php
                             
                             $dept_id = $_GET['dept'] ?? '';
-                            $staff_query = $conn->prepare("SELECT * FROM personnels WHERE do_id = :dept_id AND separation_date IS NULL ORDER BY lname, fname ASC");
+                            $staff_query = $conn->prepare("SELECT * FROM personnels WHERE do_id = :dept_id AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') ORDER BY lname, fname ASC");
                             $staff_query->execute([':dept_id' => $dept_id]);
                             while ($staff_row = $staff_query->fetch()){
                                 

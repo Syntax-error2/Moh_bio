@@ -26,7 +26,7 @@ $(document).ready(function() {
                 extend: 'print',
                 title: '<?php include('header_print_letterHead.php'); ?>',
                 messageTop: '<center><h3>LIST OF PERSONNELS BY GENDER</h3><h4><?php echo 'Gender: '.$gender; ?></h4></center><hr />',
-                messageBottom: '<center>Municipality of Binalbagan - Human Resource Management Office</center>'
+                messageBottom: '<center>Municipality of Hinoba-an - Human Resource Management Office</center>'
             }
         ]
     } );
@@ -54,7 +54,7 @@ $(document).ready(function() {
                           
                                 <?php
                                 if($gender=='ALL'){
-                                $printDataMale_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='Male' AND (separation_date IS NULL) ORDER BY lname, fname ASC") or die(mysql_error());
+                                $printDataMale_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC") or die(mysql_error());
                                 while ($printDM_row=$printDataMale_query->fetch())
                                 { ?>
                                 <tr>
@@ -95,7 +95,7 @@ $(document).ready(function() {
                                 
                                 
                                 
-                                <?php $printDataFemale_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='Female' AND (separation_date IS NULL) ORDER BY lname, fname ASC") or die(mysql_error());
+                                <?php $printDataFemale_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC") or die(mysql_error());
                                 while ($printDF_row=$printDataFemale_query->fetch())
                                 { ?>
                                     
@@ -140,7 +140,7 @@ $(document).ready(function() {
                                     
                                 <?php
                                 
-                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='$gender' AND (separation_date IS NULL) ORDER BY lname, fname ASC") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='$gender' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC") or die(mysql_error());
                                 while ($printDA_row=$printDataAge_query->fetch())
                                 { ?>
                                     

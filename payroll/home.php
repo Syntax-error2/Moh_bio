@@ -35,7 +35,7 @@ try {
     $personnel_stats = $conn->query("
         SELECT COUNT(*) as total_personnel 
         FROM personnels 
-        WHERE (separation_date IS NULL)
+        WHERE ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '))
     ")->fetch(PDO::FETCH_ASSOC);
     
 } catch (Exception $e) {

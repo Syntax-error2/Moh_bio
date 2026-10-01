@@ -66,7 +66,7 @@ function processMonthlyLeaveCredits($conn, $admin_id = null) {
             SELECT p.personnel_id, p.lname, p.fname, p.mname, es.emp_stat_name
             FROM personnels p
             LEFT JOIN emp_status es ON p.empStat_id = es.empStat_id
-            WHERE (p.separation_date IS NULL 
+            WHERE (p.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') 
                OR p.separation_date = '' 
                OR p.separation_date = '  /  /    ')
             AND (es.emp_stat_name = 'Permanent' OR es.emp_stat_name = 'Casual')

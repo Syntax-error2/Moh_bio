@@ -22,7 +22,7 @@ $(document).ready(function() {
                 extend: 'print',
                 title: '<?php include('header_print_letterHead.php'); ?>',
                 messageTop: '<center><h3>LIST OF SEPARATED PERSONNELS</h3></center><hr />',
-                messageBottom: '<center>Municipality of Binalbagan - Human Resource Management Office</center>'
+                messageBottom: '<center>Municipality of Hinoba-an - Human Resource Management Office</center>'
             }
         ]
     } );

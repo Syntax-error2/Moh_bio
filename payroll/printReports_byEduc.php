@@ -232,7 +232,7 @@
                                 while ($peb_row = $peb_query->fetch())
                                 {
                                     
-                                //$printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, do_id, des_id FROM personnels WHERE personnel_id='$peb_row[personnel_id]' AND (separation_date IS NULL)");
+                                //$printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, do_id, des_id FROM personnels WHERE personnel_id='$peb_row[personnel_id]' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '))");
                                 $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, do_id, des_id FROM personnels WHERE personnel_id='$peb_row[personnel_id]'");
                                 $printDA_row=$printDataAge_query->fetch(); 
                       

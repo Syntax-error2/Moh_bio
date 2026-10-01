@@ -39,7 +39,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND (separation_date IS NULL) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -161,7 +161,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND (separation_date IS NULL) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -280,7 +280,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND (separation_date IS NULL) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -396,7 +396,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND (separation_date IS NULL) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -515,7 +515,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE separation_date IS NULL ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') ORDER BY lname, fname") or die(mysql_error());
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;

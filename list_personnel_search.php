@@ -60,7 +60,7 @@ if(isset($_POST['search'])){
                                 $search_param = '%' . $searched . '%';
                                 $staff_query = $conn->prepare("SELECT personnel_id, RFTag_id, personnel_id_code, img, lname, fname, mname, suffix, shift_id, do_id, empStat_id
                                                                FROM personnels 
-                                                               WHERE (personnel_id_code LIKE :search1 OR lname LIKE :search2) AND separation_date IS NULL
+                                                               WHERE (personnel_id_code LIKE :search1 OR lname LIKE :search2) AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')
                                                                ORDER BY lname, fname ASC");
                                 $staff_query->execute([':search1' => $search_param, ':search2' => $search_param]);
                                 

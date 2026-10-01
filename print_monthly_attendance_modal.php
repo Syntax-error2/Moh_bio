@@ -2,10 +2,7 @@
                   <div id="print_monthly_attendance<?php echo $staff_row['RFTag_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
                     <div role="document" class="modal-dialog">
                       <div class="modal-content">
-                      <form action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
-                      <?php if(isset($staff_row['class_id'])): ?>
-                      <input name="class_id" value="<?php echo $staff_row['class_id']; ?>" type="hidden" />
-                      <?php endif; ?>
+                      <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
                       <input name="RFTag_id" value="<?php echo $staff_row['RFTag_id']; ?>" type="hidden" />
                         <div class="modal-header">
                           <h5 id="exampleModalLabel" class="modal-title">Monthly Attendance - <?php echo $staff_row['fname']." ".$staff_row['mname']." ".$staff_row['lname']; ?></h5>
@@ -44,3 +41,4 @@
                     </div>
                   </div>
                   <!-- end edit Class Modal -->
+

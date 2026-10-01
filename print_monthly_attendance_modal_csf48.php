@@ -2,7 +2,7 @@
                   <div id="print_monthly_attendance_csf48<?php echo $staff_row['RFTag_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
                     <div role="document" class="modal-dialog">
                       <div class="modal-content">
-                      <form action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
+                      <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
                       <input name="RFTag_id" value="<?php echo $staff_row['RFTag_id']; ?>" type="hidden" />
                       
                         <div class="modal-header">
@@ -61,3 +61,4 @@
                   
                   
                   
+

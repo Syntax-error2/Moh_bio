@@ -2,7 +2,7 @@
                   <div id="print_monthly_DTRNotes<?php echo $staff_row['RFTag_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
                     <div role="document" class="modal-dialog">
                       <div class="modal-content">
-                      <form action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
+                      <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
                       <input name="class_id" value="<?php echo $staff_row['class_id']; ?>" type="hidden" />
                       <input name="RFTag_id" value="<?php echo $staff_row['RFTag_id']; ?>" type="hidden" />
                         <div class="modal-header">
@@ -42,3 +42,4 @@
                     </div>
                   </div>
                   <!-- end edit Class Modal -->
+

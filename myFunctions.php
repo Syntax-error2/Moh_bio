@@ -2,7 +2,7 @@
 
 
 $day=date('l'); //Mon-Sun
-$currentDate=date('m/d/Y');
+$currentDate=date('Y-m-d');
 $logTime=date('h:i A');
 $dateTime=$logTime.', '.$day.', '.$currentDate;
 
@@ -51,25 +51,32 @@ function get_client_ip(){
 }
  
  
+function get_enr_path() {
+    $client_ip = get_client_ip();
+    if ($client_ip == '::1' || $client_ip == '127.0.0.1') {
+        return __DIR__ . '/data.enr';
+    } else {
+        return "\\\\" . $client_ip . "\\mob_bio\\data.enr";
+    }
+}
+
 function lastTagCode(){
-    
-    $tagFile=fopen("\\\\".get_client_ip()."\\rfid\\TEST\\data.enr", "r") or die ();
-    $lastTag=fread($tagFile, filesize("\\\\".get_client_ip()."\\rfid\\TEST\\data.enr"));
-    fclose($tagFile);
-    return $lastTag;
+    $enr_path = get_enr_path();
+    $tagFile = @fopen($enr_path, "r");
+    if ($tagFile) {
+        $lastTag = fread($tagFile, filesize($enr_path));
+        fclose($tagFile);
+        return $lastTag;
+    }
+    return '';
 }
 
- 
 function clearLastTag(){
-    
     $blank='';
-    
-    $dataFile=fopen("\\\\".get_client_ip()."\\rfid\\TEST\\data.enr", "w") or die ();
-    fwrite($dataFile, $blank);
-    fclose($dataFile);
- 
-    
+    $enr_path = get_enr_path();
+    $dataFile = @fopen($enr_path, "w");
+    if ($dataFile) {
+        fwrite($dataFile, $blank);
+        fclose($dataFile);
+    }
 }
-
-
-?> 

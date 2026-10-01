@@ -111,7 +111,7 @@
                 </div>
                 
                 <?php
-                $empStatCtr_query = $conn->query("SELECT * FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND (separation_date IS NULL)") or die(mysql_error());
+                $empStatCtr_query = $conn->query("SELECT * FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '))") or die(mysql_error());
                 
                 $empStatTotalCtr=$empStatTotalCtr+$empStatCtr_query->rowCount();
                 ?>

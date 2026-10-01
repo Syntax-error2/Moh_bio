@@ -17,7 +17,7 @@
                       
                             <?php
                             
-                            $staff_query = $conn->query("SELECT * FROM personnels WHERE do_id='$_GET[dept]' AND (separation_date IS NULL) ORDER BY lname, fname ASC") or die(mysql_error());
+                            $staff_query = $conn->query("SELECT * FROM personnels WHERE do_id='$_GET[dept]' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC") or die(mysql_error());
                             while ($staff_row = $staff_query->fetch()){
                                 
                             $personnel_id=$staff_row['personnel_id'];

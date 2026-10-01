@@ -5,8 +5,6 @@
 include('session.php');  
 //error_reporting(0);
 
-include('dbcon.php');
-
  
   $selectedMM=substr($_GET['dateFrom'], 5,2);
   $selectedYYYY=substr($_GET['dateFrom'], 0,4);
@@ -19,9 +17,6 @@ include('dbcon.php');
   
   $grandTotalamUTimeMin=0;
   $grandTotalpmUTimeMin=0;
-  $hours=0;
-  $minutes=0;
-  $seconds=0;
   
   
   
@@ -129,28 +124,17 @@ include('header_print.php');
 <body>
  
 
-<table style="width: 100%;">
-<tr>
-<td align="left" style="width: 100%; border: none;">
 <?php include('header_print_letterHead.php'); ?>
-</td>
- 
-</tr>
-</table>
 
 <hr />
 
 <?php
 
-$printAll_Data_stmt = $conn->prepare("SELECT * FROM personnels ORDER BY lname, fname ASC");
-$printAll_Data_stmt->execute();
-$printAll_Data_query = $printAll_Data_stmt;
+$printAll_Data_query = $conn->query("SELECT * FROM personnels ORDER BY lname, fname ASC");
 while($printALL_row=$printAll_Data_query->fetch()){
 
 
-$studData_stmt = $conn->prepare("SELECT * FROM personnels WHERE RFTag_id = :RFTag_id");
-$studData_stmt->execute([':RFTag_id' => $printALL_row['RFTag_id']]);
-$studData_query = $studData_stmt;
+$studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]'");
 $studData_row=$studData_query->fetch();
 
 ?>
@@ -163,19 +147,17 @@ $studData_row=$studData_query->fetch();
     <td style="width: 40%; border: none;" colspan="2">
     <small>Employment Status</small><br />
     <strong><?php
-    $emp_stat_stmt = $conn->prepare("SELECT * FROM emp_status WHERE empStat_id = :empStat_id");
-    $emp_stat_stmt->execute([':empStat_id' => $studData_row['empStat_id']]);
-    $es_row=$emp_stat_stmt->fetch();
-    echo strtoupper($es_row['emp_stat_name']);?></strong>
+    $emp_stat_query = $conn->query("SELECT * from emp_status WHERE empStat_id='$studData_row[empStat_id]'");
+    $es_row=$emp_stat_query->fetch();
+    echo strtoupper($es_row ? $es_row['emp_stat_name'] : '');?></strong>
     
     </td>
     
     <td style="width: 40%; border: none;" colspan="2">
     <small>Department / Office</small><br />
     <strong><?php
-    $emp_stat_stmt = $conn->prepare("SELECT * FROM dept_offices WHERE do_id = :do_id");
-    $emp_stat_stmt->execute([':do_id' => $studData_row['do_id']]);
-    $es_row=$emp_stat_stmt->fetch();
+    $emp_stat_query = $conn->query("SELECT * from dept_offices WHERE do_id='$studData_row[do_id]'");
+    $es_row=$emp_stat_query->fetch();
     echo strtoupper($es_row['dept_office_name']); ?></strong> 
     
     </td>
@@ -237,7 +219,7 @@ $studData_row=$studData_query->fetch();
  
 <?php
  
-    $RFTag_id=$studData_row['RFTag_id'];
+    $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $studData_row['biometric_id'];
  
     $amPresentCtr=0;
     $pmPresentCtr=0;
@@ -270,9 +252,7 @@ $studData_row=$studData_query->fetch();
  
     
     <?php
-  $SC_stmt3 = $conn->prepare("SELECT * FROM activity_calendar WHERE completeDate = :completeDate AND status = 'Display to DTR'");
-  $SC_stmt3->execute([':completeDate' => $logDateCtr]);
-  $SC_query3 = $SC_stmt3;
+  $SC_query3 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
       
       if($SC_query3->rowCount()>0){
       
@@ -305,9 +285,7 @@ $studData_row=$studData_query->fetch();
     
     <?php
     
-    $studLogs_remarks_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logDate = :logDate AND (remarks != '' AND remarks != 'Updated' AND remarks != 'Inserted')");
-    $studLogs_remarks_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_remarks_query = $studLogs_remarks_stmt;
+    $studLogs_remarks_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logDate='$logDateCtr' AND (remarks!='' AND remarks!='Updated' AND remarks!='Inserted')");
     if($studLogs_remarks_query->rowCount()>0){ 
     $SRQ_row=$studLogs_remarks_query->fetch();
     $leaveCtr=$leaveCtr+1;
@@ -317,18 +295,14 @@ $studData_row=$studData_query->fetch();
      
       <?php }else{
         
-    $studLogs_sat_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logDate = :logDate");
-    $studLogs_sat_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_sat_query = $studLogs_sat_stmt;
+    $studLogs_sat_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logDate='$logDateCtr'");
     if($studLogs_sat_query->rowCount()==0 AND ($dayName2=='Sat' OR $dayName2=='Sun')){ ?> 
     
     <td colspan="6" style="background-color: #ececec;"><center><strong><?php if($dayName2=='Sat'){ echo "S A T U R D A Y"; } if($dayName2=='Sun'){ echo "S U N D A Y"; } ?></strong></center></td>
      
       <?php }else{
      
-      $SC_stmt = $conn->prepare("SELECT * FROM activity_calendar WHERE completeDate = :completeDate AND status != 'Display to DTR'");
-      $SC_stmt->execute([':completeDate' => $logDateCtr]);
-      $SC_query = $SC_stmt;
+      $SC_query = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status!='Display to DTR'");
       
       if($SC_query->rowCount()>0){
       $SC_row=$SC_query->fetch();
@@ -343,9 +317,7 @@ $studData_row=$studData_query->fetch();
     <!-- AM IN -->
     <td>
     <?php
-    $studLogs_AM_IN_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = 'AM IN' AND logDate = :logDate");
-    $studLogs_AM_IN_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_query_AM_IN = $studLogs_AM_IN_stmt;
+    $studLogs_query_AM_IN = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='AM IN' AND logDate='$logDateCtr'");
     $studLogs_AM_IN_row=$studLogs_query_AM_IN->fetch();
     ?>
     
@@ -363,9 +335,8 @@ $studData_row=$studData_query->fetch();
     <?php
     if($studLogs_AM_IN_row['late_status']==='on'){
         
-        $sched_stmt = $conn->prepare("SELECT am_IN_co FROM time_schedules WHERE school_id = :school_id AND do_id = :do_id AND shift_id = :shift_id AND day = :day");
-        $sched_stmt->execute([':school_id' => $school_id, ':do_id' => $studData_row['do_id'], ':shift_id' => $studData_row['shift_id'], ':day' => $dayName]);
-        $sq_row=$sched_stmt->fetch();
+        $sched_query = $conn->query("SELECT am_IN_co FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
+        $sq_row=$sched_query->fetch();
  
         $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN_co']));
         $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
@@ -413,9 +384,7 @@ $studData_row=$studData_query->fetch();
     <!-- AM OUT -->
     <td>
     <?php
-    $studLogs_AM_OUT_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = 'AM OUT' AND logDate = :logDate");
-    $studLogs_AM_OUT_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_query_AM_OUT = $studLogs_AM_OUT_stmt;
+    $studLogs_query_AM_OUT = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='AM OUT' AND logDate='$logDateCtr'");
     $studLogs_AM_OUT_row=$studLogs_query_AM_OUT->fetch();
     ?>
     
@@ -432,9 +401,8 @@ $studData_row=$studData_query->fetch();
     <?php
     if($studLogs_AM_OUT_row['late_status']==='on'){
         
-        $sched_stmt = $conn->prepare("SELECT am_OUT FROM time_schedules WHERE school_id = :school_id AND do_id = :do_id AND shift_id = :shift_id AND day = :day");
-        $sched_stmt->execute([':school_id' => $school_id, ':do_id' => $studData_row['do_id'], ':shift_id' => $studData_row['shift_id'], ':day' => $dayName]);
-        $sq_row=$sched_stmt->fetch();
+        $sched_query = $conn->query("SELECT am_OUT FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
+        $sq_row=$sched_query->fetch();
         
         $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
         $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
@@ -464,9 +432,7 @@ $studData_row=$studData_query->fetch();
     
     <?php }else{ $time_seconds_time_am_out=0; 
     
-    $studLogs_PM_OUT_chk_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = 'PM OUT' AND logDate = :logDate");
-    $studLogs_PM_OUT_chk_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_query_PM_OUT_chk = $studLogs_PM_OUT_chk_stmt;
+    $studLogs_query_PM_OUT_chk = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM OUT' AND logDate='$logDateCtr'");
     
     if($studLogs_query_PM_OUT_chk->rowCount()>0 AND $studLogs_query_AM_IN->rowCount()>0){ }else{ ?>
     
@@ -481,9 +447,7 @@ $studData_row=$studData_query->fetch();
     <!-- PM IN -->
     <td>
     <?php
-    $studLogs_PM_IN_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = 'PM IN' AND logDate = :logDate");
-    $studLogs_PM_IN_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_query_PM_IN = $studLogs_PM_IN_stmt;
+    $studLogs_query_PM_IN = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM IN' AND logDate='$logDateCtr'");
     $studLogs_PM_IN_row=$studLogs_query_PM_IN->fetch();
     ?>
     
@@ -503,9 +467,8 @@ $studData_row=$studData_query->fetch();
     <?php
     if($studLogs_PM_IN_row['late_status']==='on'){
         
-        $sched_stmt = $conn->prepare("SELECT pm_IN_co FROM time_schedules WHERE school_id = :school_id AND do_id = :do_id AND shift_id = :shift_id AND day = :day");
-        $sched_stmt->execute([':school_id' => $school_id, ':do_id' => $studData_row['do_id'], ':shift_id' => $studData_row['shift_id'], ':day' => $dayName]);
-        $sq_row=$sched_stmt->fetch();
+        $sched_query = $conn->query("SELECT pm_IN_co FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
+        $sq_row=$sched_query->fetch();
  
         $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN_co']));
         $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
@@ -535,9 +498,7 @@ $studData_row=$studData_query->fetch();
     
     <?php
     
-    $studLogs_PM_OUT_chk_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = 'PM OUT' AND logDate = :logDate");
-    $studLogs_PM_OUT_chk_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_query_PM_OUT_chk = $studLogs_PM_OUT_chk_stmt;
+    $studLogs_query_PM_OUT_chk = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM OUT' AND logDate='$logDateCtr'");
     
     if($studLogs_query_PM_OUT_chk->rowCount()>0 AND $studLogs_query_AM_IN->rowCount()>0){ $pmPresentCtr=$pmPresentCtr+1; }else{ 
         
@@ -555,9 +516,7 @@ $studData_row=$studData_query->fetch();
     <!-- PM OUT -->
     <td>
     <?php
-    $studLogs_PM_OUT_stmt = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = 'PM OUT' AND logDate = :logDate");
-    $studLogs_PM_OUT_stmt->execute([':RFTag_id' => $RFTag_id, ':logDate' => $logDateCtr]);
-    $studLogs_query_PM_OUT = $studLogs_PM_OUT_stmt;
+    $studLogs_query_PM_OUT = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM OUT' AND logDate='$logDateCtr'");
     $studLogs_PM_OUT_row=$studLogs_query_PM_OUT->fetch();
     ?>
     
@@ -571,9 +530,8 @@ $studData_row=$studData_query->fetch();
      
     if($studLogs_PM_OUT_row['late_status']=="on"){
         
-        $sched_stmt = $conn->prepare("SELECT pm_OUT FROM time_schedules WHERE school_id = :school_id AND do_id = :do_id AND shift_id = :shift_id AND day = :day");
-        $sched_stmt->execute([':school_id' => $school_id, ':do_id' => $studData_row['do_id'], ':shift_id' => $studData_row['shift_id'], ':day' => $dayName]);
-        $sq_row=$sched_stmt->fetch();
+        $sched_query = $conn->query("SELECT pm_OUT FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
+        $sq_row=$sched_query->fetch();
         
         $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
         $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
@@ -610,9 +568,7 @@ $studData_row=$studData_query->fetch();
     
     
     <?php
-    $SC_stmt3 = $conn->prepare("SELECT * FROM activity_calendar WHERE completeDate = :completeDate AND status = 'Display to DTR'");
-    $SC_stmt3->execute([':completeDate' => $logDateCtr]);
-    $SC_query3 = $SC_stmt3;
+    $SC_query3 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
     if($SC_query3->rowCount()>0){
         
     ?>
@@ -651,9 +607,7 @@ $studData_row=$studData_query->fetch();
     <?php } } } ?>
     
   <?php
-  $SC_stmt4 = $conn->prepare("SELECT * FROM activity_calendar WHERE completeDate = :completeDate AND status = 'Display to DTR'");
-  $SC_stmt4->execute([':completeDate' => $logDateCtr]);
-  $SC_query4 = $SC_stmt4;
+  $SC_query4 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
       
       if($SC_query4->rowCount()>0){
      
@@ -668,9 +622,7 @@ $studData_row=$studData_query->fetch();
   </tr>
   
   <?php
-  $SC_stmt2 = $conn->prepare("SELECT * FROM activity_calendar WHERE completeDate = :completeDate AND status = 'Display to DTR'");
-  $SC_stmt2->execute([':completeDate' => $logDateCtr]);
-  $SC_query2 = $SC_stmt2;
+  $SC_query2 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
       
       if($SC_query2->rowCount()>0){
       $SC_row2=$SC_query2->fetch();

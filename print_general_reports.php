@@ -72,19 +72,19 @@ $sex = $_GET['sex'];
                                 
                                 if($do_id > 0 AND $empStat_id > 0){
                                 
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND do_id='$do_id' AND empStat_id='$empStat_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND do_id='$do_id' AND empStat_id='$empStat_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                 
                                 }elseif($do_id == 0 AND $empStat_id > 0){
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND empStat_id='$empStat_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND empStat_id='$empStat_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }elseif($do_id > 0 AND $empStat_id == 0){
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND do_id='$do_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND do_id='$do_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }else{
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }
                                 
@@ -161,19 +161,19 @@ $sex = $_GET['sex'];
                                 
                                 if($do_id > 0 AND $empStat_id > 0){
                                 
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND do_id='$do_id' AND empStat_id='$empStat_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND do_id='$do_id' AND empStat_id='$empStat_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                 
                                 }elseif($do_id == 0 AND $empStat_id > 0){
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND empStat_id='$empStat_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND empStat_id='$empStat_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }elseif($do_id > 0 AND $empStat_id == 0){
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND do_id='$do_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND do_id='$do_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }else{
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }
                                 
@@ -252,19 +252,19 @@ $sex = $_GET['sex'];
                                 
                                 if($do_id > 0 AND $empStat_id > 0){
                                 
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE do_id='$do_id' AND empStat_id='$empStat_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE do_id='$do_id' AND empStat_id='$empStat_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                 
                                 }elseif($do_id == 0 AND $empStat_id > 0){
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE empStat_id='$empStat_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE empStat_id='$empStat_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }elseif($do_id > 0 AND $empStat_id == 0){
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE do_id='$do_id' AND (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE do_id='$do_id' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }else{
                                     
-                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE (separation_date IS NULL) ORDER BY lname, fname ASC");
+                                    $printDataAge_query = $conn->query("SELECT personnel_id_code, lname, fname, mname, suffix, sex FROM personnels WHERE ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
                                     
                                 }
                                 

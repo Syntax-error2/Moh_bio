@@ -121,7 +121,7 @@ $base_query = "SELECT " . implode(", ", $select_fields) . "
                LEFT JOIN dept_offices do ON p.do_id = do.do_id
                LEFT JOIN designation des ON p.des_id = des.des_id
                LEFT JOIN emp_status es ON p.empStat_id = es.empStat_id 
-               WHERE (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ')";
+               WHERE (p.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') OR p.separation_date = '' OR p.separation_date = '  /  /    ')";
 
 ?>
 <!DOCTYPE html>

@@ -46,7 +46,7 @@
     
     <?php include('navbar_header.php');
     
-    if($session_access==='Admin'){ ?>
+    if($session_access==='Administrator'){ ?>
     
         <!-- Breadcrumb-->
       <div class="breadcrumb-holder">
@@ -90,7 +90,7 @@
                    
                   <?php
                   $currentDate="";
-                  $opt_query = $conn->query("SELECT DISTINCT logDate FROM personnel_logs WHERE remarks='Inserted' OR remarks='Updated' OR remarks='' ORDER BY logDate DESC") or die(mysql_error());
+                  $opt_query = $conn->query("SELECT DISTINCT logDate FROM personnel_logs WHERE remarks='Inserted' OR remarks='Updated' OR remarks='' ORDER BY logDate DESC");
                   while ($opt_row = $opt_query->fetch()) 
                   { 
                     if($filterDate==$opt_row['logDate']){
@@ -126,6 +126,7 @@
                 
                       <thead>
                         <tr>
+                          <th>#</th>
                           <th><center>VALIDATED IMAGE</center></th>
                           <th><center>IMAGE</center></th>
                           <th>DETAILS</th>
@@ -154,6 +155,8 @@
                         } ?> 
                       
                         <tr>
+                          <th scope="row"><?php echo $row_ctr; ?></th>
+                          
                           <td>
                           <center>
                           <a href="#" data-toggle="modal" data-target="#zoom_snap<?php echo $nc_row['log_id']; ?>" style="cursor: move;" title="Click to zoom image..."><img src="upload/<?php echo $nc_row['captured_img']; ?>" width="100" height="75" class="img-fluid rounded" /></a>
