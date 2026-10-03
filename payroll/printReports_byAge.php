@@ -125,7 +125,8 @@
                         : (date("Y") - $birthDate[2]));
                    
                     if($age<80){
-                        $conn->query("UPDATE personnels SET age='$age' WHERE personnel_id='$pDA_row[personnel_id]'");
+                        $ageUpdateStmt = $conn->prepare("UPDATE personnels SET age=? WHERE personnel_id=?");
+                        $ageUpdateStmt->execute([$age, $pDA_row['personnel_id']]);
                     }else{
                         
                     }
@@ -160,7 +161,8 @@
                 <select name="empStat_id" class="form-control">
                 
                 <?php if($empStat_id>0){
-                    $emp_stat2_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$empStat_id'");
+                    $emp_stat2_query = $conn->prepare("SELECT * FROM emp_status WHERE empStat_id=?");
+                    $emp_stat2_query->execute([$empStat_id]);
                     $es2_row=$emp_stat2_query->fetch();
                 ?>
                     <option value="<?php echo $es2_row['empStat_id']; ?>" <?php if($es2_row['status']==='Active'){ ?> style="color: green;" <?php }else{ ?> style="color: red;" <?php } ?>><?php echo $es2_row['emp_stat_name']; ?></option>
@@ -252,12 +254,14 @@
                       if($empStat_id>0){
                         
                         //$printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE sex='Male' AND (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) AND empStat_id='$empStat_id' ORDER BY age, lname, fname ASC") ;
-                        $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) AND empStat_id='$empStat_id' ORDER BY age, lname, fname ASC") ;
+                        $printDataAge_query = $conn->prepare("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN ? AND ?) AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) AND empStat_id=? ORDER BY age, lname, fname ASC");
+                        $printDataAge_query->execute([$ageFrom, $ageTo, $empStat_id]);
                       
                       }else{
                         
                         //$printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE sex='Male' AND (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY age, lname, fname ASC") ;
-                        $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN '$ageFrom' AND '$ageTo') AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY age, lname, fname ASC") ;
+                        $printDataAge_query = $conn->prepare("SELECT personnel_id, lname, fname, mname, suffix, age, sex, do_id, des_id, empStat_id, bdMM, bdDD, bdYYYY FROM personnels WHERE (age BETWEEN ? AND ?) AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY age, lname, fname ASC");
+                        $printDataAge_query->execute([$ageFrom, $ageTo]);
                       
                       }
                       
@@ -288,10 +292,12 @@
                       <td>
                       <?php
                       
-                      $emp_stat_query1 = $conn->query("SELECT des_name from designation WHERE des_id='$printDA_row[des_id]'");
+                      $emp_stat_query1 = $conn->prepare("SELECT des_name from designation WHERE des_id=?");
+                      $emp_stat_query1->execute([$printDA_row['des_id']]);
                       $es_row1=$emp_stat_query1->fetch();
                       
-                      $emp_stat_query2 = $conn->query("SELECT dept_office_name from dept_offices WHERE do_id='$printDA_row[do_id]'");
+                      $emp_stat_query2 = $conn->prepare("SELECT dept_office_name from dept_offices WHERE do_id=?");
+                      $emp_stat_query2->execute([$printDA_row['do_id']]);
                       $es_row2=$emp_stat_query2->fetch();
                       
                       echo $es_row2['dept_office_name'].' - '.$es_row1['des_name'];

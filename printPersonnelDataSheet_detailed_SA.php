@@ -8,7 +8,8 @@ include('session.php');
     
 $personnel_id=$_GET['personnel_id']; 
 
-    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
+    $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+    $staff_query->execute([$_GET['personnel_id']]);
     $staff_row = $staff_query->fetch();
 
     
@@ -135,7 +136,8 @@ $studData_row=$studData_query->fetch();
                             <?php
                             $subjK_ctr=0;
                             
-                            $ps_query = $conn->query("SELECT * FROM personnel_seminars WHERE personnel_id='$_GET[personnel_id]' ORDER BY ps_id ASC") ;
+                            $ps_query = $conn->prepare("SELECT * FROM personnel_seminars WHERE personnel_id=? ORDER BY ps_id ASC");
+                            $ps_query->execute([$_GET['personnel_id']]);
                             while ($ps_row = $ps_query->fetch())
                             {
                                 ?>

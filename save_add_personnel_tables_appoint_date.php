@@ -2,11 +2,14 @@
  
     include('session.php');
     
-    $conn->query("UPDATE service_record SET appointDate_status='' WHERE sr_id!='$_GET[sr_id]' AND personnel_id='$_GET[personnel_id]'");
+    $stmt = $conn->prepare("UPDATE service_record SET appointDate_status='' WHERE sr_id!=? AND personnel_id=?");
+    $stmt->execute([$_GET['sr_id'], $_GET['personnel_id']]);
     
-    $conn->query("UPDATE service_record SET appointDate_status='Active' WHERE sr_id='$_GET[sr_id]' AND personnel_id='$_GET[personnel_id]'");
+    $stmt = $conn->prepare("UPDATE service_record SET appointDate_status='Active' WHERE sr_id=? AND personnel_id=?");
+    $stmt->execute([$_GET['sr_id'], $_GET['personnel_id']]);
     
-    $conn->query("UPDATE personnels SET appointment_date='$_GET[appointment_date]' WHERE personnel_id='$_GET[personnel_id]'");
+    $stmt = $conn->prepare("UPDATE personnels SET appointment_date=? WHERE personnel_id=?");
+    $stmt->execute([$_GET['appointment_date'], $_GET['personnel_id']]);
     
  
 ?>

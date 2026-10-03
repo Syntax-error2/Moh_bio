@@ -47,7 +47,12 @@ if(isset($_POST['update_pref']))
          ]);
   
     }else{
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif');
+        $file_ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         
+        if(!in_array($file_ext, $allowed_extensions)){
+            die("<script>window.alert('Invalid file format. Only JPG, PNG and GIF are allowed.'); window.location='school_preferences.php?sfp_stat=xEdit';</script>");
+        }
         
     if(move_uploaded_file($file_loc,$folder.$final_file)){
     $pref_logo_stmt = $conn->prepare("UPDATE institution_preferences SET zip_code = :zip_code, logo = :logo, region = :region, division = :division, institution_name = :institution_name, address = :address, emailAddress = :emailAddress, contactNumber = :contactNumber");

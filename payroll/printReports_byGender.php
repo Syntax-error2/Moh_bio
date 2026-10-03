@@ -154,10 +154,12 @@
                             <td>
                               <?php
                               
-                              $emp_stat_query1 = $conn->query("select des_name from designation WHERE des_id='$printDA_row[des_id]'");
+                              $emp_stat_query1 = $conn->prepare("select des_name from designation WHERE des_id=?");
+                              $emp_stat_query1->execute([$printDA_row['des_id']]);
                               $es_row1=$emp_stat_query1->fetch();
                               
-                              $emp_stat_query2 = $conn->query("select dept_office_name from dept_offices WHERE do_id='$printDA_row[do_id]'");
+                              $emp_stat_query2 = $conn->prepare("select dept_office_name from dept_offices WHERE do_id=?");
+                              $emp_stat_query2->execute([$printDA_row['do_id']]);
                               $es_row2=$emp_stat_query2->fetch();
                               
                               echo $es_row2['dept_office_name'].' - '.$es_row1['des_name'];
@@ -220,10 +222,12 @@
                             <td>
                               <?php
                               
-                              $emp_stat_query1 = $conn->query("select des_name from designation WHERE des_id='$printDA_row[des_id]'");
+                              $emp_stat_query1 = $conn->prepare("select des_name from designation WHERE des_id=?");
+                              $emp_stat_query1->execute([$printDA_row['des_id']]);
                               $es_row1=$emp_stat_query1->fetch();
                               
-                              $emp_stat_query2 = $conn->query("select dept_office_name from dept_offices WHERE do_id='$printDA_row[do_id]'");
+                              $emp_stat_query2 = $conn->prepare("select dept_office_name from dept_offices WHERE do_id=?");
+                              $emp_stat_query2->execute([$printDA_row['do_id']]);
                               $es_row2=$emp_stat_query2->fetch();
                               
                               echo $es_row2['dept_office_name'].' - '.$es_row1['des_name'];
@@ -258,7 +262,8 @@
                           
                                 <?php
                                 
-                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex='$gender' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC") ;
+                                $printDataAge_query = $conn->prepare("SELECT lname, fname, mname, suffix, sex, do_id, des_id FROM personnels WHERE sex=? AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname ASC");
+                                $printDataAge_query->execute([$gender]);
                                 while ($printDA_row=$printDataAge_query->fetch())
                                 { ?>
                                     
@@ -284,10 +289,12 @@
                             <td>
                               <?php
                               
-                              $emp_stat_query1 = $conn->query("select des_name from designation WHERE des_id='$printDA_row[des_id]'");
+                              $emp_stat_query1 = $conn->prepare("select des_name from designation WHERE des_id=?");
+                              $emp_stat_query1->execute([$printDA_row['des_id']]);
                               $es_row1=$emp_stat_query1->fetch();
                               
-                              $emp_stat_query2 = $conn->query("select dept_office_name from dept_offices WHERE do_id='$printDA_row[do_id]'");
+                              $emp_stat_query2 = $conn->prepare("select dept_office_name from dept_offices WHERE do_id=?");
+                              $emp_stat_query2->execute([$printDA_row['do_id']]);
                               $es_row2=$emp_stat_query2->fetch();
                               
                               echo $es_row2['dept_office_name'].' - '.$es_row1['des_name'];

@@ -57,8 +57,8 @@ $searched="";
                             
                         }else{  
                           
-                          $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id_code LIKE '%$searched%' OR lname LIKE '%$searched%' ORDER BY lname, fname ASC");
-                          $staff_query->execute();
+                          $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id_code LIKE :search1 OR lname LIKE :search2 ORDER BY lname, fname ASC");
+                          $staff_query->execute([':search1' => '%'.$searched.'%', ':search2' => '%'.$searched.'%']);
                           while ($staff_row = $staff_query->fetch()){
                             
                           $personnel_id=$staff_row['personnel_id'];

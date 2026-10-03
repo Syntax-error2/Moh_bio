@@ -64,48 +64,23 @@ if(isset($_POST['saveAddPersonnel']))
     }
 
     
-    /*if($_POST['user_rfid_type']==='With RFID'){
-        
-        $RFTag_id=$_POST['RFTag_id'];
-        
-    }else{
-        
-        
-        
-                                function randomcode() {
-                                $var = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                                srand((double)microtime()*1000000);
-                                $i = 0;
-                                $code = '';
-                                while ($i <= 9) {
-                                $num = rand() % 33;
-                                $tmp = substr($var, $num, 1);
-                                $code = $code . $tmp;
-                                $i++;
-                                }
-                                return $code;
-                                }
-                                
-        $RFTag_id='NRF'.substr(randomcode(), 0, 5);
-        
-    } */
-    
     $personnel_id_code=trim($_POST['personnel_id_code']);
-    $RFTag_id = '';
-
-    for ($attempt = 0; $attempt < 50; $attempt++) {
-        $candidateRFTag = generateRandomRFTag(10);
-
-        if (strcasecmp($candidateRFTag, $personnel_id_code) === 0) {
-            continue;
-        }
-
-        $rfidCheckStmt = $conn->prepare("SELECT personnel_id FROM personnels WHERE RFTag_id = :RFTag_id LIMIT 1");
-        $rfidCheckStmt->execute([':RFTag_id' => $candidateRFTag]);
-
-        if ($rfidCheckStmt->rowCount() === 0) {
-            $RFTag_id = $candidateRFTag;
-            break;
+    
+    if (isset($_POST['user_rfid_type']) && $_POST['user_rfid_type'] === 'With RFID') {
+        $RFTag_id = $_POST['RFTag_id'];
+    } else {
+        $RFTag_id = '';
+        for ($attempt = 0; $attempt < 50; $attempt++) {
+            $candidateRFTag = generateRandomRFTag(10);
+            if (strcasecmp($candidateRFTag, $personnel_id_code) === 0) {
+                continue;
+            }
+            $rfidCheckStmt = $conn->prepare("SELECT personnel_id FROM personnels WHERE RFTag_id = :RFTag_id LIMIT 1");
+            $rfidCheckStmt->execute([':RFTag_id' => $candidateRFTag]);
+            if ($rfidCheckStmt->rowCount() === 0) {
+                $RFTag_id = $candidateRFTag;
+                break;
+            }
         }
     }
 

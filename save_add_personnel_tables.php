@@ -13,7 +13,8 @@ $blank=''; ?>
 //EMPLOYEE FAMILY BG
 if(isset($_POST['save_add_fam_bg']))
 {   
-        $conn->query("INSERT INTO personnel_fam_bg (personnel_id, fullname, sex, relationship, contact_num)VALUES('$_GET[personnel_id]', '$_POST[fullname]', '$_POST[sex]', '$_POST[relationship]', '$_POST[contact_num]')");
+        $stmt = $conn->prepare("INSERT INTO personnel_fam_bg (personnel_id, fullname, sex, relationship, contact_num) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$_GET['personnel_id'], $_POST['fullname'], $_POST['sex'], $_POST['relationship'], $_POST['contact_num']]);
         
         ?>
           
@@ -29,7 +30,8 @@ if(isset($_POST['save_add_fam_bg']))
 //UPDATE FAMILY BG
 if(isset($_POST['update_fam_bg']))
 {   
-        $conn->query("UPDATE personnel_fam_bg SET fullname='$_POST[fullname]', sex='$_POST[sex]', relationship='$_POST[relationship]', contact_num='$_POST[contact_num]' WHERE fm_id='$_POST[fm_id]'");
+        $stmt = $conn->prepare("UPDATE personnel_fam_bg SET fullname=?, sex=?, relationship=?, contact_num=? WHERE fm_id=?");
+        $stmt->execute([$_POST['fullname'], $_POST['sex'], $_POST['relationship'], $_POST['contact_num'], $_POST['fm_id']]);
         
         ?>
           
@@ -46,7 +48,8 @@ if(isset($_POST['update_fam_bg']))
 if(isset($_POST['delete_fam_bg']))
 {
      
-    $conn->query("DELETE FROM personnel_fam_bg WHERE fm_id='$_POST[fm_id]'");
+    $stmt = $conn->prepare("DELETE FROM personnel_fam_bg WHERE fm_id=?");
+    $stmt->execute([$_POST['fm_id']]);
  
 ?>
 
@@ -65,7 +68,8 @@ if(isset($_POST['delete_fam_bg']))
 //EMPLOYEE EDUCATIONAL BG
 if(isset($_POST['update_educ_bg']))
 {   
-        $conn->query("UPDATE personnel_educ_bg SET degree='$_POST[degree]', course_details='$_POST[course_details]', units='$_POST[units]', year_grad='$_POST[year_grad]', school_name='$_POST[school_name]' WHERE eb_id='$_POST[eb_id]'");
+        $stmt = $conn->prepare("UPDATE personnel_educ_bg SET degree=?, course_details=?, units=?, year_grad=?, school_name=? WHERE eb_id=?");
+        $stmt->execute([$_POST['degree'], $_POST['course_details'], $_POST['units'], $_POST['year_grad'], $_POST['school_name'], $_POST['eb_id']]);
         
         ?>
           
@@ -84,7 +88,8 @@ if(isset($_POST['update_educ_bg']))
 if(isset($_POST['delete_educ_bg']))
 {
      
-    $conn->query("DELETE FROM personnel_educ_bg WHERE eb_id='$_POST[eb_id]'");
+    $stmt = $conn->prepare("DELETE FROM personnel_educ_bg WHERE eb_id=?");
+    $stmt->execute([$_POST['eb_id']]);
  
 ?>
 
@@ -109,7 +114,8 @@ if(isset($_POST['update_seminar']))
         $dateTo=substr($_POST['sem_date_to'], 5,2).'/'.substr($_POST['sem_date_to'], 8,2).'/'.substr($_POST['sem_date_to'], 0,4);
          
         
-        $conn->query("UPDATE personnel_seminars SET seminar_title='$_POST[purpose_title]', seminar_desc='$_POST[description]', seminar_venue='$_POST[location_venue]', event_date='$dateFrom', event_date_to='$dateTo' WHERE ps_id='$_POST[ps_id]'");
+        $stmt = $conn->prepare("UPDATE personnel_seminars SET seminar_title=?, seminar_desc=?, seminar_venue=?, event_date=?, event_date_to=? WHERE ps_id=?");
+        $stmt->execute([$_POST['purpose_title'], $_POST['description'], $_POST['location_venue'], $dateFrom, $dateTo, $_POST['ps_id']]);
         
         ?>
           
@@ -128,7 +134,8 @@ if(isset($_POST['update_seminar']))
 if(isset($_POST['delete_seminar']))
 {
      
-    $conn->query("DELETE FROM personnel_seminars WHERE ps_id='$_POST[ps_id]'");
+    $stmt = $conn->prepare("DELETE FROM personnel_seminars WHERE ps_id=?");
+    $stmt->execute([$_POST['ps_id']]);
  
 ?>
 
@@ -151,7 +158,8 @@ if(isset($_POST['add_servRecord']))
 {
  
         
-        $studDataCHK_query = $conn->query("SELECT * FROM service_record WHERE personnel_id='$_GET[personnel_id]' AND serv_date_from='$_POST[serv_date_from]' AND serv_date_to='$_POST[serv_date_to]'") ;
+        $studDataCHK_query = $conn->prepare("SELECT * FROM service_record WHERE personnel_id=? AND serv_date_from=? AND serv_date_to=?");
+        $studDataCHK_query->execute([$_GET['personnel_id'], $_POST['serv_date_from'], $_POST['serv_date_to']]);
         if($studDataCHK_query->rowCount()>0){
          ?>
  
@@ -253,7 +261,8 @@ if(isset($_POST['update_servRecord']))
 if(isset($_POST['delete_servRecord']))
 {
      
-    $conn->query("DELETE FROM service_record WHERE sr_id='$_POST[sr_id]'");
+    $stmt = $conn->prepare("DELETE FROM service_record WHERE sr_id=?");
+    $stmt->execute([$_POST['sr_id']]);
  
 ?>
 

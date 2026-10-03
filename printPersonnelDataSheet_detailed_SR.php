@@ -8,10 +8,12 @@ include('session.php');
     
 $personnel_id=$_GET['personnel_id']; 
 
-    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
+    $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+    $staff_query->execute([$_GET['personnel_id']]);
     $staff_row = $staff_query->fetch();
     
-    $staff_sr_query = $conn->query("SELECT * FROM service_record WHERE personnel_id='$_GET[personnel_id]'") ;
+    $staff_sr_query = $conn->prepare("SELECT * FROM service_record WHERE personnel_id=?");
+    $staff_sr_query->execute([$_GET['personnel_id']]);
     $staff_sr_row = $staff_sr_query->fetch();
 
     // Default fallback signatory
@@ -252,7 +254,8 @@ $personnel_id=$_GET['personnel_id'];
                             <?php
                             $subjK_ctr=0;
                             
-                            $sr_query = $conn->query("SELECT * FROM service_record WHERE personnel_id='$_GET[personnel_id]' ORDER BY sr_id ASC") ;
+                            $sr_query = $conn->prepare("SELECT * FROM service_record WHERE personnel_id=? ORDER BY sr_id ASC");
+                            $sr_query->execute([$_GET['personnel_id']]);
                             while ($sr_row = $sr_query->fetch())
                             {
                                 ?>

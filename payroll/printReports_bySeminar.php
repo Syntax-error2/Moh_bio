@@ -159,11 +159,13 @@
                                 <?php
                                 
                                 //$printSeminarData_query = $conn->query("SELECT personnel_id, seminar_title, seminar_desc, seminar_venue, event_date, event_date_to FROM personnel_seminars WHERE event_date BETWEEN '$dateFrom' AND '$dateTo' ORDER BY ps_id ASC") ;
-                                $printSeminarData_query = $conn->query("SELECT personnel_id, seminar_title, seminar_desc, seminar_venue, event_date FROM personnel_seminars WHERE event_date BETWEEN '$dateFrom' AND '$dateTo' ORDER BY ps_id ASC") ;
+                                $printSeminarData_query = $conn->prepare("SELECT personnel_id, seminar_title, seminar_desc, seminar_venue, event_date FROM personnel_seminars WHERE event_date BETWEEN ? AND ? ORDER BY ps_id ASC");
+                                $printSeminarData_query->execute([$dateFrom, $dateTo]);
                                 while($printSD_row=$printSeminarData_query->fetch()){  
                                 
                                 
-                                $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$printSD_row[personnel_id]'") ;
+                                $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+                                $staff_query->execute([$printSD_row['personnel_id']]);
                                 $staff_row = $staff_query->fetch(); ?>
      
                                     

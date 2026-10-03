@@ -51,27 +51,41 @@ $name = substr($user_row['fname'], 0,1).". ".$user_row['lname'];
 
 $school_id = $user_row['school_id'];
 
-$do_TotalCtr = $conn->query('SELECT COUNT(*) FROM dept_offices')->fetchColumn(); 
-$desTotalCtr = $conn->query('SELECT COUNT(*) FROM designation')->fetchColumn(); 
-$gassTotalCtr = $conn->query('SELECT COUNT(*) FROM gass')->fetchColumn(); 
-$ES_TotalCtr = $conn->query('SELECT COUNT(*) FROM emp_status')->fetchColumn(); 
-$shiftTotalCtr = $conn->query('SELECT COUNT(*) FROM shifts')->fetchColumn(); 
-$client_computerTotalCtr = $conn->query('SELECT COUNT(*) FROM client_computer')->fetchColumn();
+if (!isset($_SESSION['sidebar_cache']) || (time() - ($_SESSION['sidebar_cache_time'] ?? 0)) > 60) {
+    
+    $perCtr_query = $conn->prepare("SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END) as male_count,
+        SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END) as female_count
+    FROM personnels 
+    WHERE separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '");
 
+    $perCtr_query->execute();
+    $perCtr_result = $perCtr_query->fetch();
+    
+    $_SESSION['sidebar_cache'] = [
+        'do_TotalCtr' => $conn->query('SELECT COUNT(*) FROM dept_offices')->fetchColumn(),
+        'desTotalCtr' => $conn->query('SELECT COUNT(*) FROM designation')->fetchColumn(),
+        'gassTotalCtr' => $conn->query('SELECT COUNT(*) FROM gass')->fetchColumn(),
+        'ES_TotalCtr' => $conn->query('SELECT COUNT(*) FROM emp_status')->fetchColumn(),
+        'shiftTotalCtr' => $conn->query('SELECT COUNT(*) FROM shifts')->fetchColumn(),
+        'client_computerTotalCtr' => $conn->query('SELECT COUNT(*) FROM client_computer')->fetchColumn(),
+        'perCtr_all' => $perCtr_result['total'] ?? 0,
+        'perCtrM_all' => $perCtr_result['male_count'] ?? 0,
+        'perCtrF_all' => $perCtr_result['female_count'] ?? 0
+    ];
+    $_SESSION['sidebar_cache_time'] = time();
+}
 
-$perCtr_query = $conn->prepare("SELECT 
-    COUNT(*) as total,
-    SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END) as male_count,
-    SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END) as female_count
-FROM personnels 
-WHERE separation_date = '' OR separation_date = '  /  /    '");
-
-$perCtr_query->execute();
-$perCtr_result = $perCtr_query->fetch();
-
-$perCtr_all = $perCtr_result['total'];
-$perCtrM_all = $perCtr_result['male_count'];
-$perCtrF_all = $perCtr_result['female_count'];
+$do_TotalCtr = $_SESSION['sidebar_cache']['do_TotalCtr'];
+$desTotalCtr = $_SESSION['sidebar_cache']['desTotalCtr'];
+$gassTotalCtr = $_SESSION['sidebar_cache']['gassTotalCtr'];
+$ES_TotalCtr = $_SESSION['sidebar_cache']['ES_TotalCtr'];
+$shiftTotalCtr = $_SESSION['sidebar_cache']['shiftTotalCtr'];
+$client_computerTotalCtr = $_SESSION['sidebar_cache']['client_computerTotalCtr'];
+$perCtr_all = $_SESSION['sidebar_cache']['perCtr_all'];
+$perCtrM_all = $_SESSION['sidebar_cache']['perCtrM_all'];
+$perCtrF_all = $_SESSION['sidebar_cache']['perCtrF_all'];
 
 
 $check_pass = $user_row['password'];

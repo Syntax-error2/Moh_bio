@@ -160,7 +160,8 @@ echo "<hr />";
                    */
                    
                     if($num_of_yrs < 60){
-                        $conn->query("UPDATE personnels SET num_of_yrs='$num_of_yrs' WHERE personnel_id='$pDA_row[personnel_id]'");
+                        $numUpdateStmt = $conn->prepare("UPDATE personnels SET num_of_yrs=? WHERE personnel_id=?");
+                        $numUpdateStmt->execute([$num_of_yrs, $pDA_row['personnel_id']]);
                         
                     }else{
                         
@@ -218,7 +219,8 @@ echo "<hr />";
                       </thead>
                       <tbody>
                       <?php
-                      $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, appointment_date, num_of_yrs FROM personnels WHERE num_of_yrs BETWEEN '$ageFrom' AND '$ageTo' ORDER BY lname, fname ASC") ;
+                      $printDataAge_query = $conn->prepare("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, appointment_date, num_of_yrs FROM personnels WHERE num_of_yrs BETWEEN ? AND ? ORDER BY lname, fname ASC");
+                      $printDataAge_query->execute([$ageFrom, $ageTo]);
                       
                       while($printDA_row=$printDataAge_query->fetch()){ ?>
                       
@@ -241,10 +243,12 @@ echo "<hr />";
                       <td>
                       <?php
                       
-                      $emp_stat_query1 = $conn->query("select des_name from designation WHERE des_id='$printDA_row[des_id]'");
+                      $emp_stat_query1 = $conn->prepare("select des_name from designation WHERE des_id=?");
+                      $emp_stat_query1->execute([$printDA_row['des_id']]);
                       $es_row1=$emp_stat_query1->fetch();
                       
-                      $emp_stat_query2 = $conn->query("select dept_office_name from dept_offices WHERE do_id='$printDA_row[do_id]'");
+                      $emp_stat_query2 = $conn->prepare("select dept_office_name from dept_offices WHERE do_id=?");
+                      $emp_stat_query2->execute([$printDA_row['do_id']]);
                       $es_row2=$emp_stat_query2->fetch();
                       
                       if(!empty($es_row1)){

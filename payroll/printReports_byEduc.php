@@ -216,16 +216,19 @@
                                 
                                 }elseif($degree != 'ALL' AND $school_name == 'ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE degree='$degree' ORDER BY school_name ASC") ;
+                                    $peb_query = $conn->prepare("SELECT * FROM personnel_educ_bg WHERE degree=? ORDER BY school_name ASC");
+                                    $peb_query->execute([$degree]);
                                 
                                 }elseif($degree == 'ALL' AND $school_name != 'ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE school_name='$school_name' ORDER BY school_name ASC") ;
+                                    $peb_query = $conn->prepare("SELECT * FROM personnel_educ_bg WHERE school_name=? ORDER BY school_name ASC");
+                                    $peb_query->execute([$school_name]);
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE degree='$degree' AND school_name='$school_name' ORDER BY degree ASC") ;
+                                    $peb_query = $conn->prepare("SELECT * FROM personnel_educ_bg WHERE degree=? AND school_name=? ORDER BY degree ASC");
+                                    $peb_query->execute([$degree, $school_name]);
                                 
                                 }
                                 
@@ -233,7 +236,8 @@
                                 {
                                     
                                 //$printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, do_id, des_id FROM personnels WHERE personnel_id='$peb_row[personnel_id]' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '))");
-                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, do_id, des_id FROM personnels WHERE personnel_id='$peb_row[personnel_id]'");
+                                $printDataAge_query = $conn->prepare("SELECT lname, fname, mname, suffix, do_id, des_id FROM personnels WHERE personnel_id=?");
+                                $printDataAge_query->execute([$peb_row['personnel_id']]);
                                 $printDA_row=$printDataAge_query->fetch(); 
                       
                                 ?>

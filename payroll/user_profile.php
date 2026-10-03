@@ -30,7 +30,8 @@
     <?php include('navbar_header.php'); ?>
     
     <?php
-    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
+    $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+    $staff_query->execute([$_GET['personnel_id']]);
     $staff_row = $staff_query->fetch();
     ?>
     <!-- Breadcrumb-->
@@ -314,7 +315,8 @@
                                 <?php
                                 $subjK_ctr=0;
                                 
-                                $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$_GET[personnel_id]' ORDER BY eb_id ASC") ;
+                                $peb_query = $conn->prepare("SELECT * FROM personnel_educ_bg WHERE personnel_id=? ORDER BY eb_id ASC");
+                                $peb_query->execute([$_GET['personnel_id']]);
                                 while ($peb_row = $peb_query->fetch())
                                 {
                                     ?>
@@ -362,7 +364,8 @@
                             <?php
                             $subjK_ctr=0;
                             
-                            $ps_query = $conn->query("SELECT * FROM personnel_seminars WHERE personnel_id='$_GET[personnel_id]' ORDER BY ps_id ASC") ;
+                            $ps_query = $conn->prepare("SELECT * FROM personnel_seminars WHERE personnel_id=? ORDER BY ps_id ASC");
+                            $ps_query->execute([$_GET['personnel_id']]);
                             while ($ps_row = $ps_query->fetch())
                             {
                                 ?>

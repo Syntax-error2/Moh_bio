@@ -289,7 +289,11 @@
                                   $es_row=$emp_stat_query->fetch();
                                   ?>
                                     <select name="shift_id" class="form-control">
-                                    <option value="<?php echo $es_row['shift_id']; ?>"><?php echo $es_row['shift_name'].' ( '.$es_row['type'].' )'; ?></option>
+                                    <?php if ($es_row): ?>
+                                      <option value="<?php echo $es_row['shift_id']; ?>"><?php echo $es_row['shift_name'].' ( '.$es_row['type'].' )'; ?></option>
+                                    <?php else: ?>
+                                      <option value="0">Not Set</option>
+                                    <?php endif; ?>
                                     <option value="0">-</option>
                                     <?php
                                     $dept = $_GET['dept'] ?? '';

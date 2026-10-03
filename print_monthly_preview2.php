@@ -114,7 +114,8 @@ include('header_print.php');
  
 <?php
 
-$printAll_Data_query = $conn->query("select * FROM personnels WHERE do_id='$_GET[do_id]' ORDER BY lname, fname ASC");
+$printAll_Data_query = $conn->prepare("select * FROM personnels WHERE do_id=? ORDER BY lname, fname ASC");
+$printAll_Data_query->execute([$_GET['do_id']]);
 while($printALL_row=$printAll_Data_query->fetch()){
 
 

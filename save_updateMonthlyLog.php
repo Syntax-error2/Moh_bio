@@ -28,13 +28,11 @@
     $am_in_stat="Updated";
     
         if($am_in_lq=="Update"){
-            
-        $conn->query("UPDATE personnel_logs SET do_id='$_GET[dept]', shift_id='$shift_id', logTime='$am_IN', late_status='$late_status1', remarks='Updated' WHERE RFTag_id='$RFTag_id' AND logDate='$logDate' AND logFlow='AM IN'");    
-        
+            $stmt = $conn->prepare("UPDATE personnel_logs SET do_id=?, shift_id=?, logTime=?, late_status=?, remarks='Updated' WHERE RFTag_id=? AND logDate=? AND logFlow='AM IN'");
+            $stmt->execute([$_GET['dept'], $shift_id, $am_IN, $late_status1, $RFTag_id, $logDate]);
         }else{
-            
-        $conn->query("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks)VALUES('$RFTag_id', '$_GET[dept]', '$shift_id', '$logDate', '$am_IN', 'AM IN', '$late_status1', 'Inserted')");    
-        
+            $stmt = $conn->prepare("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks) VALUES (?, ?, ?, ?, ?, 'AM IN', ?, 'Inserted')");
+            $stmt->execute([$RFTag_id, $_GET['dept'], $shift_id, $logDate, $am_IN, $late_status1]);
         }
     
     }
@@ -59,13 +57,11 @@
     $am_out_stat="Updated";
     
         if($am_out_lq=="Update"){
-        
-        $conn->query("UPDATE personnel_logs SET do_id='$_GET[dept]', shift_id='$shift_id', logTime='$am_OUT', late_status='$late_status2', remarks='Updated' WHERE RFTag_id='$RFTag_id' AND logDate='$logDate' AND logFlow='AM OUT'");    
-        
+            $stmt = $conn->prepare("UPDATE personnel_logs SET do_id=?, shift_id=?, logTime=?, late_status=?, remarks='Updated' WHERE RFTag_id=? AND logDate=? AND logFlow='AM OUT'");
+            $stmt->execute([$_GET['dept'], $shift_id, $am_OUT, $late_status2, $RFTag_id, $logDate]);
         }else{
-        
-        $conn->query("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks)VALUES('$RFTag_id', '$_GET[dept]', '$shift_id', '$logDate', '$am_OUT', 'AM OUT', '$late_status2', 'Inserted')");    
-        
+            $stmt = $conn->prepare("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks) VALUES (?, ?, ?, ?, ?, 'AM OUT', ?, 'Inserted')");
+            $stmt->execute([$RFTag_id, $_GET['dept'], $shift_id, $logDate, $am_OUT, $late_status2]);
         }
         
     }
@@ -92,13 +88,11 @@
     $pm_in_stat="Updated";
     
         if($pm_in_lq=="Update"){
-        
-        $conn->query("UPDATE personnel_logs SET do_id='$_GET[dept]', shift_id='$shift_id', logTime='$pm_IN', late_status='$late_status3', remarks='Updated' WHERE RFTag_id='$RFTag_id' AND logDate='$logDate' AND logFlow='PM IN'");    
-        
+            $stmt = $conn->prepare("UPDATE personnel_logs SET do_id=?, shift_id=?, logTime=?, late_status=?, remarks='Updated' WHERE RFTag_id=? AND logDate=? AND logFlow='PM IN'");
+            $stmt->execute([$_GET['dept'], $shift_id, $pm_IN, $late_status3, $RFTag_id, $logDate]);
         }else{
-            
-        $conn->query("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks)VALUES('$RFTag_id', '$_GET[dept]', '$shift_id', '$logDate', '$pm_IN', 'PM IN', '$late_status3', 'Inserted')");    
-        
+            $stmt = $conn->prepare("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks) VALUES (?, ?, ?, ?, ?, 'PM IN', ?, 'Inserted')");
+            $stmt->execute([$RFTag_id, $_GET['dept'], $shift_id, $logDate, $pm_IN, $late_status3]);
         }
         
     }
@@ -124,13 +118,11 @@
     $pm_out_stat="Updated";
     
         if($pm_out_lq=="Update"){
-            
-        $conn->query("UPDATE personnel_logs SET do_id='$_GET[dept]', shift_id='$shift_id', logTime='$pm_OUT', late_status='$late_status4', remarks='Updated' WHERE RFTag_id='$RFTag_id' AND logDate='$logDate' AND logFlow='PM OUT'");    
-        
+            $stmt = $conn->prepare("UPDATE personnel_logs SET do_id=?, shift_id=?, logTime=?, late_status=?, remarks='Updated' WHERE RFTag_id=? AND logDate=? AND logFlow='PM OUT'");
+            $stmt->execute([$_GET['dept'], $shift_id, $pm_OUT, $late_status4, $RFTag_id, $logDate]);
         }else{
-            
-        $conn->query("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks)VALUES('$RFTag_id', '$_GET[dept]', '$shift_id', '$logDate', '$pm_OUT', 'PM OUT', '$late_status4', 'Inserted')");    
-        
+            $stmt = $conn->prepare("INSERT INTO personnel_logs (RFTag_id, do_id, shift_id, logDate, logTime, logFlow, late_status, remarks) VALUES (?, ?, ?, ?, ?, 'PM OUT', ?, 'Inserted')");
+            $stmt->execute([$RFTag_id, $_GET['dept'], $shift_id, $logDate, $pm_OUT, $late_status4]);
         }
     }
     
@@ -147,13 +139,14 @@
     
 <?php if(isset($_POST['saveRD'])){
     
-    $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
+    $studData_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+    $studData_query->execute([$_GET['personnel_id']]);
     $sd_row=$studData_query->fetch();
  
     $logDate=$_POST['selectedMM'].'/'.$_POST['selectedDD'].'/'.$_POST['selectedYYYY'];
     
-    $conn->query("INSERT INTO personnel_logs(RFTag_id, img, lname, fname, mname, suffix, do_id, shift_id, logDate, remarks)
-    VALUES ('$sd_row[RFTag_id]', '$sd_row[img]', '$sd_row[lname]', '$sd_row[fname]', '$sd_row[mname]', '$sd_row[suffix]', '$sd_row[do_id]', '$sd_row[shift_id]', '$logDate', 'REST DAY')");
+    $stmt = $conn->prepare("INSERT INTO personnel_logs(RFTag_id, img, lname, fname, mname, suffix, do_id, shift_id, logDate, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'REST DAY')");
+    $stmt->execute([$sd_row['RFTag_id'], $sd_row['img'], $sd_row['lname'], $sd_row['fname'], $sd_row['mname'], $sd_row['suffix'], $sd_row['do_id'], $sd_row['shift_id'], $logDate]);
         
     ?>
     
@@ -167,7 +160,8 @@
 
 <?php if(isset($_POST['delRD'])){
 
-    $conn->query("DELETE FROM personnel_logs WHERE log_id='$_POST[log_id]'");
+    $stmt = $conn->prepare("DELETE FROM personnel_logs WHERE log_id=?");
+    $stmt->execute([$_POST['log_id']]);
         
     ?>
     

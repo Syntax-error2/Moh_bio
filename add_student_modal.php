@@ -13,6 +13,48 @@
                         
                         <div class="modal-body">
                         
+                        <script src="js/jquery-latest.js"></script>
+                        
+                        <div class="col-lg-12">
+                                <div class="row">
+                                  <div class="col-md-12">
+                                    <select name="user_rfid_type" class="form-control" id='purpose'>
+                                    <option>With RFID</option>
+                                    <option value="1">Non-RFID</option>
+                                    </select>
+                                    <small class="form-text">Select RFID Card Type</small>
+                                  </div>
+                                  
+                                  <br /><br /><br />
+                                  
+                                  <div id="business" class="col-md-12">
+                                  
+                                  <input required="true" name="RFTag_id" id="RFTag_id_add" type="text" class="form-control" value="" readonly>
+                                  <small class="form-text" id="statusMsg_add">Connecting to scanner...</small>
+                                  
+                                  </div>
+                                    
+                                </div>
+                              </div>
+                              
+                              
+                              <script>
+                              $(document).ready(function(){
+                                $('#purpose').on('change', function() {
+                                  if ( this.value == '1')
+                                  {
+                                    $("#business").hide();
+                                  }
+                                  else
+                                  {
+                                    $("#business").show();
+                                  }
+                                });
+                              });
+                              </script>
+                              
+                              <br />
+                        
                         <div class="form-group row">
                               <label class="col-sm-2 form-control-label">Personnel ID</label>
                               <div class="col-sm-10">

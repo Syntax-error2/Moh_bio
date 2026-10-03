@@ -19,11 +19,18 @@ if(isset($_POST['updateAnnouncementImg']))
     
     $final_file=str_replace(' ','-',$new_file_name);
         
+    $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif');
+    $file_ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+    
+    if(!in_array($file_ext, $allowed_extensions)){
+        die("<script>window.alert('Invalid file format. Only JPG, PNG and GIF are allowed.'); window.location='list_slides.php';</script>");
+    }
         
      
     if(move_uploaded_file($file_loc,$folder.$final_file)){
         
-        $conn->query("UPDATE slides SET img='$final_file' WHERE slide_id='$_GET[slide_id]'");
+        $stmt = $conn->prepare("UPDATE slides SET img=? WHERE slide_id=?");
+        $stmt->execute([$final_file, $_GET['slide_id']]);
 
 ?>
     <script> window.location='list_slides.php'; </script>    

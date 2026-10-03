@@ -9,7 +9,8 @@ include('session.php');
     
 $personnel_id=$_GET['personnel_id']; 
 
-    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
+    $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+    $staff_query->execute([$_GET['personnel_id']]);
     $staff_row = $staff_query->fetch();
 
     

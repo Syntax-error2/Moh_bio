@@ -115,11 +115,13 @@ include('header_print.php');
  
 <?php
  
-$printAll_Data_query = $conn->query("select * FROM personnels WHERE do_id='$_GET[do_id]' AND (separation_date='' OR separation_date='  /  /    ') ORDER BY lname, fname ASC");
+$printAll_Data_query = $conn->prepare("select * FROM personnels WHERE do_id=? AND (separation_date='' OR separation_date='  /  /    ') ORDER BY lname, fname ASC");
+$printAll_Data_query->execute([$_GET['do_id']]);
 while($printALL_row=$printAll_Data_query->fetch()){
 
 
-$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]' AND do_id='$_GET[do_id]'");
+$studData_query = $conn->prepare("select * FROM personnels WHERE personnel_id=? AND do_id=?");
+$studData_query->execute([$printALL_row['personnel_id'], $_GET['do_id']]);
 $studData_row=$studData_query->fetch();
 
 

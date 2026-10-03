@@ -25,10 +25,12 @@
     $personnel_id = $_GET['personnel_id'] ?? '';
     $dept_id = $_GET['dept'] ?? '';
     
-    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'");
+    $staff_query = $conn->prepare("SELECT * FROM personnels WHERE personnel_id=?");
+    $staff_query->execute([$_GET['personnel_id']]);
     $staff_row = $staff_query->fetch();
 
-    $emp_stat_query5 = $conn->query("SELECT * FROM shifts WHERE shift_id='$staff_row[shift_id]'");
+    $emp_stat_query5 = $conn->prepare("SELECT * FROM shifts WHERE shift_id=?");
+    $emp_stat_query5->execute([$staff_row['shift_id']]);
     $es_row5=$emp_stat_query5->fetch();
     
     // Get department/office name for leave application
