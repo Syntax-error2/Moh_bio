@@ -3,7 +3,7 @@
 date_default_timezone_set('Asia/Manila');
 
 $host = 'localhost';
-$db = 'moh_hrms';
+$db = 'moh_bio';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';

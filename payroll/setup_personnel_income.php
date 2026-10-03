@@ -218,7 +218,7 @@ if (isset($_POST['create_table'])) {
                                             <p class="small">You can also create this table manually by:</p>
                                             <ol class="small">
                                                 <li>Opening phpMyAdmin</li>
-                                                <li>Selecting <code>moh_hrms</code> database</li>
+                                                <li>Selecting <code>moh_bio</code> database</li>
                                                 <li>Going to Import tab</li>
                                                 <li>Importing: <code>payroll/db/personnel_income_schema.sql</code></li>
                                             </ol>

@@ -16,7 +16,7 @@ date_default_timezone_set('Asia/Manila');
 
 // Database configuration constants
 define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'moh_hrms');
+define('DB_NAME', 'moh_bio');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');

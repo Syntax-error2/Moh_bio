@@ -7,7 +7,7 @@
  * 
  * Run this script once to sync all existing records, then delete or disable it.
  * 
- * Usage: Access via browser http://localhost/moh_hrms/fix_leave_card_sync.php
+ * Usage: Access via browser http://localhost/moh_bio/fix_leave_card_sync.php
  *        Or run from command line: php fix_leave_card_sync.php
  */
 

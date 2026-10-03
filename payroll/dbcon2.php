@@ -9,7 +9,7 @@ date_default_timezone_set('Asia/Manila');
 
 // Database configuration
 define('DB_HOST2', 'localhost');
-define('DB_NAME2', 'moh_hrms');
+define('DB_NAME2', 'moh_bio');
 define('DB_USER2', 'root');
 define('DB_PASS2', '');
 define('DB_CHARSET2', 'utf8mb4');
