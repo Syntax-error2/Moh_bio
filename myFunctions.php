@@ -56,7 +56,7 @@ function get_enr_path() {
     if ($client_ip == '::1' || $client_ip == '127.0.0.1') {
         return __DIR__ . '/data.enr';
     } else {
-        return "\\\\" . $client_ip . "\\mob_bio\\data.enr";
+        return "\\\\" . $client_ip . "\\moh_hris\\data.enr";
     }
 }
 

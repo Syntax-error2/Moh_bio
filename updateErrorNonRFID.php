@@ -17,7 +17,7 @@ function randomcode() {
                                 
                                 
                                 
-$perData_query = $conn->query("SELECT personnel_id, RFTag_id FROM personnels") or die(mysql_error());
+$perData_query = $conn->query("SELECT personnel_id, RFTag_id FROM personnels") ;
 while($pd_row=$perData_query->fetch()){
     
 $personnel_id=$pd_row['personnel_id'];

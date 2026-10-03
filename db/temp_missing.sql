@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS `cron_monthly_leave` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `month_year` varchar(7) DEFAULT NULL,
+  `date_executed` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `month_year` (`month_year`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `leave_accrual_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `accrual_month` varchar(7) NOT NULL,
+  `date_processed` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `accrual_month` (`accrual_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `leave_credit_logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_id` int(11) NOT NULL,
+  `log_type` varchar(50) NOT NULL,
+  `vl_amount` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `sl_amount` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `remarks` text DEFAULT NULL,
+  `date_logged` datetime NOT NULL DEFAULT current_timestamp(),
+  `period` varchar(100) DEFAULT NULL,
+  `particulars` varchar(100) DEFAULT NULL,
+  `vl_wout_pay` decimal(10,3) DEFAULT 0.000,
+  `sl_wout_pay` decimal(10,3) DEFAULT 0.000,
+  PRIMARY KEY (`log_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `personnel_overtime_requests` (
+  `ot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_id` int(11) NOT NULL,
+  `ot_date` date NOT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ot_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

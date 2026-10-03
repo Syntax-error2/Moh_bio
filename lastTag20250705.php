@@ -16,7 +16,7 @@ $ct2_row=$ct2_query->fetch();
 
 $currentTag=$ct2_row['RFID_tag']; 
 
-$personnelData_query = $conn->prepare('SELECT img, lname, fname, mname, suffix, do_id, shift_id FROM personnels WHERE RFTag_id = :RFTag_id') or die(mysql_error());
+$personnelData_query = $conn->prepare('SELECT img, lname, fname, mname, suffix, do_id, shift_id FROM personnels WHERE RFTag_id = :RFTag_id') ;
 $personnelData_query->execute(['RFTag_id' => $currentTag]);
 
 if($personnelData_query->rowCount()<=0)
@@ -1194,7 +1194,7 @@ if($sSDQ_row['type']==='Regular Shift'){
                 $date_yesterday = new DateTime($currentDate.'- 1 day');
                 $yesterDate=$date_yesterday->format('m/d/Y');
                 
-                $log_ctr_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$yesterDate'") or die(mysql_error());
+                $log_ctr_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$yesterDate'") ;
                 $log_ctr=$log_ctr_query->rowcount();
                 
                 $mod_val=$log_ctr % 2;
@@ -1202,7 +1202,7 @@ if($sSDQ_row['type']==='Regular Shift'){
                 if($mod_val>0){
                 //OUT
                 
-                $yesterday_in_log_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$yesterDate' AND (logFlow='AM IN' OR logFlow='PM IN') ORDER BY log_id DESC") or die(mysql_error());
+                $yesterday_in_log_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$yesterDate' AND (logFlow='AM IN' OR logFlow='PM IN') ORDER BY log_id DESC") ;
                 $yd_il_row=$yesterday_in_log_query->fetch();
                 $ref_log_id=$yd_il_row['log_id'];
                 
@@ -1227,7 +1227,7 @@ if($sSDQ_row['type']==='Regular Shift'){
                             $conn->commit();
                
                             
-                            $in_log_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND (logFlow='AM IN' OR logFlow='PM IN') ORDER BY log_id DESC") or die(mysql_error());
+                            $in_log_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND (logFlow='AM IN' OR logFlow='PM IN') ORDER BY log_id DESC") ;
                             $il_row=$in_log_query->fetch();
                             $ref_log_id=$il_row['log_id'];
                 
@@ -1258,7 +1258,7 @@ if($sSDQ_row['type']==='Regular Shift'){
                         
                         //IN
                         
-                        $current_log_ctr_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate'") or die(mysql_error());
+                        $current_log_ctr_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate'") ;
                         $current_log_ctr=$current_log_ctr_query->rowcount();
                         
                         $current_mod_val=$current_log_ctr % 2;
@@ -1266,7 +1266,7 @@ if($sSDQ_row['type']==='Regular Shift'){
                         if($current_mod_val>0){
                         //CURRENT DAY OUT OPEN
                         
-                        $in_log_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND (logFlow='AM IN' OR logFlow='PM IN') ORDER BY log_id DESC") or die(mysql_error());
+                        $in_log_query = $conn->query("SELECT log_id, logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND (logFlow='AM IN' OR logFlow='PM IN') ORDER BY log_id DESC") ;
                         $il_row=$in_log_query->fetch();
                         $ref_log_id=$il_row['log_id'];
                         

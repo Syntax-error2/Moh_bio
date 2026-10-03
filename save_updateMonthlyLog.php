@@ -147,7 +147,7 @@
     
 <?php if(isset($_POST['saveRD'])){
     
-    $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") or die(mysql_error());
+    $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
     $sd_row=$studData_query->fetch();
  
     $logDate=$_POST['selectedMM'].'/'.$_POST['selectedDD'].'/'.$_POST['selectedYYYY'];
@@ -177,3 +177,4 @@
     </script>
     
 <?php } ?>
+

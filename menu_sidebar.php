@@ -93,7 +93,7 @@
                 <li><a href="list_shift.php"> <i class="icon-presentation"></i>Shifts 
                 <div class="badge badge-warning"><?php echo $shiftTotalCtr; ?></div></a></li>
                 <li><a href="schedule_preferences.php?do_id=&shift_id=&shift=&type="> <i class="icon-clock"></i>Schedules</a></li>
-                <li><a href="biometric_dtr.php" target="_blank"> <i class="fa fa-fingerprint"></i>Biometric DTR Terminal</a></li>
+                <li><a href="biometric_dtr.php" target="_blank"> <i class="fa fa-hand-paper-o"></i>Biometric DTR Terminal</a></li>
                 <li><a href="log_validation_viewer.php"> <i class="fa fa-search-plus"></i>Log Validations</a></li>
               </ul>
             </li>

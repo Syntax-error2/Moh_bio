@@ -89,7 +89,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("SELECT * FROM designation ORDER BY des_name ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("SELECT * FROM designation ORDER BY des_name ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             {  ?>
            

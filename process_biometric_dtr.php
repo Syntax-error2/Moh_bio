@@ -48,33 +48,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['RFTag_id'])) {
             $personnelLogDate = date('m/d/Y'); // personnel_logs expects m/d/Y
             $hour = (int)date('H', strtotime($currentTime));
             
-            $stmt_am_in = $conn->prepare("SELECT 1 FROM personnel_logs WHERE RFTag_id=:rftag AND logDate=:ldate AND logFlow='AM IN'");
-            $stmt_am_in->execute(['rftag' => $rfTagId, 'ldate' => $personnelLogDate]);
-            $has_am_in = $stmt_am_in->fetchColumn();
+            // Determine flow exclusively based on bio_dtr records for today
+            $recentLogQuery = $conn->prepare("SELECT time_in, time_out FROM bio_dtr WHERE personnel_id = :pid AND log_date = :ldate ORDER BY bio_id DESC LIMIT 1");
+            $recentLogQuery->execute(['pid' => $personnelId, 'ldate' => $currentDate]);
+            $recentLog = $recentLogQuery->fetch(PDO::FETCH_ASSOC);
 
-            $stmt_am_out = $conn->prepare("SELECT 1 FROM personnel_logs WHERE RFTag_id=:rftag AND logDate=:ldate AND logFlow='AM OUT'");
-            $stmt_am_out->execute(['rftag' => $rfTagId, 'ldate' => $personnelLogDate]);
-            $has_am_out = $stmt_am_out->fetchColumn();
-
-            $stmt_pm_in = $conn->prepare("SELECT 1 FROM personnel_logs WHERE RFTag_id=:rftag AND logDate=:ldate AND logFlow='PM IN'");
-            $stmt_pm_in->execute(['rftag' => $rfTagId, 'ldate' => $personnelLogDate]);
-            $has_pm_in = $stmt_pm_in->fetchColumn();
-
-            $flow = '';
-            if ($hour < 12) {
-                $flow = (!$has_am_in) ? 'IN' : 'OUT';
-            } else if ($hour == 12) {
-                $flow = ($has_am_in && !$has_am_out) ? 'OUT' : 'IN';
-            } else {
-                // 13:00 onwards
-                if (!$has_pm_in) {
-                    if ($has_am_in || $has_am_out) {
-                        $flow = ($hour < 15) ? 'IN' : 'OUT';
-                    } else {
-                        $flow = 'IN';
-                    }
-                } else {
+            $flow = 'IN'; // Default to IN if no logs today
+            if ($recentLog) {
+                // If the most recent log has no time_out, they are currently IN, so the next action must be OUT
+                if ($recentLog['time_out'] === null || $recentLog['time_out'] === '00:00:00') {
                     $flow = 'OUT';
+                } else {
+                    // They have completed an IN-OUT cycle, so the next action is a fresh IN
+                    $flow = 'IN';
                 }
             }
             

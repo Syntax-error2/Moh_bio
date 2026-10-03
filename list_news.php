@@ -70,7 +70,7 @@ include('header.php');
                   </thead>
                   <tbody>
                     <?php
-                    $subjK_query = $conn->query("SELECT * FROM news ORDER BY news_id DESC") or die(mysql_error());
+                    $subjK_query = $conn->query("SELECT * FROM news ORDER BY news_id DESC") ;
                     while ($subjK_row = $subjK_query->fetch()) {
                       $client_stmt = $conn->prepare("SELECT description, ipAddress FROM client_computer WHERE ipAddress = :ipAddress LIMIT 1");
                       $client_stmt->execute([':ipAddress' => $subjK_row['ipAddress']]);
@@ -112,3 +112,4 @@ include('header.php');
 
 </body>
 </html>
+

@@ -38,7 +38,7 @@ include('header_print.php');
                           
                         <?php
                         $personCtr=0;
-                        $studData_query = $conn->query("SELECT personnels.*, dept_offices.dept_office_name, emp_status.emp_stat_name FROM personnels LEFT JOIN dept_offices ON dept_offices.do_id = personnels.do_id LEFT JOIN emp_status ON emp_status.empStat_id = personnels.empStat_id WHERE personnels.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') AND personnels.sex='Male' ORDER BY personnels.lname, personnels.fname ASC") or die(mysql_error());
+                        $studData_query = $conn->query("SELECT personnels.*, dept_offices.dept_office_name, emp_status.emp_stat_name FROM personnels LEFT JOIN dept_offices ON dept_offices.do_id = personnels.do_id LEFT JOIN emp_status ON emp_status.empStat_id = personnels.empStat_id WHERE personnels.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') AND personnels.sex='Male' ORDER BY personnels.lname, personnels.fname ASC") ;
                         while($staff_row=$studData_query->fetch()){
                         
                         $personCtr+=1;
@@ -127,7 +127,7 @@ include('header_print.php');
                           
                         <?php
                         $personCtr=0;
-                        $studData_query = $conn->query("SELECT personnels.*, dept_offices.dept_office_name, emp_status.emp_stat_name FROM personnels LEFT JOIN dept_offices ON dept_offices.do_id = personnels.do_id LEFT JOIN emp_status ON emp_status.empStat_id = personnels.empStat_id WHERE personnels.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') AND personnels.sex='Male' ORDER BY personnels.lname, personnels.fname ASC") or die(mysql_error());
+                        $studData_query = $conn->query("SELECT personnels.*, dept_offices.dept_office_name, emp_status.emp_stat_name FROM personnels LEFT JOIN dept_offices ON dept_offices.do_id = personnels.do_id LEFT JOIN emp_status ON emp_status.empStat_id = personnels.empStat_id WHERE personnels.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') AND personnels.sex='Male' ORDER BY personnels.lname, personnels.fname ASC") ;
                         while($staff_row=$studData_query->fetch()){
                         
                         $personCtr+=1;

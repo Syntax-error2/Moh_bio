@@ -124,7 +124,7 @@
                 <select name="school_name" class="form-control">
                 <option><?php echo $school_name; ?></option>
                 <?php
-                $pebSName_query = $conn->query("SELECT DISTINCT school_name FROM personnel_educ_bg ORDER BY school_name ASC") or die(mysql_error());              
+                $pebSName_query = $conn->query("SELECT DISTINCT school_name FROM personnel_educ_bg ORDER BY school_name ASC") ;              
                 while($pebSN_row=$pebSName_query->fetch()){ ?>
                 
                 <option><?php echo $pebSN_row['school_name']; ?></option>
@@ -212,20 +212,20 @@
                                 
                               
                                 if($degree == 'ALL' AND $school_name == 'ALL'){
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg ORDER BY school_name ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg ORDER BY school_name ASC") ;
                                 
                                 }elseif($degree != 'ALL' AND $school_name == 'ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE degree='$degree' ORDER BY school_name ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE degree='$degree' ORDER BY school_name ASC") ;
                                 
                                 }elseif($degree == 'ALL' AND $school_name != 'ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE school_name='$school_name' ORDER BY school_name ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE school_name='$school_name' ORDER BY school_name ASC") ;
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE degree='$degree' AND school_name='$school_name' ORDER BY degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE degree='$degree' AND school_name='$school_name' ORDER BY degree ASC") ;
                                 
                                 }
                                 

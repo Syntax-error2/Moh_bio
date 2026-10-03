@@ -63,7 +63,7 @@
                   
                 <?php
                 $empStatTotalCtr=0;
-                $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Active' ORDER BY emp_stat_name ASC") or die(mysql_error());
+                $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Active' ORDER BY emp_stat_name ASC") ;
                 while ($empStat_row = $empStat_query->fetch()) 
                 { ?>
                 <div class="page-statistics d-flex justify-content-between">
@@ -111,7 +111,7 @@
                 </div>
                 
                 <?php
-                $empStatCtr_query = $conn->query("SELECT * FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '))") or die(mysql_error());
+                $empStatCtr_query = $conn->query("SELECT * FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    '))") ;
                 
                 $empStatTotalCtr=$empStatTotalCtr+$empStatCtr_query->rowCount();
                 ?>
@@ -143,14 +143,14 @@
                   
                   <?php
                 $empStatTotalCtr=0;
-                $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC") or die(mysql_error());
+                $empStat_query = $conn->query("SELECT * FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC") ;
                 while ($empStat_row = $empStat_query->fetch()) 
                 { ?>
                 <div class="page-statistics d-flex justify-content-between">
                 <div class="page-statistics-left"><a href="printPersonnelEmpStatusDataSeparated.php?empStat_id=<?php echo $empStat_row['empStat_id']; ?>" target="_blank" title="Print list of <?php echo $empStat_row['emp_stat_name']; ?> personnels..." style="text-decoration-line: none; color: red;"><small><small><i class="fa fa-print"></i></small> <?php echo $empStat_row['emp_stat_name']; ?></small></a></div>
                 
                 <?php
-                $empStatCtr_query = $conn->query("SELECT * FROM personnels WHERE empStat_id='$empStat_row[empStat_id]'") or die(mysql_error());
+                $empStatCtr_query = $conn->query("SELECT * FROM personnels WHERE empStat_id='$empStat_row[empStat_id]'") ;
                 
                 $empStatTotalCtr=$empStatTotalCtr+$empStatCtr_query->rowCount();
                 ?>

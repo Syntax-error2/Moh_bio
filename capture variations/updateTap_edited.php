@@ -26,7 +26,7 @@ include('dbcon.php');
     file_put_contents($file, $image_base64);
     
     
-    $conn->query("UPDATE personnel_logs SET captured_img='$fileName', logFlow='$_GET[logFlow]', late_status='$lateStat' WHERE RFTag_id='$_GET[RFTag_id]' AND log_id='$_GET[log_id]'") or die(mysql_error());
+    $conn->query("UPDATE personnel_logs SET captured_img='$fileName', logFlow='$_GET[logFlow]', late_status='$lateStat' WHERE RFTag_id='$_GET[RFTag_id]' AND log_id='$_GET[log_id]'") ;
 
  
             if($_GET['logFlow']==='PM IN'){
@@ -34,7 +34,7 @@ include('dbcon.php');
             
             if($_GET['type']==='Night Shift'){
            
-            $logCHK_query = $conn->query("SELECT * FROM personnel_logs WHERE log_id='$_GET[log_id]'") or die(mysql_error());
+            $logCHK_query = $conn->query("SELECT * FROM personnel_logs WHERE log_id='$_GET[log_id]'") ;
             $pl_row=$logCHK_query->fetch();
 
             $pm_in_date=strtotime($pl_row['logDate']); 

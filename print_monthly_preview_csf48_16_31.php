@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html>
-
 <?php
 
 include('session.php');  
 //error_reporting(0);
 
- 
+  $get_RFTag_id=$_GET['RFTag_id'];
   $selectedMM=substr($_GET['dateFrom'], 5,2);
   $selectedYYYY=substr($_GET['dateFrom'], 0,4);
  
+  $grandTotalamLateMin=0;
+  $grandTotalpmLateMin=0;
+  
+  $grandTotalamUTimeMin=0;
+  $grandTotalpmUTimeMin=0;
+  
+  
+  
                  
                 if($selectedMM=="01")
                 {
@@ -51,7 +58,7 @@ include('session.php');
                 if($selectedMM=="05")
                 {
                     $mmWords="May";
-                    $MMmaxDay=32;
+                    $MMmaxDay=32;  
 
                 }
                 
@@ -104,10 +111,13 @@ include('session.php');
                     $mmWords="December";
                     $MMmaxDay=32;
                 }
+  
+          
         
 include('header_print.php');
 
 ?>
+ 
 
 <body>
  
@@ -117,18 +127,14 @@ $studData_query = $conn->prepare("SELECT * FROM personnels WHERE RFTag_id = :RFT
 $studData_query->execute(['RFTag_id' => $_GET['RFTag_id'], 'bio_id' => $_GET['RFTag_id']]);
 $studData_row=$studData_query->fetch();
 
-
   $grandTotalamLateMin=0;
   $grandTotalpmLateMin=0;
   
   $grandTotalamUTimeMin=0;
   $grandTotalpmUTimeMin=0;
-  $amLateCtr = 0;
-  $amPresentCtr = 0;
-  $pmLateCtr = 0;
-  $pmPresentCtr = 0;
   
 ?>
+
 
 
 <table style="width: 45%;">
@@ -141,7 +147,7 @@ $studData_row=$studData_query->fetch();
 </tr>
 
 <tr>
-<td colspan="2" style="font-size: x-large; border: none; background-color: #fff; padding: 0px; text-align: center;">DAILY TIME RECORD</td>
+<td colspan="2" style="font-size: x-large; border: none; background-color: #fff; padding: 0px;"><center>DAILY TIME RECORD</center></td>
 </tr>
 
 <tr>
@@ -174,7 +180,7 @@ $studData_row=$studData_query->fetch();
 </tr>
 
 <tr>
-<td style="border: none; background-color: #fff; padding: 0px;">For the month of <strong><?php echo $mmWords; ?> 16, <?php echo $selectedYYYY; ?> - <?php echo $mmWords.' '.($MMmaxDay-1).', '.$selectedYYYY; ?></strong></td>
+<td style="border: none; background-color: #fff;  padding: 0px;">For the month of <strong><?php echo $mmWords; ?> 1, <?php echo $selectedYYYY; ?> - <?php echo $mmWords.' '.($MMmaxDay-1).', '.$selectedYYYY; ?></strong></td>
 </tr>
 
 <tr>
@@ -195,7 +201,7 @@ $studData_row=$studData_query->fetch();
  
 </tr>
 </table>
- 
+
 <br />
  
 <table id="myTable" style="width: 45%;">
@@ -379,7 +385,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
  
-        $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        if ($sq_row && !empty($sq_row['am_IN'])) {
+            $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        } else {
+            $str_time_sched_am_in_late = "00:00:00";
+        }
         $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
         sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -456,7 +466,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
         
-        $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        if ($sq_row && !empty($sq_row['am_OUT'])) {
+            $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        } else {
+            $str_time_sched_am_out_utime = "00:00:00";
+        }
         $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
         sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -539,7 +553,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
  
-        $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        if ($sq_row && !empty($sq_row['pm_IN'])) {
+            $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        } else {
+            $str_time_sched_pm_in_late = "00:00:00";
+        }
         $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
         sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -613,7 +631,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
     $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
     $sq_row=$sched_query->fetch();
     
-    $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+    if ($sq_row && !empty($sq_row['pm_OUT'])) {
+        $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+    } else {
+        $str_time_sched_pm_out_utime = "00:00:00";
+    }
     $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
     sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
     $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -861,7 +883,4 @@ Verified as to the prescribed office hours. <br />
 <?php include_once('universal_excel_export.php'); ?>
 </body>
 </html>
-       
-            
-            
 

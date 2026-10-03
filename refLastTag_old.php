@@ -188,7 +188,7 @@ RFID Card problem? <a href="#" style="color: orange;">Please log your time at <s
 <marquee>
 <p style="margin-top: 2px; margin-bottom: 0px;">
 <?php 
-$news_query = $conn->query("SELECT news_title, news_contents FROM news WHERE ipAddress='$machine_ip7'") or die(mysql_error());
+$news_query = $conn->query("SELECT news_title, news_contents FROM news WHERE ipAddress='$machine_ip7'") ;
 while($news_row = $news_query->fetch()){ ?>
 <?php
 if($news_row['news_title']==""){
@@ -411,4 +411,5 @@ function myFunction6() {
 
  
  
+
 

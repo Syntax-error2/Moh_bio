@@ -7,13 +7,13 @@ include('myFunctions.php');
 
 $current_time=date("h:i:s a");
 
-$ct_query = $conn->query("select RFID_tag FROM client_computer WHERE RFID_tag='' AND ipAddress='".get_client_ip()."'") or die(mysql_error());
+$ct_query = $conn->query("select RFID_tag FROM client_computer WHERE RFID_tag='' AND ipAddress='".get_client_ip()."'") ;
 
 if($ct_query->rowCount()===1){ 
 
 $currentTag=lastTagCode();
     
-$conn->query("UPDATE client_computer SET RFID_tag='$currentTag' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+$conn->query("UPDATE client_computer SET RFID_tag='$currentTag' WHERE ipAddress='".get_client_ip()."'") ;
 
 clearLastTag();
 
@@ -21,12 +21,12 @@ clearLastTag();
     
 clearLastTag();
 
-$ct2_query = $conn->query("SELECT RFID_tag FROM client_computer WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+$ct2_query = $conn->query("SELECT RFID_tag FROM client_computer WHERE ipAddress='".get_client_ip()."'") ;
 $ct2_row=$ct2_query->fetch();
 
 $currentTag=$ct2_row['RFID_tag']; 
 
-$personnelData_query = $conn->query("SELECT img, lname, fname, mname, suffix, do_id, shift_id FROM personnels WHERE RFTag_id='$currentTag'") or die(mysql_error());
+$personnelData_query = $conn->query("SELECT img, lname, fname, mname, suffix, do_id, shift_id FROM personnels WHERE RFTag_id='$currentTag'") ;
 
 if($personnelData_query->rowCount()==0)
 { 
@@ -52,7 +52,7 @@ if($personnelData_query->rowCount()==0)
     }
 
     clearLastTag();
-    $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+    $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
     
 }else{
     
@@ -74,7 +74,7 @@ if($personnelData_query->rowCount()==0)
     $shift_id=$persData_row['shift_id'];
     
     
-$studSchedDataQuery = $conn->query("SELECT * FROM time_schedules WHERE day='$day' AND do_id='$do_id' AND shift_id='$shift_id'") or die(mysql_error());
+$studSchedDataQuery = $conn->query("SELECT * FROM time_schedules WHERE day='$day' AND do_id='$do_id' AND shift_id='$shift_id'") ;
  
 if($studSchedDataQuery->rowCount()>0)
 {
@@ -134,16 +134,16 @@ if($studSchedDataQuery->rowCount()>0)
                 //END PM QUERY
                 
                 
-                $am_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='AM IN'") or die(mysql_error());
+                $am_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='AM IN'") ;
                 $ail_row=$am_in_log_query->fetch();
                 
-                $am_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='AM OUT'") or die(mysql_error());
+                $am_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='AM OUT'") ;
                 $aol_row=$am_out_log_query->fetch();
                 
-                $pm_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM IN'") or die(mysql_error());
+                $pm_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM IN'") ;
                 $pil_row=$pm_in_log_query->fetch();
                 
-                $pm_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM OUT'") or die(mysql_error());
+                $pm_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM OUT'") ;
                 $pol_row=$pm_out_log_query->fetch();
                 
         if($mname=='')
@@ -210,7 +210,7 @@ if($studSchedDataQuery->rowCount()>0)
                             
                              //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") ;
                             
                             
                         }else{  ?>
@@ -230,14 +230,14 @@ if($studSchedDataQuery->rowCount()>0)
                              
                             //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
                             
                             
                         } } else{
                             
                             //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
                             
                         } 
                     
@@ -267,7 +267,7 @@ if($studSchedDataQuery->rowCount()>0)
                             
                              //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") ;
                    
                  }
                 
@@ -292,7 +292,7 @@ if($studSchedDataQuery->rowCount()>0)
                              
                              //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
                             
                             }else{
                   //END AM LOGS           END AM LOGS           END AM LOGS           END AM LOGS           END AM LOGS
@@ -304,7 +304,7 @@ if($studSchedDataQuery->rowCount()>0)
                 
                 if($time_seconds_current_time>=$time_seconds_am_in AND $time_seconds_current_time>=$time_seconds_pm_in){
                 
-                $logCHK_PM_IN_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM IN'") or die(mysql_error());
+                $logCHK_PM_IN_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM IN'") ;
                 if($logCHK_PM_IN_query->rowCount()>0)
                 {
                         $lcq_PM_IN_row=$logCHK_PM_IN_query->fetch();
@@ -322,7 +322,7 @@ if($studSchedDataQuery->rowCount()>0)
                         
                         if($time_seconds_current_time>$LOG_timeAllowance){
                         
-                        $PM_OUT_logCHK_query = $conn->query("SELECT logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM OUT'") or die(mysql_error());
+                        $PM_OUT_logCHK_query = $conn->query("SELECT logTime FROM personnel_logs WHERE RFTag_id='$currentTag' AND logDate='$currentDate' AND logFlow='PM OUT'") ;
                         if($PM_OUT_logCHK_query->rowCount()<=0)
                         { 
                         ?>
@@ -351,7 +351,7 @@ if($studSchedDataQuery->rowCount()>0)
                             
                              //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") ;
                             
                             
                             
@@ -359,13 +359,13 @@ if($studSchedDataQuery->rowCount()>0)
                             
                             //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
                          
                          
                         } } else{
                             //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
                          
                         } }else{ //PM IN LOG
                         
@@ -395,7 +395,7 @@ if($studSchedDataQuery->rowCount()>0)
                             
                              //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='', display_time=0 WHERE ipAddress='".get_client_ip()."'") ;
                             
                             
                         }
@@ -419,7 +419,7 @@ if($studSchedDataQuery->rowCount()>0)
                              
                              //clear tag data
                             clearLastTag();
-                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+                            $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
                             
                                     
                         }
@@ -453,7 +453,7 @@ if($studSchedDataQuery->rowCount()>0)
     <?php
     
     clearLastTag();
-    $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") or die(mysql_error());
+    $conn->query("UPDATE client_computer SET RFID_tag='' WHERE ipAddress='".get_client_ip()."'") ;
             
 } }
 

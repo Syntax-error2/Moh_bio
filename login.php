@@ -10,7 +10,8 @@
         $final_pass=$salt.$safe_pass;
         
 		/* student */
-			$query = $conn->query("SELECT * FROM useraccount WHERE username='$username' AND password='$final_pass'");
+			$query = $conn->prepare("SELECT * FROM useraccount WHERE username=:username AND password=:password");
+			$query->execute(['username' => $username, 'password' => $final_pass]);
 			$row = $query->fetch();
 			$num_row = $query->rowcount();
 		if( $num_row > 0 ) { 

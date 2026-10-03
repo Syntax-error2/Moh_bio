@@ -85,7 +85,7 @@ $si_row = $slide_img_query->fetch();
 
 <?php
 
-$conn->query("DELETE FROM personnel_logs WHERE logFlow=''") or die(mysql_error());
+$conn->query("DELETE FROM personnel_logs WHERE logFlow=''") ;
 
 $cc_query=null;
 $slide_img_query=null;
@@ -99,17 +99,17 @@ $tr1_gl="";
 $logTime="";
  
 
-$log_id_query = $conn->query("SELECT log_id FROM personnel_logs WHERE logDate='$currentDateDisplay' AND logFlow='' AND client_ip='$machine_ip' ORDER BY log_id DESC") or die(mysql_error());
+$log_id_query = $conn->query("SELECT log_id FROM personnel_logs WHERE logDate='$currentDateDisplay' AND logFlow='' AND client_ip='$machine_ip' ORDER BY log_id DESC") ;
 
 if($log_id_query->rowCount()>0){
 
 $liq_row=$log_id_query->fetch();
 
-$displayLog_query = $conn->query("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE log_id='$liq_row[log_id]'") or die(mysql_error());
+$displayLog_query = $conn->query("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE log_id='$liq_row[log_id]'") ;
 
 }else{
 
-$displayLog_query = $conn->query("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' ORDER BY log_id DESC") or die(mysql_error());
+$displayLog_query = $conn->query("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' ORDER BY log_id DESC") ;
 
 }
 
@@ -150,7 +150,7 @@ while($dpLog_row=$displayLog_query->fetch())
         $logTime=$dpLog_row['logTime'];
         $logFlow=$dpLog_row['logFlow'];
         
-        $studData_query = $conn->query("SELECT * FROM personnels WHERE RFTag_id='$RFTag_id'") or die(mysql_error());
+        $studData_query = $conn->query("SELECT * FROM personnels WHERE RFTag_id='$RFTag_id'") ;
         $sd_row=$studData_query->fetch();
         
         $do_idxx=$sd_row['do_id'];
@@ -221,16 +221,16 @@ if($tr1_img==""){
 
             <?php
                             
-                $am_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='AM IN'") or die(mysql_error());
+                $am_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='AM IN'") ;
                 $ail_row=$am_in_log_query->fetch();
                 
-                $am_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='AM OUT'") or die(mysql_error());
+                $am_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='AM OUT'") ;
                 $aol_row=$am_out_log_query->fetch();
                 
-                $pm_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='PM IN'") or die(mysql_error());
+                $pm_in_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='PM IN'") ;
                 $pil_row=$pm_in_log_query->fetch();
                 
-                $pm_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='PM OUT'") or die(mysql_error());
+                $pm_out_log_query = $conn->query("SELECT * FROM personnel_logs WHERE logDate='$currentDateDisplay' AND client_ip='$machine_ip' AND RFTag_id='$RFTag_id' AND logFlow='PM OUT'") ;
                 $pol_row=$pm_out_log_query->fetch();
              
                 
@@ -245,7 +245,7 @@ if($tr1_img==""){
                 $time_seconds_current_time = ($hours * 3600) + $minutes * 60 + $seconds;
                 
                 
-                $studSchedDataQuery = $conn->query("SELECT * FROM time_schedules WHERE day='$day' AND do_id='$sd_row[do_id]' AND shift_id='$sd_row[shift_id]'") or die(mysql_error());
+                $studSchedDataQuery = $conn->query("SELECT * FROM time_schedules WHERE day='$day' AND do_id='$sd_row[do_id]' AND shift_id='$sd_row[shift_id]'") ;
                 $sSDQ_row = $studSchedDataQuery->fetch();
                 
                 //AM QUERY
@@ -554,3 +554,4 @@ if($tr1_img==""){
  
  
 <?php } } } ?>
+

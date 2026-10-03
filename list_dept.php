@@ -89,7 +89,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("SELECT * FROM dept_offices ORDER BY dept_office_name ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("SELECT * FROM dept_offices ORDER BY dept_office_name ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             {  ?>
            

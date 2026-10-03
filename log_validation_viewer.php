@@ -51,7 +51,7 @@
     
     <?php include('navbar_header.php');
     
-    if($session_access==='Administrator'){ ?>
+    if($session_access==='Administrator' || $session_access==='Admin'){ ?>
     
         <!-- Breadcrumb-->
       <div class="breadcrumb-holder">

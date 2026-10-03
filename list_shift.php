@@ -103,7 +103,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("SELECT * FROM shifts WHERE type='Regular Shift' ORDER BY shift_name ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("SELECT * FROM shifts WHERE type='Regular Shift' ORDER BY shift_name ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             {
                                 
@@ -251,7 +251,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("SELECT * FROM shifts WHERE type='Night Shift' ORDER BY shift_name ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("SELECT * FROM shifts WHERE type='Night Shift' ORDER BY shift_name ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             {
                                 
@@ -399,7 +399,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("SELECT * FROM shifts WHERE type='24 Hours Shift' ORDER BY shift_name ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("SELECT * FROM shifts WHERE type='24 Hours Shift' ORDER BY shift_name ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             {
                                 

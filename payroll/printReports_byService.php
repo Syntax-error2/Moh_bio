@@ -126,7 +126,7 @@ echo "<hr />";
 */      
                 
                 //error_reporting(0);
-                $pDataAge_query = $conn->query("SELECT personnel_id, appointment_date FROM personnels") or die(mysql_error());
+                $pDataAge_query = $conn->query("SELECT personnel_id, appointment_date FROM personnels") ;
                 while($pDA_row=$pDataAge_query->fetch()){
                     
                     if(substr($pDA_row['appointment_date'], 6) < 1000){
@@ -218,7 +218,7 @@ echo "<hr />";
                       </thead>
                       <tbody>
                       <?php
-                      $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, appointment_date, num_of_yrs FROM personnels WHERE num_of_yrs BETWEEN '$ageFrom' AND '$ageTo' ORDER BY lname, fname ASC") or die(mysql_error());
+                      $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, appointment_date, num_of_yrs FROM personnels WHERE num_of_yrs BETWEEN '$ageFrom' AND '$ageTo' ORDER BY lname, fname ASC") ;
                       
                       while($printDA_row=$printDataAge_query->fetch()){ ?>
                       

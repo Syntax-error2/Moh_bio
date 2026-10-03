@@ -41,7 +41,7 @@ include('header_print.php');
                           <tbody>
                           
                           <?php
-                          $printEmpStat_query = $conn->query("SELECT empStat_id, emp_stat_name FROM emp_status WHERE status='Active'") or die(mysql_error());
+                          $printEmpStat_query = $conn->query("SELECT empStat_id, emp_stat_name FROM emp_status WHERE status='Active'") ;
                           while ($printES_row=$printEmpStat_query->fetch())
                           { ?>
                          
@@ -55,11 +55,11 @@ include('header_print.php');
                             $finalExManLevelCtr=0;
                             $finalThirdLevelCtr=0;
                             
-                            $empStatCtr_query = $conn->query("SELECT gass_id FROM personnels WHERE empStat_id='$printES_row[empStat_id]' AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')") or die(mysql_error());
+                            $empStatCtr_query = $conn->query("SELECT gass_id FROM personnels WHERE empStat_id='$printES_row[empStat_id]' AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')") ;
                             while($lvlCtr_row=$empStatCtr_query->fetch()){
                                 
                                 
-                                    $LevelCtr_query = $conn->query("SELECT level FROM gass WHERE gass_id='$lvlCtr_row[gass_id]'") or die(mysql_error());
+                                    $LevelCtr_query = $conn->query("SELECT level FROM gass WHERE gass_id='$lvlCtr_row[gass_id]'") ;
                                     $levelCtr_row=$LevelCtr_query->fetch();
                                    
                                     if ($levelCtr_row) {

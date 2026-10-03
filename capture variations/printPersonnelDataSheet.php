@@ -75,7 +75,7 @@ function myFunction() {
 <hr />
 
 <?php
-$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$personnel_id'") or die(mysql_error());
+$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$personnel_id'") ;
 $studData_row=$studData_query->fetch();
 
 ?>

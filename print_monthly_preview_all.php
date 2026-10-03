@@ -120,7 +120,11 @@ include('session.php');
 include('header_print.php');
 
 ?>
-
+<style>
+@media print {
+    .pb {page-break-after: always;}
+}
+</style>
 <body>
  
 
@@ -138,7 +142,6 @@ $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pr
 $studData_row=$studData_query->fetch();
 
 ?>
-
 <table style="width: 100%;">
 
   <tr style="font-size: large;" style="border: none;">
@@ -147,16 +150,16 @@ $studData_row=$studData_query->fetch();
     <td style="width: 40%; border: none;" colspan="2">
     <small>Employment Status</small><br />
     <strong><?php
-    $emp_stat_query = $conn->query("SELECT * from emp_status WHERE empStat_id='$studData_row[empStat_id]'");
+    $emp_stat_query = $conn->query("select * from emp_status WHERE empStat_id='$studData_row[empStat_id]'");
     $es_row=$emp_stat_query->fetch();
-    echo strtoupper($es_row ? $es_row['emp_stat_name'] : '');?></strong>
+    echo strtoupper($es_row['emp_stat_name']);?></strong>
     
     </td>
     
     <td style="width: 40%; border: none;" colspan="2">
     <small>Department / Office</small><br />
-    <strong><?php
-    $emp_stat_query = $conn->query("SELECT * from dept_offices WHERE do_id='$studData_row[do_id]'");
+    <strong style="font-size: small;"><?php
+    $emp_stat_query = $conn->query("select * from dept_offices WHERE do_id='$studData_row[do_id]'");
     $es_row=$emp_stat_query->fetch();
     echo strtoupper($es_row['dept_office_name']); ?></strong> 
     
@@ -209,12 +212,13 @@ $studData_row=$studData_query->fetch();
     
     <td style="width:8%;"><center><strong>DATE</strong></center></td>
     
-    <td style="width:18%;"><center><strong>AM IN</strong></center></td>
-    <td style="width:18%;"><center><strong>AM OUT</strong></center></td>
-    <td style="width:18%;"><center><strong>PM IN</strong></center></td>
-    <td style="width:18%;"><center><strong>PM OUT</strong></center></td>
+    <td style="width:15%;"><center><strong>AM IN</strong></center></td>
+    <td style="width:15%;"><center><strong>AM OUT</strong></center></td>
+    <td style="width:15%;"><center><strong>PM IN</strong></center></td>
+    <td style="width:15%;"><center><strong>PM OUT</strong></center></td>
     <td style="width:10%;"><center><strong>TARDINESS</strong></center></td>
     <td style="width:10%;"><center><strong>UNDERTIME</strong></center></td>
+    <td style="width:12%;"><center><strong>OVERTIME</strong></center></td>
   </tr>
  
 <?php
@@ -235,26 +239,125 @@ $studData_row=$studData_query->fetch();
     
     $leaveCtr=0;
     
+    $grandTotalamLateMin = 0;
+    $grandTotalpmLateMin = 0;
+    $grandTotalamUTimeMin = 0;
+    $grandTotalpmUTimeMin = 0;
+    $grandTotalLateMin = 0;
+    $grandTotalUTimeMin = 0;
+    $grandTotalOvertimeMin = 0;
+    
+    // --- BULK FETCH OPTIMIZATION ---
+    // Fetch all logs for the month
+    $startDate = sprintf("%04d-%02d-01", $selectedYYYY, $selectedMM);
+    $endDate = sprintf("%04d-%02d-%02d", $selectedYYYY, $selectedMM, $MMmaxDay - 1);
+    
+    $allBioLogs = [];
+    if (!empty($studData_row['biometric_id'])) {
+        $bio_stmt = $conn->prepare("SELECT log_date, time_in, time_out FROM bio_dtr WHERE personnel_id = ? AND log_date BETWEEN ? AND ? ORDER BY time_in ASC");
+        $bio_stmt->execute([$studData_row['personnel_id'], $startDate, $endDate]);
+        while ($r = $bio_stmt->fetch(PDO::FETCH_ASSOC)) {
+            $allBioLogs[$r['log_date']][] = $r;
+        }
+    }
+    
+    // Fetch schedule
+    $allSchedules = [];
+    $sched_stmt = $conn->prepare("SELECT * FROM time_schedules WHERE do_id = ? AND shift_id = ?");
+    $sched_stmt->execute([$studData_row['do_id'], $studData_row['shift_id']]);
+    while ($r = $sched_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $allSchedules[$r['day']] = $r;
+    }
+    
+    // Fetch activity calendar
+    $allHolidays = [];
+    $hol_stmt = $conn->prepare("SELECT completeDate, event_title, status FROM activity_calendar WHERE completeDate BETWEEN ? AND ?");
+    $hol_stmt->execute([$startDate, $endDate]);
+    while ($r = $hol_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $allHolidays[$r['completeDate']][] = $r;
+    }
+    
+    // Fetch approved leaves
+        // Fetch approved overtime requests
+    $allOvertime = [];
+    $startDateDB = $startDate;
+    $endDateDB = $endDate;
+    $ot_stmt = $conn->prepare("SELECT ot_date FROM personnel_overtime_requests WHERE personnel_id = ? AND ot_date BETWEEN ? AND ?");
+    $ot_stmt->execute([$studData_row['personnel_id'], $startDateDB, $endDateDB]);
+    while ($r = $ot_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $formattedDate = date('m/d/Y', strtotime($r['ot_date']));
+        $allOvertime[$formattedDate] = true;
+    }
+    
+    $allLeaves = [];
+    $leave_stmt = $conn->prepare("SELECT logDate, remarks FROM personnel_logs WHERE RFTag_id = ? AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ? AND (remarks='Vacation Leave' OR remarks='Sick Leave' OR travel_leave_code != '')");
+    $leave_stmt->execute([$studData_row['RFTag_id'], $startDate, $endDate]);
+    while ($r = $leave_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $allLeaves[$r['logDate']] = $r['remarks'];
+    }
+    // Fetch personnel_logs
+    $allPersonnelLogs = [];
+    $p_stmt = $conn->prepare("SELECT logFlow, logTime, late_status, logDate FROM personnel_logs WHERE RFTag_id = ? AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ?");
+    $p_stmt->execute([$studData_row['RFTag_id'], $startDate, $endDate]);
+    while ($r = $p_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $allPersonnelLogs[$r['logDate']][$r['logFlow']] = $r;
+    }
+    // -------------------------------
     
     for($d=1; $d<$MMmaxDay; $d++){
         
         $dailyLate=0;
         $dailyUTime=0;
-        if($d<10){
-        $logDateCtr=$selectedMM.'/0'.$d.'/'.$selectedYYYY;
-        }else{
-        $logDateCtr=$selectedMM.'/'.$d.'/'.$selectedYYYY;
+        $dailyOvertime=0;
+        $dayPad = str_pad($d, 2, '0', STR_PAD_LEFT);
+        $logDateCtr = $selectedYYYY . '-' . $selectedMM . '-' . $dayPad;
+        $displayDateCtr = $selectedMM . '/' . $dayPad . '/' . substr($selectedYYYY, 2, 2);
+        
+        $is_biometric = !empty($studData_row['biometric_id']);
+        $bio_am_in = false;
+        $bio_am_out = false;
+        $bio_pm_in = false;
+        $bio_pm_out = false;
+        
+        if ($is_biometric) {
+            $bio_logs = $allBioLogs[$logDateCtr] ?? [];
+            
+            foreach($bio_logs as $log) {
+                if (!empty($log['time_in']) && $log['time_in'] != '00:00:00') {
+                    if ($log['time_in'] < '12:00:00' && !$bio_am_in) {
+                        $bio_am_in = ['logTime' => $log['time_in'], 'late_status' => 'on'];
+                    } else if ($log['time_in'] >= '12:00:00' && !$bio_pm_in) {
+                        $bio_pm_in = ['logTime' => $log['time_in'], 'late_status' => 'on'];
+                    }
+                }
+                if (!empty($log['time_out']) && $log['time_out'] != '00:00:00') {
+                    if ($log['time_out'] < '13:00:00' && !$bio_am_out) {
+                        $bio_am_out = ['logTime' => $log['time_out'], 'late_status' => 'on'];
+                    } else if ($log['time_out'] >= '13:00:00' && !$bio_pm_out) {
+                        $bio_pm_out = ['logTime' => $log['time_out'], 'late_status' => 'on'];
+                    }
+                }
+            }
         }
  
     ?>
     
   <tr>
- 
-    
-    <?php
-  $SC_query3 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
-      
-      if($SC_query3->rowCount()>0){
+  
+  <?php
+  $isWorkingDayHoliday = false;
+  $sc_row3 = null;
+  if (isset($allHolidays[$logDateCtr])) {
+      foreach ($allHolidays[$logDateCtr] as $hol) {
+          if ($hol['status'] == 'Add as working day') {
+              $isWorkingDayHoliday = true;
+              $sc_row3 = $hol;
+              break;
+          }
+      }
+  }
+  
+  if ($isWorkingDayHoliday) {
       
   ?>
   <td rowspan="2">
@@ -263,7 +366,7 @@ $studData_row=$studData_query->fetch();
     $timestamp = strtotime($logDateCtr);
     $dayName=date('l', $timestamp);
     $dayName2=substr($dayName, 0,3);
-    echo substr($logDateCtr, 0, 6).substr($logDateCtr, 8, 2)." <sup>".$dayName2."</sup>";
+    echo $displayDateCtr." <sup>".$dayName2."</sup>";
     
     ?>
     </td>
@@ -274,7 +377,7 @@ $studData_row=$studData_query->fetch();
     $timestamp = strtotime($logDateCtr);
     $dayName=date('l', $timestamp);
     $dayName2=substr($dayName, 0,3);
-    echo substr($logDateCtr, 0, 6).substr($logDateCtr, 8, 2)." <sup>".$dayName2."</sup>";
+    echo $displayDateCtr." <sup>".$dayName2."</sup>";
     
     ?>
     </td>
@@ -284,31 +387,44 @@ $studData_row=$studData_query->fetch();
     
     
     <?php
-    
-    $studLogs_remarks_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logDate='$logDateCtr' AND (remarks!='' AND remarks!='Updated' AND remarks!='Inserted')");
-    if($studLogs_remarks_query->rowCount()>0){ 
-    $SRQ_row=$studLogs_remarks_query->fetch();
+    $hasLeave = isset($allLeaves[$logDateCtr]);
+    if($hasLeave){ 
+    $leaveRemarks = $allLeaves[$logDateCtr];
     $leaveCtr=$leaveCtr+1;
     
     ?> 
-    <td colspan="7" style="background-color: #b8ffd9;"><center><strong><?php echo $SRQ_row['remarks']; ?></strong></center></td>
+    <td colspan="7" style="background-color: #b8ffd9;"><center><strong><?php echo $leaveRemarks; ?></strong></center></td>
      
       <?php }else{
-        
-    $studLogs_sat_query = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logDate='$logDateCtr'");
-    if($studLogs_sat_query->rowCount()==0 AND ($dayName2=='Sat' OR $dayName2=='Sun')){ ?> 
+    $hasAnyLogs = false;
+    if ($is_biometric) {
+        $hasAnyLogs = !empty($allPersonnelLogs[$logDateCtr]) || !empty($bio_am_in) || !empty($bio_am_out) || !empty($bio_pm_in) || !empty($bio_pm_out);
+    } else {
+        $hasAnyLogs = !empty($allPersonnelLogs[$logDateCtr]);
+    }
+    
+    if(!$hasAnyLogs AND ($dayName2=='Sat' OR $dayName2=='Sun')){ ?> 
     
     <td colspan="6" style="background-color: #ececec;"><center><strong><?php if($dayName2=='Sat'){ echo "S A T U R D A Y"; } if($dayName2=='Sun'){ echo "S U N D A Y"; } ?></strong></center></td>
      
       <?php }else{
      
-      $SC_query = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status!='Display to DTR'");
+      $isRegularHoliday = false;
+      $sc_row = null;
+      if (isset($allHolidays[$logDateCtr])) {
+          foreach ($allHolidays[$logDateCtr] as $hol) {
+              if ($hol['status'] != 'Add as working day') {
+                  $isRegularHoliday = true;
+                  $sc_row = $hol;
+                  break;
+              }
+          }
+      }
       
-      if($SC_query->rowCount()>0){
-      $SC_row=$SC_query->fetch();
+      if($isRegularHoliday){
       ?>
         
-      <td colspan="6" style="background-color: #ffbac5;"><center><strong><?php echo $SC_row['event_title'].'</strong> [ '.$SC_row['act_type'].' ]'; ?></strong></center></td>
+      <td colspan="6" style="background-color: #ffbac5;"><center><strong><?php echo $sc_row['event_title'].'</strong> [ '.$sc_row['status'].' ]'; ?></strong></center></td>
       
       <?php }else{ ?> 
  
@@ -317,12 +433,16 @@ $studData_row=$studData_query->fetch();
     <!-- AM IN -->
     <td>
     <?php
-    $studLogs_query_AM_IN = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='AM IN' AND logDate='$logDateCtr'");
-    $studLogs_AM_IN_row=$studLogs_query_AM_IN->fetch();
+    $studLogs_AM_IN_row = $allPersonnelLogs[$logDateCtr]['AM IN'] ?? null;
+    $has_am_in = !empty($studLogs_AM_IN_row);
+    if (!$has_am_in && $is_biometric && !empty($bio_am_in)) {
+        $studLogs_AM_IN_row = $bio_am_in;
+        $has_am_in = true;
+    }
     ?>
     
     <?php
-    if($studLogs_query_AM_IN->rowCount()>0){
+    if($has_am_in){
     
     $str_time_am_in= date("H:i:s", strtotime($studLogs_AM_IN_row['logTime']));
     $str_time_am_in = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_am_in);
@@ -335,31 +455,45 @@ $studData_row=$studData_query->fetch();
     <?php
     if($studLogs_AM_IN_row['late_status']==='on'){
         
-        $sched_query = $conn->query("SELECT am_IN_co FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
-        $sq_row=$sched_query->fetch();
+        $sq_row = $allSchedules[$dayName] ?? null;
  
-        $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN_co']));
-        $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
-        sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
-        $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $am_in_late_min=($time_seconds_time_am_in-$time_seconds_time_am_in_late)/60;
-        
-        $grandTotalamLateMin=$grandTotalamLateMin+$am_in_late_min;
-        
-        $amLateCtr=$amLateCtr+1;
-        $amPresentCtr=$amPresentCtr+1;
-        
-        $dailyLate=$dailyLate+$am_in_late_min;
-        ?>
-        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo $studLogs_AM_IN_row['logTime']; ?> ]</p>
+        if ($sq_row && !empty($sq_row['am_IN'])) {
+            $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+            $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
+            sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
+            $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
+            
+            $am_in_late_min=($time_seconds_time_am_in-$time_seconds_time_am_in_late)/60;
+            
+            if ($am_in_late_min <= 15) {
+                $dailyLate=$dailyLate+0;
+                $amPresentCtr=$amPresentCtr+1;
+                ?>
+                <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
+                <?php
+            } else {
+                $grandTotalamLateMin=$grandTotalamLateMin+$am_in_late_min;
+                
+                $amLateCtr=$amLateCtr+1;
+                $amPresentCtr=$amPresentCtr+1;
+                
+                $dailyLate=$dailyLate+$am_in_late_min;
+                ?>
+                <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
+            <?php } ?>
+        <?php } else {
+            $dailyLate=$dailyLate+0;
+            $amPresentCtr=$amPresentCtr+1;
+            ?>
+            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
+        <?php } ?>
     <?php }else{ 
         
         $dailyLate=$dailyLate+0;
         $amPresentCtr=$amPresentCtr+1;
         
         ?>
-        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo $studLogs_AM_IN_row['logTime']; ?> ]</p>
+        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
     <?php } ?>
 
     <!-- time in seconds AM_IN -->
@@ -384,12 +518,16 @@ $studData_row=$studData_query->fetch();
     <!-- AM OUT -->
     <td>
     <?php
-    $studLogs_query_AM_OUT = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='AM OUT' AND logDate='$logDateCtr'");
-    $studLogs_AM_OUT_row=$studLogs_query_AM_OUT->fetch();
+    $studLogs_AM_OUT_row = $allPersonnelLogs[$logDateCtr]['AM OUT'] ?? null;
+    $has_am_out = !empty($studLogs_AM_OUT_row);
+    if (!$has_am_out && $is_biometric && !empty($bio_am_out)) {
+        $studLogs_AM_OUT_row = $bio_am_out;
+        $has_am_out = true;
+    }
     ?>
     
     <?php
-    if($studLogs_query_AM_OUT->rowCount()>0){ 
+    if($has_am_out){ 
         
     $str_time_am_out= date("H:i:s", strtotime($studLogs_AM_OUT_row['logTime']));
     $str_time_am_out = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_am_out);
@@ -401,29 +539,34 @@ $studData_row=$studData_query->fetch();
     <?php
     if($studLogs_AM_OUT_row['late_status']==='on'){
         
-        $sched_query = $conn->query("SELECT am_OUT FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
-        $sq_row=$sched_query->fetch();
+        $sq_row = $allSchedules[$dayName] ?? null;
         
-        $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
-        $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
-        sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
-        $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $am_out_utime_min=($time_seconds_time_am_out_utime-$time_seconds_time_am_out)/60;
-        
-        $grandTotalamUTimeMin=$grandTotalamUTimeMin+$am_out_utime_min;
-        
-        $amUTimeCtr=$amUTimeCtr+1;
-        
-        $dailyUTime=$dailyUTime+$am_out_utime_min;
+        if ($sq_row && !empty($sq_row['am_OUT'])) {
+            $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+            $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
+            sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
+            $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
             
-    ?>
-        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo $studLogs_AM_OUT_row['logTime']; ?> ]</p>
+            $am_out_utime_min=($time_seconds_time_am_out_utime-$time_seconds_time_am_out)/60;
+            
+            $grandTotalamUTimeMin=$grandTotalamUTimeMin+$am_out_utime_min;
+            
+            $amUTimeCtr=$amUTimeCtr+1;
+            
+            $dailyUTime=$dailyUTime+$am_out_utime_min;
+                
+        ?>
+            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
+        <?php } else {
+            $dailyUTime=$dailyUTime+0;
+        ?>
+            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
+        <?php } ?>
     <?php }else{
         
         $dailyUTime=$dailyUTime+0; ?>
         
-        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo $studLogs_AM_OUT_row['logTime']; ?> ]</p>
+        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
     
     <?php } ?>
 
@@ -432,9 +575,14 @@ $studData_row=$studData_query->fetch();
     
     <?php }else{ $time_seconds_time_am_out=0; 
     
-    $studLogs_query_PM_OUT_chk = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM OUT' AND logDate='$logDateCtr'");
+    $chk_has_pm_out = false;
+    if ($is_biometric) {
+        $chk_has_pm_out = !empty($bio_pm_out);
+    } else {
+        $chk_has_pm_out = isset($allPersonnelLogs[$logDateCtr]['PM OUT']);
+    }
     
-    if($studLogs_query_PM_OUT_chk->rowCount()>0 AND $studLogs_query_AM_IN->rowCount()>0){ }else{ ?>
+    if($chk_has_pm_out AND $has_am_in){ }else{ ?>
     
     <p style="margin: 0px;">--:--</p>   
     
@@ -447,12 +595,16 @@ $studData_row=$studData_query->fetch();
     <!-- PM IN -->
     <td>
     <?php
-    $studLogs_query_PM_IN = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM IN' AND logDate='$logDateCtr'");
-    $studLogs_PM_IN_row=$studLogs_query_PM_IN->fetch();
+    $studLogs_PM_IN_row = $allPersonnelLogs[$logDateCtr]['PM IN'] ?? null;
+    $has_pm_in = !empty($studLogs_PM_IN_row);
+    if (!$has_pm_in && $is_biometric && !empty($bio_pm_in)) {
+        $studLogs_PM_IN_row = $bio_pm_in;
+        $has_pm_in = true;
+    }
     ?>
     
     <?php
-    if($studLogs_query_PM_IN->rowCount()>0){ ?>
+    if($has_pm_in){ ?>
     
     <!-- time in seconds PM_IN -->
     <?php
@@ -467,40 +619,58 @@ $studData_row=$studData_query->fetch();
     <?php
     if($studLogs_PM_IN_row['late_status']==='on'){
         
-        $sched_query = $conn->query("SELECT pm_IN_co FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
-        $sq_row=$sched_query->fetch();
+        $sq_row = $allSchedules[$dayName] ?? null;
  
-        $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN_co']));
-        $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
-        sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
-        $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $pm_in_late_min=($time_seconds_time_pm_in-$time_seconds_time_pm_in_late)/60;
-        
-        $grandTotalpmLateMin=$grandTotalpmLateMin+$pm_in_late_min;
-        
-        $pmLateCtr=$pmLateCtr+1;
-        $pmPresentCtr=$pmPresentCtr+1;
-        
-        
-        $dailyLate=$dailyLate+$pm_in_late_min;
-        ?>
-        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo $studLogs_PM_IN_row['logTime']; ?> ]</p>
+        if ($sq_row && !empty($sq_row['pm_IN'])) {
+            $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+            $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
+            sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
+            $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
+            
+            $pm_in_late_min=($time_seconds_time_pm_in-$time_seconds_time_pm_in_late)/60;
+            
+            if ($pm_in_late_min <= 15) {
+                $dailyLate=$dailyLate+0;
+                $pmPresentCtr=$pmPresentCtr+1;
+                ?>
+                <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
+                <?php
+            } else {
+                $grandTotalpmLateMin=$grandTotalpmLateMin+$pm_in_late_min;
+                
+                $pmLateCtr=$pmLateCtr+1;
+                $pmPresentCtr=$pmPresentCtr+1;
+                
+                $dailyLate=$dailyLate+$pm_in_late_min;
+                ?>
+                <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
+            <?php } ?>
+        <?php } else {
+            $dailyLate=$dailyLate+0;
+            $pmPresentCtr=$pmPresentCtr+1;
+            ?>
+            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
+        <?php } ?>
     <?php }else{ 
         $dailyLate=$dailyLate+0;
         $pmPresentCtr=$pmPresentCtr+1;
         
         ?>
-        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo $studLogs_PM_IN_row['logTime']; ?> ]</p>
+        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
     <?php } ?>
  
     <?php }else{ $time_seconds_time_pm_in=0; ?>
     
     <?php
     
-    $studLogs_query_PM_OUT_chk = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM OUT' AND logDate='$logDateCtr'");
+    $chk_has_pm_out = false;
+    if ($is_biometric) {
+        $chk_has_pm_out = !empty($bio_pm_out);
+    } else {
+        $chk_has_pm_out = isset($allPersonnelLogs[$logDateCtr]['PM OUT']);
+    }
     
-    if($studLogs_query_PM_OUT_chk->rowCount()>0 AND $studLogs_query_AM_IN->rowCount()>0){ $pmPresentCtr=$pmPresentCtr+1; }else{ 
+    if($chk_has_pm_out AND $has_am_in){ $pmPresentCtr=$pmPresentCtr+1; }else{ 
         
         $pmAbsentCtr=$pmAbsentCtr+1;
         
@@ -516,44 +686,73 @@ $studData_row=$studData_query->fetch();
     <!-- PM OUT -->
     <td>
     <?php
-    $studLogs_query_PM_OUT = $conn->query("SELECT * FROM personnel_logs WHERE RFTag_id='$RFTag_id' AND logFlow='PM OUT' AND logDate='$logDateCtr'");
-    $studLogs_PM_OUT_row=$studLogs_query_PM_OUT->fetch();
+    $studLogs_PM_OUT_row = $allPersonnelLogs[$logDateCtr]['PM OUT'] ?? null;
+    $has_pm_out = !empty($studLogs_PM_OUT_row);
+    if (!$has_pm_out && $is_biometric && !empty($bio_pm_out)) {
+        $studLogs_PM_OUT_row = $bio_pm_out;
+        $has_pm_out = true;
+    }
     ?>
     
     <?php
-    if($studLogs_query_PM_OUT->rowCount()>0){ 
+    if($has_pm_out){ 
     
     $str_time_pm_out= date("H:i:s", strtotime($studLogs_PM_OUT_row['logTime']));
     $str_time_pm_out = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_pm_out);
     sscanf($str_time_pm_out, "%d:%d:%d", $hours, $minutes, $seconds);
     $time_seconds_time_pm_out = ($hours * 3600) + $minutes * 60 + $seconds;
-     
-    if($studLogs_PM_OUT_row['late_status']=="on"){
-        
-        $sched_query = $conn->query("SELECT pm_OUT FROM time_schedules WHERE school_id='$school_id' AND do_id='$studData_row[do_id]' AND shift_id='$studData_row[shift_id]' AND day='$dayName'");
-        $sq_row=$sched_query->fetch();
-        
+    
+    // Always fetch schedule to calculate Overtime even if not 'on' for undertime
+    $sq_row = $allSchedules[$dayName] ?? null;
+    
+    if ($sq_row && !empty($sq_row['pm_OUT'])) {
         $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
         $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
         sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $pm_out_utime_min=($time_seconds_time_pm_out_utime-$time_seconds_time_pm_out)/60;
-        
-        $grandTotalpmUTimeMin=$grandTotalpmUTimeMin+$pm_out_utime_min;
-        
-        $pmUTimeCtr=$pmUTimeCtr+1;
-        
-        $dailyUTime=$dailyUTime+$pm_out_utime_min;
-            
-    ?>
-        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo $studLogs_PM_OUT_row['logTime']; ?> ]</p>
-    <?php }else{
-        
-    $dailyUTime=$dailyUTime+0;
+    } else {
+        $time_seconds_time_pm_out_utime = 0;
+    }
     
+    // Check for Overtime
+        $overtime_sec = 0; 
+        $checkDate = date('m/d/Y', strtotime($logDateCtr));
+    if (isset($allOvertime[$checkDate])) {
+        if ($is_biometric && !empty($bio_logs)) {
+            foreach($bio_logs as $log) {
+                if (!empty($log['time_in']) && !empty($log['time_out'])) {
+                    sscanf($log['time_in'], "%d:%d:%d", $h, $m, $s);
+                    $segment_in_sec = ($h * 3600) + ($m * 60) + $s;
+                    
+                    sscanf($log['time_out'], "%d:%d:%d", $h, $m, $s);
+                    $segment_out_sec = ($h * 3600) + ($m * 60) + $s;
+                    
+                    if ($segment_out_sec > $time_seconds_time_pm_out_utime) {
+                        $start = max($segment_in_sec, $time_seconds_time_pm_out_utime);
+                        $overtime_sec += ($segment_out_sec - $start);
+                    }
+                }
+            }
+        } else {
+            $overtime_sec = $time_seconds_time_pm_out - $time_seconds_time_pm_out_utime;
+        }
+    }
+    if ($overtime_sec > 0) {
+        $dailyOvertime = $overtime_sec / 60;
+        $grandTotalOvertimeMin = (isset($grandTotalOvertimeMin) ? $grandTotalOvertimeMin : 0) + $dailyOvertime;
+    }
+     
+    if($studLogs_PM_OUT_row['late_status']=="on"){
+        $pm_out_utime_min=($time_seconds_time_pm_out_utime-$time_seconds_time_pm_out)/60;
+        $grandTotalpmUTimeMin=$grandTotalpmUTimeMin+$pm_out_utime_min;
+        $pmUTimeCtr=$pmUTimeCtr+1;
+        $dailyUTime=$dailyUTime+$pm_out_utime_min;
     ?>
-        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo $studLogs_PM_OUT_row['logTime']; ?> ]</p>
+        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_PM_OUT_row['logTime'])); ?> ]</p>
+    <?php }else{
+        $dailyUTime=$dailyUTime+0;
+    ?>
+        <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_OUT_row['logTime'])); ?> ]</p>
     <?php } ?>
     
     
@@ -568,14 +767,14 @@ $studData_row=$studData_query->fetch();
     
     
     <?php
-    $SC_query3 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
+    $SC_query3 = $conn->query("SELECT activity_id FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Add as working day'");
     if($SC_query3->rowCount()>0){
         
     ?>
     <!-- Late -->
     <td rowspan="2">
     
-    <?php echo $dailyLate.' minute(s)'; ?>
+    <?php echo round($dailyLate).' minute(s)'; ?>
 
     </td>
     <!-- end Late -->
@@ -583,14 +782,14 @@ $studData_row=$studData_query->fetch();
     
     <!-- Undertime -->
     <td rowspan="2">
-    <?php echo $dailyUTime.' minute(s)'; ?>
+    <?php echo round($dailyUTime).' minute(s)'; ?>
     </td>
     <!-- end Undertime -->
   <?php }else{?>
     <!-- Late -->
     <td>
     
-    <?php echo $dailyLate.' minute(s)'; ?>
+    <?php echo round($dailyLate).' minute(s)'; ?>
 
     </td>
     <!-- end Late -->
@@ -598,31 +797,32 @@ $studData_row=$studData_query->fetch();
     
     <!-- Undertime -->
     <td>
-    <?php echo $dailyUTime.' minute(s)'; ?>
+    <?php echo round($dailyUTime).' minute(s)'; ?>
     </td>
     <!-- end Undertime -->
+    
+    <!-- Overtime -->
+    <td>
+    <?php echo (isset($dailyOvertime) ? $dailyOvertime : 0) .' minute(s)'; ?>
+    </td>
+    <!-- end Overtime -->
   <?php } ?>
   
     
     <?php } } } ?>
     
   <?php
-  $SC_query4 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
-      
-      if($SC_query4->rowCount()>0){
-     
-  ?>
-    
- 
-  <?php }else{ ?>
+  $SC_query4 = $conn->query("select * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Add as working day'");
   
-   
+  if($SC_query4->rowCount()>0){ ?>
+  
+  <?php }else{ ?>
   
   <?php } ?>
   </tr>
   
   <?php
-  $SC_query2 = $conn->query("SELECT * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Display to DTR'");
+  $SC_query2 = $conn->query("select * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Add as working day'");
       
       if($SC_query2->rowCount()>0){
       $SC_row2=$SC_query2->fetch();
@@ -637,45 +837,40 @@ $studData_row=$studData_query->fetch();
 
 
 <?php
-
-$grandTotalLateMin=$grandTotalamLateMin+$grandTotalpmLateMin;
-$final_lateHr=$grandTotalLateMin/60;
-$final_lateHr=substr($grandTotalLateMin/60, 0,1);
-
-$final_lateMin=substr($grandTotalLateMin/60, 1)/100*60;
-$final_lateMin=number_format($final_lateMin, 2, '.', '');
-
-$final_lateMin=substr($final_lateMin, 2);
+// Suppress warnings if parts are missing, default to 0
+$amLate = isset($grandTotalamLateMin) ? (float)$grandTotalamLateMin : 0;
+$pmLate = isset($grandTotalpmLateMin) ? (float)$grandTotalpmLateMin : 0;
+$grandTotalLateMin = $amLate + $pmLate;
+$final_lateHr = floor($grandTotalLateMin / 60);
+$final_lateMin = $grandTotalLateMin % 60;
  
 
 
-$grandTotalUTimeMin=$grandTotalamUTimeMin+$grandTotalpmUTimeMin;
-$final_uTimeHr=$grandTotalUTimeMin/60;
-$final_uTimeHr=substr($grandTotalUTimeMin/60, 0,1);
-
-$final_uTimeMin=substr($grandTotalUTimeMin/60, 1)/100*60;
-$final_uTimeMin=number_format($final_uTimeMin, 2, '.', '');
-$final_uTimeMin=substr($final_uTimeMin, 2);
+$amUTime = isset($grandTotalamUTimeMin) ? (float)$grandTotalamUTimeMin : 0;
+$pmUTime = isset($grandTotalpmUTimeMin) ? (float)$grandTotalpmUTimeMin : 0;
+$grandTotalUTimeMin = $amUTime + $pmUTime;
+$final_uTimeHr = floor($grandTotalUTimeMin / 60);
+$final_uTimeMin = $grandTotalUTimeMin % 60;
  
 
 
 ?>
 
 
-<tr>
-<td colspan="5"><strong class="pull-right">TOTAL</strong></td>
-<td style="background-color: lightgoldenrodyellow;"><strong><?php echo $grandTotalLateMin; ?> minute(s)</strong></td>
-<td style="background-color: lightgoldenrodyellow;"><strong><?php echo $grandTotalUTimeMin; ?> minute(s)</strong></td>
-</tr>
+  <tr>
+  <td colspan="5"><strong class="pull-right">TOTAL</strong></td>
+  <td style="background-color: lightgoldenrodyellow;"><strong><?php echo round($grandTotalLateMin); ?> minute(s)</strong></td>
+  <td style="background-color: lightgoldenrodyellow;"><strong><?php echo round($grandTotalUTimeMin); ?> minute(s)</strong></td>
+  <td style="background-color: lightgoldenrodyellow;"><strong><?php echo (isset($grandTotalOvertimeMin) ? $grandTotalOvertimeMin : 0); ?> minute(s)</strong></td>
+  </tr>
+  </table>
 
 
 
 
 
-
-<tr>
-<td colspan="7">
-<table id="myTable">
+ 
+<table id="myTable" style="margin-top: 12px;">
 <thead>
 <tr>
 <th colspan="15"><center>M O N T H L Y &nbsp;&nbsp;&nbsp; S U M M A R Y</center></th>
@@ -697,23 +892,23 @@ $final_uTimeMin=substr($final_uTimeMin, 2);
 
 
 <tr>
-<td style="width: 7%;">AM</td>
-<td style="width: 7%;">PM</td>
-<td style="width: 7%;">Total</td>
+<td style="width: 7%; font-size: small;">AM</td>
+<td style="width: 7%; font-size: small;">PM</td>
+<td style="width: 7%; font-size: small;">Total</td>
 
-<td style="width: 4%;">AM</td>
-<td style="width: 4%;">PM</td>
-<td style="width: 4%;">Total #</td>
-<td style="width: 12%;">Total Time</td>
+<td style="width: 4%; font-size: small;">AM</td>
+<td style="width: 4%; font-size: small;">PM</td>
+<td style="width: 4%; font-size: small;">Total #</td>
+<td style="width: 12%; font-size: small;">Total Time</td>
 
-<td style="width: 4%;">AM</td>
-<td style="width: 4%;">PM</td>
-<td style="width: 4%;">Total #</td>
-<td style="width: 12%;">Total Time</td>
+<td style="width: 4%; font-size: small;">AM</td>
+<td style="width: 4%; font-size: small;">PM</td>
+<td style="width: 4%; font-size: small;">Total #</td>
+<td style="width: 12%; font-size: small;">Total Time</td>
 
-<td style="width: 7%;">AM</td>
-<td style="width: 7%;">PM</td>
-<td style="width: 7%;">Total</td>
+<td style="width: 7%; font-size: small;">AM</td>
+<td style="width: 7%; font-size: small;">PM</td>
+<td style="width: 7%; font-size: small;">Total</td>
 
 <td rowspan="2" style="width: 10%; font-size: 24px;"><center><strong><?php if($leaveCtr<=1){ echo $leaveCtr.' <small style="font-size: 12px;">day</small>'; }else{ echo $leaveCtr.' <small style="font-size: 12px;">day</small>'; } ?> </strong></center></td>
 </tr>
@@ -727,12 +922,12 @@ $final_uTimeMin=substr($final_uTimeMin, 2);
 <td><?php echo $amLateCtr; ?></td>
 <td><?php echo $pmLateCtr; ?></td>
 <td><?php echo ($amLateCtr+$pmLateCtr); ?></td>
-<td><?php echo  $grandTotalLateMin.' min(s) | '.$final_lateHr.':'.$final_lateMin; ?> hr(s) </td>
+<td><small><?php echo  $grandTotalLateMin.' min(s) | '.$final_lateHr.':'.$final_lateMin; ?> hr(s)</small></td>
 
 <td><?php echo $amUTimeCtr; ?></td>
 <td><?php echo $pmUTimeCtr; ?></td>
 <td><?php echo ($amUTimeCtr+$pmUTimeCtr); ?></td>
-<td><?php echo  $grandTotalUTimeMin.' min(s) | '.$final_uTimeHr.':'.$final_uTimeMin; ?> hr(s) </td>
+<td><small><?php echo  $grandTotalUTimeMin.' min(s) | '.$final_uTimeHr.':'.$final_uTimeMin; ?> hr(s)</small></td>
 
 <td><?php echo $amAbsentCtr; ?></td>
 <td><?php echo $pmAbsentCtr; ?></td>
@@ -759,22 +954,11 @@ $final_uTimeMin=substr($final_uTimeMin, 2);
  
 </tbody>
 </table>
-
-</td>
-</tr>
-</table>
-
-</td>
-</tr>
-</table>
- 
-<?php include('footer_print.php'); ?>
-
 <h1 class="pb"></h1>
+<?php
+} // end while
 
-<?php } ?>
-
+$conn=null;
+?>
 </body>
 </html>
-       
-            

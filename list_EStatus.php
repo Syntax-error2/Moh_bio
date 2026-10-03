@@ -91,7 +91,7 @@
                       
                             <?php 
                             
-                            $subjK_query = $conn->query("SELECT * FROM emp_status ORDER BY emp_stat_name ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("SELECT * FROM emp_status ORDER BY emp_stat_name ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             {  ?>
            

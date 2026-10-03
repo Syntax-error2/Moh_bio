@@ -9,7 +9,7 @@ include('session.php');
     
 $personnel_id=$_GET['personnel_id']; 
 
-    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") or die(mysql_error());
+    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'") ;
     $staff_row = $staff_query->fetch();
 
     
@@ -36,7 +36,7 @@ include('header_print.php');
 <hr />
 
 <?php
-$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$personnel_id'") or die(mysql_error());
+$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$personnel_id'") ;
 $studData_row=$studData_query->fetch();
 
 ?>
@@ -135,7 +135,7 @@ $studData_row=$studData_query->fetch();
                                 <?php
                                 $subjK_ctr=0;
                                 
-                                $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$_GET[personnel_id]' ORDER BY eb_id ASC") or die(mysql_error());
+                                $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$_GET[personnel_id]' ORDER BY eb_id ASC") ;
                                 while ($peb_row = $peb_query->fetch())
                                 {
                                     ?>

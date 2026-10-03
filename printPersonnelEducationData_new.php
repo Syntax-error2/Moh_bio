@@ -39,7 +39,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -65,7 +65,7 @@ include('header_print.php');
                                     
                                     }
                                     
-                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") or die(mysql_error());
+                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") ;
                                     $empStat_row = $empStat_query->fetch(); 
                                       
                                     echo "<br /><small>".strtoupper($empStat_row['emp_stat_name'])."</small>";
@@ -86,20 +86,20 @@ include('header_print.php');
                             <?php
                             if($degree==='ALL' AND $school_name==='ALL'){
                                 
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree!='ALL' AND $school_name==='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree==='ALL' AND $school_name!='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }
                                 
@@ -161,12 +161,12 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
                                 
-                                $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") or die(mysql_error());
+                                $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") ;
                                 $empStat_row = $empStat_query->fetch(); 
                                       
                                 echo "<br /><small>".strtoupper($empStat_row['emp_stat_name'])."</small>";
@@ -206,20 +206,20 @@ include('header_print.php');
                             <?php
                             if($degree==='ALL' AND $school_name==='ALL'){
                                 
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree!='ALL' AND $school_name==='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree==='ALL' AND $school_name!='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }
                                 
@@ -280,7 +280,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Male' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -305,7 +305,7 @@ include('header_print.php');
                                     echo $list_ctr.". ".$printDA_row['lname'].", ".$printDA_row['fname']." ".$printDA_row['suffix']." ".substr($printDA_row['mname'], 0,1);
                                     
                                     
-                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") or die(mysql_error());
+                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") ;
                                     $empStat_row = $empStat_query->fetch(); 
                                       
                                     echo "<br /><small>".strtoupper($empStat_row['emp_stat_name'])."</small>";
@@ -326,20 +326,20 @@ include('header_print.php');
                             <?php
                             if($degree==='ALL' AND $school_name==='ALL'){
                                 
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree!='ALL' AND $school_name==='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree==='ALL' AND $school_name!='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }
                                 
@@ -396,7 +396,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE sex='Female' AND ((separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ')) ORDER BY lname, fname") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -422,7 +422,7 @@ include('header_print.php');
                                     
                                     }
                                     
-                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") or die(mysql_error());
+                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") ;
                                     $empStat_row = $empStat_query->fetch(); 
                                       
                                     echo "<br /><small>".strtoupper($empStat_row['emp_stat_name'])."</small>";
@@ -443,20 +443,20 @@ include('header_print.php');
                             <?php
                             if($degree==='ALL' AND $school_name==='ALL'){
                                 
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree!='ALL' AND $school_name==='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree==='ALL' AND $school_name!='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }
                                 
@@ -515,7 +515,7 @@ include('header_print.php');
                           
                                 <?php
                                 $list_ctr=0;
-                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') ORDER BY lname, fname") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT personnel_id, lname, fname, mname, suffix, do_id, des_id, empStat_id FROM personnels WHERE (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') ORDER BY lname, fname") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 $list_ctr+=1;
@@ -541,7 +541,7 @@ include('header_print.php');
                                     
                                     }
                                     
-                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") or die(mysql_error());
+                                    $empStat_query = $conn->query("SELECT * FROM emp_status WHERE empStat_id='$printDA_row[empStat_id]'") ;
                                     $empStat_row = $empStat_query->fetch(); 
                                       
                                     echo "<br /><small>".strtoupper($empStat_row['emp_stat_name'])."</small>";
@@ -562,20 +562,20 @@ include('header_print.php');
                             <?php
                             if($degree==='ALL' AND $school_name==='ALL'){
                                 
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree!='ALL' AND $school_name==='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }elseif($degree==='ALL' AND $school_name!='ALL'){
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 
                                 }else{
                                     
-                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") or die(mysql_error());
+                                    $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$printDA_row[personnel_id]' AND degree='$degree' AND school_name='$school_name' ORDER BY year_grad, school_name, degree ASC") ;
                                 
                                 }
                                 

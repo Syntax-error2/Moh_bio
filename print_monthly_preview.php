@@ -285,14 +285,14 @@ $studData_row=$studData_query->fetch();
     }
     
     $allLeaves = [];
-    $leave_stmt = $conn->prepare("SELECT logDate, remarks FROM personnel_logs WHERE RFTag_id = ? AND logDate BETWEEN ? AND ? AND (remarks='Vacation Leave' OR remarks='Sick Leave' OR travel_leave_code != '')");
+    $leave_stmt = $conn->prepare("SELECT logDate, remarks FROM personnel_logs WHERE RFTag_id = ? AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ? AND (remarks='Vacation Leave' OR remarks='Sick Leave' OR travel_leave_code != '')");
     $leave_stmt->execute([$studData_row['RFTag_id'], $startDate, $endDate]);
     while ($r = $leave_stmt->fetch(PDO::FETCH_ASSOC)) {
         $allLeaves[$r['logDate']] = $r['remarks'];
     }
     // Fetch personnel_logs
     $allPersonnelLogs = [];
-    $p_stmt = $conn->prepare("SELECT logFlow, logTime, late_status, logDate FROM personnel_logs WHERE RFTag_id = ? AND logDate BETWEEN ? AND ?");
+    $p_stmt = $conn->prepare("SELECT logFlow, logTime, late_status, logDate FROM personnel_logs WHERE RFTag_id = ? AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ?");
     $p_stmt->execute([$studData_row['RFTag_id'], $startDate, $endDate]);
     while ($r = $p_stmt->fetch(PDO::FETCH_ASSOC)) {
         $allPersonnelLogs[$r['logDate']][$r['logFlow']] = $r;
@@ -392,9 +392,8 @@ $studData_row=$studData_query->fetch();
      
       <?php }else{
     $hasAnyLogs = false;
-    $hasAnyLogs = false;
     if ($is_biometric) {
-        $hasAnyLogs = !empty($bio_am_in) || !empty($bio_am_out) || !empty($bio_pm_in) || !empty($bio_pm_out);
+        $hasAnyLogs = !empty($allPersonnelLogs[$logDateCtr]) || !empty($bio_am_in) || !empty($bio_am_out) || !empty($bio_pm_in) || !empty($bio_pm_out);
     } else {
         $hasAnyLogs = !empty($allPersonnelLogs[$logDateCtr]);
     }
@@ -453,26 +452,33 @@ $studData_row=$studData_query->fetch();
         
         $sq_row = $allSchedules[$dayName] ?? null;
  
-        $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
-        $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
-        sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
-        $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $am_in_late_min=($time_seconds_time_am_in-$time_seconds_time_am_in_late)/60;
-        
-        if ($am_in_late_min <= 15) {
+        if ($sq_row && !empty($sq_row['am_IN'])) {
+            $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+            $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
+            sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
+            $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
+            
+            $am_in_late_min=($time_seconds_time_am_in-$time_seconds_time_am_in_late)/60;
+            
+            if ($am_in_late_min <= 15) {
+                $dailyLate=$dailyLate+0;
+                $amPresentCtr=$amPresentCtr+1;
+                ?>
+                <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
+                <?php
+            } else {
+                $grandTotalamLateMin=$grandTotalamLateMin+$am_in_late_min;
+                
+                $amLateCtr=$amLateCtr+1;
+                $amPresentCtr=$amPresentCtr+1;
+                
+                $dailyLate=$dailyLate+$am_in_late_min;
+                ?>
+                <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
+            <?php } ?>
+        <?php } else {
             $dailyLate=$dailyLate+0;
             $amPresentCtr=$amPresentCtr+1;
-            ?>
-            <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
-            <?php
-        } else {
-            $grandTotalamLateMin=$grandTotalamLateMin+$am_in_late_min;
-            
-            $amLateCtr=$amLateCtr+1;
-            $amPresentCtr=$amPresentCtr+1;
-            
-            $dailyLate=$dailyLate+$am_in_late_min;
             ?>
             <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
         <?php } ?>
@@ -530,21 +536,27 @@ $studData_row=$studData_query->fetch();
         
         $sq_row = $allSchedules[$dayName] ?? null;
         
-        $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
-        $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
-        sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
-        $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $am_out_utime_min=($time_seconds_time_am_out_utime-$time_seconds_time_am_out)/60;
-        
-        $grandTotalamUTimeMin=$grandTotalamUTimeMin+$am_out_utime_min;
-        
-        $amUTimeCtr=$amUTimeCtr+1;
-        
-        $dailyUTime=$dailyUTime+$am_out_utime_min;
+        if ($sq_row && !empty($sq_row['am_OUT'])) {
+            $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+            $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
+            sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
+            $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
             
-    ?>
-        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
+            $am_out_utime_min=($time_seconds_time_am_out_utime-$time_seconds_time_am_out)/60;
+            
+            $grandTotalamUTimeMin=$grandTotalamUTimeMin+$am_out_utime_min;
+            
+            $amUTimeCtr=$amUTimeCtr+1;
+            
+            $dailyUTime=$dailyUTime+$am_out_utime_min;
+                
+        ?>
+            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
+        <?php } else {
+            $dailyUTime=$dailyUTime+0;
+        ?>
+            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
+        <?php } ?>
     <?php }else{
         
         $dailyUTime=$dailyUTime+0; ?>
@@ -604,26 +616,33 @@ $studData_row=$studData_query->fetch();
         
         $sq_row = $allSchedules[$dayName] ?? null;
  
-        $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
-        $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
-        sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
-        $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
-        
-        $pm_in_late_min=($time_seconds_time_pm_in-$time_seconds_time_pm_in_late)/60;
-        
-        if ($pm_in_late_min <= 15) {
+        if ($sq_row && !empty($sq_row['pm_IN'])) {
+            $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+            $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
+            sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
+            $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
+            
+            $pm_in_late_min=($time_seconds_time_pm_in-$time_seconds_time_pm_in_late)/60;
+            
+            if ($pm_in_late_min <= 15) {
+                $dailyLate=$dailyLate+0;
+                $pmPresentCtr=$pmPresentCtr+1;
+                ?>
+                <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
+                <?php
+            } else {
+                $grandTotalpmLateMin=$grandTotalpmLateMin+$pm_in_late_min;
+                
+                $pmLateCtr=$pmLateCtr+1;
+                $pmPresentCtr=$pmPresentCtr+1;
+                
+                $dailyLate=$dailyLate+$pm_in_late_min;
+                ?>
+                <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
+            <?php } ?>
+        <?php } else {
             $dailyLate=$dailyLate+0;
             $pmPresentCtr=$pmPresentCtr+1;
-            ?>
-            <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
-            <?php
-        } else {
-            $grandTotalpmLateMin=$grandTotalpmLateMin+$pm_in_late_min;
-            
-            $pmLateCtr=$pmLateCtr+1;
-            $pmPresentCtr=$pmPresentCtr+1;
-            
-            $dailyLate=$dailyLate+$pm_in_late_min;
             ?>
             <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
         <?php } ?>
@@ -681,10 +700,14 @@ $studData_row=$studData_query->fetch();
     // Always fetch schedule to calculate Overtime even if not 'on' for undertime
     $sq_row = $allSchedules[$dayName] ?? null;
     
-    $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
-    $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
-    sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
-    $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
+    if ($sq_row && !empty($sq_row['pm_OUT'])) {
+        $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+        $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
+        sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
+        $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
+    } else {
+        $time_seconds_time_pm_out_utime = 0;
+    }
     
     // Check for Overtime
         $overtime_sec = 0; 

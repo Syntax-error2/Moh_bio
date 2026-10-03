@@ -85,7 +85,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("select * FROM slides ORDER BY slide_id ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("select * FROM slides ORDER BY slide_id ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             { 
                                 

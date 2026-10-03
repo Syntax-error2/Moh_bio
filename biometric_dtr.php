@@ -430,7 +430,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     if(logData.status == 'success') {
                                         $('#overlayImg').attr('src', logData.img);
                                         $('#overlayName').text(logData.name);
-                                        $('#overlayType').text(logData.logFlow);
+                                        $('#overlayType').text(logData.logFlow + " - " + logData.time);
                                         
                                         if(logData.logFlow.indexOf('IN') !== -1) {
                                             $('#overlayType').removeClass('bg-danger').addClass('bg-success');

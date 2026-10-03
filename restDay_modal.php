@@ -169,7 +169,7 @@
                               </div>
                                 
                                 <?php
-                                $restDay_query = $conn->query("SELECT log_id, logDate FROM personnel_logs WHERE RFTag_id='$staff_row[RFTag_id]' AND remarks='REST DAY' ORDER BY log_id DESC") or die(mysql_error());
+                                $restDay_query = $conn->query("SELECT log_id, logDate FROM personnel_logs WHERE RFTag_id='$staff_row[RFTag_id]' AND remarks='REST DAY' ORDER BY log_id DESC") ;
                                 
                                 if($restDay_query->rowCount()>0){
                                 ?>
@@ -218,7 +218,7 @@
                                 
                                 <?php
                                          
-                                $restDay_query = $conn->query("SELECT log_id, logDate FROM personnel_logs WHERE RFTag_id='$staff_row[RFTag_id]' AND remarks='REST DAY' ORDER BY log_id DESC") or die(mysql_error());
+                                $restDay_query = $conn->query("SELECT log_id, logDate FROM personnel_logs WHERE RFTag_id='$staff_row[RFTag_id]' AND remarks='REST DAY' ORDER BY log_id DESC") ;
                                 while ($rd_row = $restDay_query->fetch()) 
                                 {  ?>
                               <!-- delete Class Modal -->

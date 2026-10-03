@@ -145,7 +145,7 @@ include('header_print.php');
                           while($pi_row = $pi_query->fetch())
                           {
                           
-                          $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'") or die(mysql_error());
+                          $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'") ;
                           $sd_row=$studData_query->fetch();
                           
                           echo '<li>';

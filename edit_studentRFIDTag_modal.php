@@ -78,7 +78,7 @@
       
                 <?php
                 
-                $updRFIDTag_query = $conn->query("select * FROM personnels WHERE personnel_id='$personnel_id'") or die(mysql_error());
+                $updRFIDTag_query = $conn->query("select * FROM personnels WHERE personnel_id='$personnel_id'") ;
                 $urt_row=$updRFIDTag_query->fetch();
                 
                 ?>

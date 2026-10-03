@@ -3,7 +3,6 @@
                     <div role="document" class="modal-dialog">
                       <div class="modal-content">
                       <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
-                      <input name="class_id" value="<?php echo $staff_row['class_id']; ?>" type="hidden" />
                       <input name="RFTag_id" value="<?php echo $staff_row['RFTag_id']; ?>" type="hidden" />
                         <div class="modal-header">
                           <h5 id="exampleModalLabel" class="modal-title">Monthly DTR Notes - <?php echo $staff_row['fname']." ".$staff_row['mname']." ".$staff_row['lname']; ?></h5>

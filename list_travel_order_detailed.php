@@ -66,7 +66,7 @@
       
             <?php
             
-            $opt_query = $conn->query("SELECT DISTINCT travel_date FROM personnel_official_travel_logs ORDER BY travel_date DESC") or die(mysql_error());
+            $opt_query = $conn->query("SELECT DISTINCT travel_date FROM personnel_official_travel_logs ORDER BY travel_date DESC") ;
  
             ?>
             
@@ -166,7 +166,7 @@
                           <tr>
                           <td>
                           <?php
-                          $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'") or die(mysql_error());
+                          $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'") ;
                           $sd_row=$studData_query->fetch();
                           
                           if($sd_row['suffix']=="-")

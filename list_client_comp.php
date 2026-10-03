@@ -97,7 +97,7 @@
                       
                             <?php
                              
-                            $subjK_query = $conn->query("select * FROM client_computer ORDER BY clientNumber ASC") or die(mysql_error());
+                            $subjK_query = $conn->query("select * FROM client_computer ORDER BY clientNumber ASC") ;
                             while ($subjK_row = $subjK_query->fetch()) 
                             { 
                                 

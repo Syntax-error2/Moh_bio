@@ -57,10 +57,10 @@ $(document).ready(function() {
                 
                                     
                                 <?php
-                                $empStat_query = $conn->query("SELECT empStat_id, emp_stat_name FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC") or die(mysql_error());
+                                $empStat_query = $conn->query("SELECT empStat_id, emp_stat_name FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC") ;
                                 while($empStat_row = $empStat_query->fetch()){
                                     
-                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, age, do_id, des_id, appointment_date, separation_date FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND sex='Male' ORDER BY lname, fname ASC") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, age, do_id, des_id, appointment_date, separation_date FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND sex='Male' ORDER BY lname, fname ASC") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 ?>
@@ -137,10 +137,10 @@ $(document).ready(function() {
                 
                                     
                                 <?php
-                                $empStat_query = $conn->query("SELECT empStat_id, emp_stat_name FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC") or die(mysql_error());
+                                $empStat_query = $conn->query("SELECT empStat_id, emp_stat_name FROM emp_status WHERE status='Separated' ORDER BY emp_stat_name ASC") ;
                                 while($empStat_row = $empStat_query->fetch()){
                                     
-                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, age, do_id, des_id, appointment_date, separation_date FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND sex='Female' ORDER BY lname, fname ASC") or die(mysql_error());
+                                $printDataAge_query = $conn->query("SELECT lname, fname, mname, suffix, age, do_id, des_id, appointment_date, separation_date FROM personnels WHERE empStat_id='$empStat_row[empStat_id]' AND sex='Female' ORDER BY lname, fname ASC") ;
                                 while($printDA_row=$printDataAge_query->fetch()){
                                 
                                 ?>
@@ -191,3 +191,4 @@ $(document).ready(function() {
                     <?php include('footer_print.php'); ?>
 </body>
 </html>
+

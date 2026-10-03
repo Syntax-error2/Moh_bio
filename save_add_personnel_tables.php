@@ -151,7 +151,7 @@ if(isset($_POST['add_servRecord']))
 {
  
         
-        $studDataCHK_query = $conn->query("SELECT * FROM service_record WHERE personnel_id='$_GET[personnel_id]' AND serv_date_from='$_POST[serv_date_from]' AND serv_date_to='$_POST[serv_date_to]'") or die(mysql_error());
+        $studDataCHK_query = $conn->query("SELECT * FROM service_record WHERE personnel_id='$_GET[personnel_id]' AND serv_date_from='$_POST[serv_date_from]' AND serv_date_to='$_POST[serv_date_to]'") ;
         if($studDataCHK_query->rowCount()>0){
          ?>
  

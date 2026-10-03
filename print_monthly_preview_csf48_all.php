@@ -1,163 +1,76 @@
+
 <!DOCTYPE html>
-<html> 
-
+<html>
 <?php
+include("session.php");  
 
- 
-include('session.php');  
-//error_reporting(0);
+$selectedMM=substr($_GET["dateFrom"], 5,2);
+$selectedYYYY=substr($_GET["dateFrom"], 0,4);
 
- 
-  $selectedMM=substr($_GET['dateFrom'], 5,2);
-  $selectedYYYY=substr($_GET['dateFrom'], 0,4);
+if($selectedMM=="01"){ $mmWords="January"; $MMmaxDay=32; }
+if($selectedMM=="02"){
+    $mmWords="February";
+    $leap = date("L", mktime(0, 0, 0, 1, 1, $selectedYYYY));
+    if($leap==0){ $MMmaxDay=29; }else{ $MMmaxDay=30; }
+}
+if($selectedMM=="03"){ $mmWords="March"; $MMmaxDay=32; }
+if($selectedMM=="04"){ $mmWords="April"; $MMmaxDay=31; }
+if($selectedMM=="05"){ $mmWords="May"; $MMmaxDay=32; }
+if($selectedMM=="06"){ $mmWords="June"; $MMmaxDay=31; }
+if($selectedMM=="07"){ $mmWords="July"; $MMmaxDay=32; }
+if($selectedMM=="08"){ $mmWords="August"; $MMmaxDay=32; }
+if($selectedMM=="09"){ $mmWords="September"; $MMmaxDay=31; }
+if($selectedMM=="10"){ $mmWords="October"; $MMmaxDay=32; }
+if($selectedMM=="11"){ $mmWords="November"; $MMmaxDay=31; }
+if($selectedMM=="12"){ $mmWords="December"; $MMmaxDay=32; }
+
+?>
+<head>
+<title>Print Monthly Preview</title>
+<style>
+@media print {
+    .pb {page-break-after: always;}
+}
+</style>
+</head>
+<body>
+<?php
+$printAll_Data_query = $conn->query("SELECT * FROM personnels WHERE separation_date='' OR separation_date='  /  /    ' ORDER BY lname, fname ASC");
+while($printALL_row=$printAll_Data_query->fetch()){
+
+$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]'");
+$studData_row=$studData_query->fetch();
+
 
   $grandTotalamLateMin=0;
   $grandTotalpmLateMin=0;
   
   $grandTotalamUTimeMin=0;
   $grandTotalpmUTimeMin=0;
-  $amLateCtr = 0;
-  $amPresentCtr = 0;
-  $pmLateCtr = 0;
-  $pmPresentCtr = 0;
   
-  
-  
-                 
-                if($selectedMM=="01")
-                {
-                    
-                    $mmWords="January";
-                    $MMmaxDay=32;
-                }
-                
-                if($selectedMM=="02")
-                {
-                    $mmWords="February";
-                    
-                    $leap = date('L', mktime(0, 0, 0, 1, 1, $selectedYYYY));
-            
-                    if($leap==0)
-                    {
-                    $MMmaxDay=29;    
-                    }else{
-                    $MMmaxDay=30;        
-                    }
-                    
-                }
-                
-                
-                if($selectedMM=="03")
-                {
-                    $mmWords="March";
-                    $MMmaxDay=32;    
-                }
-                
-                
-                if($selectedMM=="04")
-                {
-                    $mmWords="April";
-                    $MMmaxDay=31;    
-                }
-                
-                
-                if($selectedMM=="05")
-                {
-                    $mmWords="May";
-                    $MMmaxDay=32;  
-
-                }
-                
-                
-                if($selectedMM=="06")
-                {
-                    $mmWords="June";
-                    $MMmaxDay=31;
-                }
-                
-                
-                
-                if($selectedMM=="07")
-                {
-                    $mmWords="July";
-                    $MMmaxDay=32;
-                }
-                
-                
-                if($selectedMM=="08")
-                {
-                    $mmWords="August";
-                    $MMmaxDay=32;
-                }
-                
-                
-                if($selectedMM=="09")
-                {
-                    $mmWords="September";
-                    $MMmaxDay=31;
-                }
-                
-                
-                if($selectedMM=="10")
-                {
-                    $mmWords="October";
-                    $MMmaxDay=32;
-                }
-                
-                
-                if($selectedMM=="11")
-                {
-                    $mmWords="November";
-                    $MMmaxDay=31;
-                }
-                
-                
-                if($selectedMM=="12")
-                {
-                    $mmWords="December";
-                    $MMmaxDay=32;
-                }
-  
-            $classData="<strong>Class - Type:</strong> ";
-        
-include('header_print.php');
-
 ?>
- 
 
-<body>
- 
-<?php
-
-$printAll_Data_query = $conn->query("SELECT * FROM personnels WHERE separation_date='' OR separation_date='  /  /    ' ORDER BY lname, fname ASC");
-while($printALL_row=$printAll_Data_query->fetch()){
-
-
-$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]'");
-$studData_row=$studData_query->fetch();
-
-?>
 
 
 <table style="width: 45%;">
 <tr>
-<td align="left" style="width: 100%; border: none;">
+<td style="width: 100%; border: none; padding: 0px; text-align: left;">
 <table style="width: 100%;"  >
 
 <tr>
-<td style="border: none;">CIVIL SERVICE FORM No. <strong>48</strong></td>
+<td style="border: none; background-color: #fff; padding: 0px;">CIVIL SERVICE FORM No. <strong>48</strong></td>
 </tr>
 
 <tr>
-<td colspan="2" style="font-size: x-large; border: none;"><center>DAILY TIME RECORD</center></td>
+<td colspan="2" style="font-size: x-large; border: none; background-color: #fff; padding: 0px;"><center>DAILY TIME RECORD</center></td>
 </tr>
 
 <tr>
-<td style="border: none;" colspan="2"><center> 
+<td style="border: none; padding: 0px; text-align: center;" colspan="2">
 
      
-    <p style="font-size: 14px; margin-bottom: 4px;">(Name)</p>
-    <p style="font-size: 24px; font-variant-caps: all-petite-caps; margin-top: 4px;">
+    <p style="font-size: 14px; padding: 0px;">(Name)</p>
+    <p style="font-size: 24px; font-variant-caps: all-petite-caps; padding: 0px;">
     <?php
     $mname=$studData_row['mname'];
             
@@ -177,24 +90,24 @@ $studData_row=$studData_query->fetch();
             echo $studData_row['lname'].", ".$studData_row['fname']." ".$finalMName;
             
     }
-    ?></p></center>
+    ?></p>
 </td>
 </tr>
 
 <tr>
-<td style="border: none;">For the month of <strong><?php echo $mmWords; ?> 1, <?php echo $selectedYYYY; ?> - <?php echo $mmWords.' '.($MMmaxDay-1).', '.$selectedYYYY; ?></strong></td>
+<td style="border: none; background-color: #fff;  padding: 0px;">For the month of <strong><?php echo $mmWords; ?> 1, <?php echo $selectedYYYY; ?> - <?php echo $mmWords.' '.($MMmaxDay-1).', '.$selectedYYYY; ?></strong></td>
 </tr>
 
 <tr>
-<td style="border: none;">Official hours for arrival
+<td style="border: none; padding: 0px;">Official hours for arrival
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ( Regular days.......</td>
 </tr>
 
 <tr>
-<td style="border: none;">and departure
+<td style="border: none; background-color: #fff; padding: 0px;">and departure
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ( Saturdays.......</td>
 </tr>
 
@@ -206,8 +119,6 @@ $studData_row=$studData_query->fetch();
 
 <br />
  
- 
-
 <table id="myTable" style="width: 45%;">
     
   <tr style="font-weight: light; font-size: 14px">
@@ -389,7 +300,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
  
-        $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        if ($sq_row && !empty($sq_row['am_IN'])) {
+            $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        } else {
+            $str_time_sched_am_in_late = "00:00:00";
+        }
         $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
         sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -466,7 +381,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
         
-        $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        if ($sq_row && !empty($sq_row['am_OUT'])) {
+            $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        } else {
+            $str_time_sched_am_out_utime = "00:00:00";
+        }
         $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
         sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -549,7 +468,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
  
-        $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        if ($sq_row && !empty($sq_row['pm_IN'])) {
+            $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        } else {
+            $str_time_sched_pm_in_late = "00:00:00";
+        }
         $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
         sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -623,7 +546,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
     $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
     $sq_row=$sched_query->fetch();
     
-    $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+    if ($sq_row && !empty($sq_row['pm_OUT'])) {
+        $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+    } else {
+        $str_time_sched_pm_out_utime = "00:00:00";
+    }
     $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
     sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
     $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -864,66 +791,11 @@ Verified as to the prescribed office hours. <br />
  
  
 </table>
-
 <h1 class="pb"></h1>
-
 <?php
-
-$SC_query=null;
-$SC_row=null;
-
-$SC_query2=null;
-$SC_row2=null;    
-
-$SC_query3=null;
-$SC_query4=null;
-
-$studLogs_remarks_query=null;
-$SRQ_row=null;
-
-$adminData_query=null;
-$adminData_row=null;
-
-$dept_off_query=null;
-$do_row=null;
-
-$officeHead_query=null;
-$oh_row=null;
-
-$studData_query=null;
-$studData_row=null;
-
-$studLogs_query_AM_IN=null;
-$studLogs_AM_IN_row=null;
-
-$studLogs_query_AM_OUT=null;
-$studLogs_AM_OUT_row=null;
-
-$studLogs_query_PM_IN=null;
-$studLogs_PM_IN_row=null;
-
-$studLogs_query_PM_OUT=null;
-$studLogs_PM_OUT_row=null;
-
-$studLogs_query_PM_OUT_chk=null;
-
-
-}
-
-$printAll_Data_query=null;
-$printALL_row=null;
-
-$sf_query=null;
-$sf_row=null;
+} // end while
 
 $conn=null;
-
 ?>
-
-
-<?php include_once('universal_excel_export.php'); ?>
 </body>
 </html>
-       
-            
-

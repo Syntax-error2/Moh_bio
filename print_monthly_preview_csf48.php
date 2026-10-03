@@ -385,7 +385,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
  
-        $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        if ($sq_row && !empty($sq_row['am_IN'])) {
+            $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        } else {
+            $str_time_sched_am_in_late = "00:00:00";
+        }
         $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
         sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -462,7 +466,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
         
-        $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        if ($sq_row && !empty($sq_row['am_OUT'])) {
+            $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        } else {
+            $str_time_sched_am_out_utime = "00:00:00";
+        }
         $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
         sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -545,7 +553,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
         $sq_row=$sched_query->fetch();
  
-        $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        if ($sq_row && !empty($sq_row['pm_IN'])) {
+            $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        } else {
+            $str_time_sched_pm_in_late = "00:00:00";
+        }
         $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
         sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
@@ -619,7 +631,11 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
     $sched_query->execute(['do_id' => $studData_row['do_id'], 'shift_id' => $studData_row['shift_id'], 'day' => $dayName]);
     $sq_row=$sched_query->fetch();
     
-    $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+    if ($sq_row && !empty($sq_row['pm_OUT'])) {
+        $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
+    } else {
+        $str_time_sched_pm_out_utime = "00:00:00";
+    }
     $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
     sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
     $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;

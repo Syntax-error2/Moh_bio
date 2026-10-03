@@ -26,15 +26,15 @@ if(isset($_GET['RFTag_id'])) {
         $name = strtoupper($personnel['lname']) . ", " . $personnel['fname'];
         
         $logFlow = 'IN'; // default if no logs exist (but this shouldn't happen if they just scanned)
+        $logTime = date('h:i A'); // fallback to current time
         if($log) {
             // If time_out is not null, their last action was OUT
-            // Wait, if time_out is NOT null, it means the row is complete (IN and OUT).
-            // So the most recent action was OUT.
-            // If time_out IS null, it means they just timed IN.
             if ($log['time_out'] !== null && $log['time_out'] !== '00:00:00') {
                 $logFlow = 'TIME OUT';
+                $logTime = date('h:i A', strtotime($log['time_out']));
             } else {
                 $logFlow = 'TIME IN';
+                $logTime = date('h:i A', strtotime($log['time_in']));
             }
         }
         
@@ -42,7 +42,8 @@ if(isset($_GET['RFTag_id'])) {
             'status' => 'success',
             'img' => $img,
             'name' => $name,
-            'logFlow' => $logFlow
+            'logFlow' => $logFlow,
+            'time' => $logTime
         ]);
     } else {
         echo json_encode(['status' => 'error']);
