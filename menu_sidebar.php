@@ -62,7 +62,7 @@
               <ul id="personnels_dd" class="collapse list-unstyled ">
                 
                 <li><a href="list_personnel.php?dept=All"><i class="icon-user"></i> Personnels
-                <div class="badge badge-warning"> <?php echo $perCtr_all=$perCtr_query->rowCount(); ?></div></a></li>
+                <div class="badge badge-warning"> <?php echo $perCtr_all; ?></div></a></li>
                 
                 <li><a href="list_dept.php"> <i class="fa fa-tasks"></i>Dept. / Offices
                 <div class="badge badge-warning"><?php echo $do_TotalCtr; ?></div></a></li>
