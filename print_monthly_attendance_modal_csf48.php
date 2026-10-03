@@ -1,9 +1,9 @@
                 <!-- edit Class Modal -->
-                  <div id="print_monthly_attendance_csf48<?php echo $staff_row['RFTag_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
+                  <div id="print_monthly_attendance_csf48<?php echo $personnel_id; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
                     <div role="document" class="modal-dialog">
                       <div class="modal-content">
                       <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>" method="POST">
-                      <input name="RFTag_id" value="<?php echo $staff_row['RFTag_id']; ?>" type="hidden" />
+                      <input name="RFTag_id" value="<?php echo !empty($staff_row['RFTag_id']) ? $staff_row['RFTag_id'] : $staff_row['biometric_id']; ?>" type="hidden" />
                       
                         <div class="modal-header">
                           <h5 id="exampleModalLabel" class="modal-title">Civil Service Form 48 - <?php echo $staff_row['fname']." ".$staff_row['mname']." ".$staff_row['lname']; ?></h5>

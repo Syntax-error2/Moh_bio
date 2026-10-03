@@ -1,8 +1,8 @@
                 <!-- edit Class Modal -->
-                  <div id="print_monthly_LV<?php echo $staff_row['RFTag_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
+                  <div id="print_monthly_LV<?php echo $personnel_id; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
                     <div role="document" class="modal-dialog">
                       <div class="modal-content">
-                      <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>&RFTag_id=<?php echo $staff_row['RFTag_id']; ?>" method="POST">
+                      <form target="_blank" action="checkPrintDetails.php?dept=<?php echo $_GET['dept']; ?>&RFTag_id=<?php echo !empty($staff_row['RFTag_id']) ? $staff_row['RFTag_id'] : $staff_row['biometric_id']; ?>" method="POST">
                        
                         <div class="modal-header">
                           <h5 id="exampleModalLabel" class="modal-title">PRINT MONTHLY LOG VALIDATION</h5>

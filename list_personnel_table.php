@@ -17,7 +17,18 @@
                             <?php
                             
                             $dept_id = $_GET['dept'] ?? '';
-                            $staff_query = $conn->prepare("SELECT * FROM personnels WHERE do_id = :dept_id AND (separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') ORDER BY lname, fname ASC");
+                            $staff_query = $conn->prepare("
+                                SELECT 
+                                    p.*, 
+                                    s.shift_name, 
+                                    s.type,
+                                    e.emp_stat_name
+                                FROM personnels p 
+                                LEFT JOIN shifts s ON p.shift_id = s.shift_id 
+                                LEFT JOIN emp_status e ON p.empStat_id = e.empStat_id
+                                WHERE p.do_id = :dept_id AND (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ') 
+                                ORDER BY p.lname, p.fname ASC
+                            ");
                             $staff_query->execute([':dept_id' => $dept_id]);
                             while ($staff_row = $staff_query->fetch()){
                                 
@@ -34,7 +45,7 @@
                               <div class="personnel-meta">
                                 <div class="personnel-code-row">
                                   <small class="badge badge-light border">ID: <?php echo htmlspecialchars($staff_row['personnel_id_code']); ?></small>
-                                  <i class="fa fa-barcode"></i> <?php echo htmlspecialchars($staff_row['RFTag_id']); ?>
+                                  <i class="fa fa-barcode"></i> <?php if(!empty($staff_row['RFTag_id'])){ echo htmlspecialchars($staff_row['RFTag_id']); } elseif(!empty($staff_row['biometric_id'])){ echo htmlspecialchars($staff_row['biometric_id']); } else { echo "<span class='text-danger'>No ID</span>"; } ?>
                                 </div>
                                 <div class="personnel-name">
                                 <?php
@@ -51,12 +62,7 @@
                             </td>
 
                             <td>
-                              <?php
-                              $emp_stat_query5 = $conn->prepare("SELECT * from shifts WHERE shift_id = :shift_id");
-                              $emp_stat_query5->execute([':shift_id' => $staff_row['shift_id']]);
-                              $es_row5=$emp_stat_query5->fetch();
-                              ?>
-                              <a title="Shift settings..." class="shift-chip" style="<?php if(!empty($es_row5) && $es_row5['type'] == 'Regular Shift'){ ?> color: green; <?php }elseif(!empty($es_row5) && $es_row5['type'] == 'Night Shift'){ ?> color: blue; <?php }elseif(!empty($es_row5) && $es_row5['type'] == '24 Hours Shift'){ ?> color: brown; <?php }elseif(!empty($es_row5) && $es_row5['type'] == 'Open Time'){ ?> color: purple; <?php }else{ ?> color: red; <?php } ?>" data-toggle="modal" data-target="#updateShift<?php echo $personnel_id; ?>" href="#"><i class="fa fa-clock-o"></i> <?php if(!empty($es_row5)){ echo htmlspecialchars($es_row5['shift_name']); }else{ echo "Not Set"; } ?> <small <?php if(empty($es_row5)){?> style="color: red;" <?php } ?>>( <?php if(!empty($es_row5)){ echo htmlspecialchars($es_row5['type']); }else{ echo "Not Set"; } ?> )</small></a>
+                              <a title="Shift settings..." class="shift-chip" style="<?php if($staff_row['type'] == 'Regular Shift'){ ?> color: green; <?php }elseif($staff_row['type'] == 'Night Shift'){ ?> color: blue; <?php }elseif($staff_row['type'] == '24 Hours Shift'){ ?> color: brown; <?php }elseif($staff_row['type'] == 'Open Time'){ ?> color: purple; <?php }else{ ?> color: red; <?php } ?>" data-toggle="modal" data-target="#updateShift<?php echo $personnel_id; ?>" href="#"><i class="fa fa-clock-o"></i> <?php if(!empty($staff_row['shift_name'])){ echo htmlspecialchars($staff_row['shift_name']); }else{ echo "Not Set"; } ?> <small <?php if(empty($staff_row['type'])){?> style="color: red;" <?php } ?>>( <?php if(!empty($staff_row['type'])){ echo htmlspecialchars($staff_row['type']); }else{ echo "Not Set"; } ?> )</small></a>
                             </td>
                            
                            <td style="text-align: center;">
@@ -68,18 +74,13 @@
                             <a title="Archive personnel..." data-toggle="modal" data-target="#deletePersonnel<?php echo $personnel_id; ?>" href="#" class="dropdown-item text-danger"><i class="fa fa-archive"></i> Archive Personnel</a>
                             <div class="dropdown-divider"></div>
                             
-                            <a title="Print Civil Service Form 48..." data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $staff_row['RFTag_id']; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> CSForm 48</a>
-                            <a title="Print detailed DTR..." data-toggle="modal" data-target="#print_monthly_attendance<?php echo $staff_row['RFTag_id']; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> Detailed DTR <small>(Monthly)</small></a>
-                            <a title="Print Log Validations history..." data-toggle="modal" data-target="#print_monthly_LV<?php echo $staff_row['RFTag_id']; ?>" href="#" class="dropdown-item"><i class="fa fa-image"></i> Log Validation History <small>(Monthly)</small></a>
+                            <a title="Print Civil Service Form 48..." data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $personnel_id; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> CSForm 48</a>
+                            <a title="Print detailed DTR..." data-toggle="modal" data-target="#print_monthly_attendance<?php echo $personnel_id; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> Detailed DTR <small>(Monthly)</small></a>
+                            <a title="Print Log Validations history..." data-toggle="modal" data-target="#print_monthly_LV<?php echo $personnel_id; ?>" href="#" class="dropdown-item"><i class="fa fa-image"></i> Log Validation History <small>(Monthly)</small></a>
                             
                             <?php
-                            
-                            $emp_stat_query = $conn->prepare("SELECT emp_stat_name FROM emp_status WHERE empStat_id = :empStat_id");
-                            $emp_stat_query->execute([':empStat_id' => $staff_row['empStat_id']]);
-                            if ($emp_stat_query) {
-                                $empstat_row = $emp_stat_query->fetch();
-                                
-                                if($empstat_row && ($empstat_row['emp_stat_name'] == "Casual" OR $empstat_row['emp_stat_name'] == "Permanent")){ ?>
+                            if (!empty($staff_row['emp_stat_name'])) {
+                                if($staff_row['emp_stat_name'] == "Casual" OR $staff_row['emp_stat_name'] == "Permanent"){ ?>
                                 <div class="dropdown-divider"></div>
                                 
                                 <!-- Leave Management Dropdown -->
@@ -87,7 +88,7 @@
                                 <a href="#" data-toggle="modal" data-target="#add_leave_application" class="dropdown-item" onclick="setPersonnelForLeaveApp(<?php echo $personnel_id; ?>, '<?php echo htmlspecialchars($staff_row['lname'] . ', ' . $staff_row['fname'], ENT_QUOTES); ?>')">
                                     <i class="fa fa-file-text"></i> Leave Application
                                 </a>
-                                <a href="leave_card.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $personnel_id; ?>" class="dropdown-item">
+                                <a href="leave_card.php?dept=<?php echo $_GET['dept'] ?? ''; ?>&personnel_id=<?php echo $personnel_id; ?>" class="dropdown-item">
                                     <i class="fa fa-book"></i> Leave Card
                                 </a>
                                 <?php } else { ?>
@@ -99,7 +100,13 @@
                                     <i class="fa fa-exclamation-triangle"></i> Set Employment Status
                                 </a>
                                 <?php }
-                            } ?>
+                            } else { ?>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fa fa-calendar"></i> Leave Management</h6>
+                                <a href="edit_completePersonnelData.php?dept=<?php echo $staff_row['do_id']; ?>&personnel_id=<?php echo $personnel_id; ?>" class="dropdown-item text-muted">
+                                    <i class="fa fa-exclamation-triangle"></i> Set Employment Status
+                                </a>
+                            <?php } ?>
                             
                             <div class="dropdown-divider"></div>
                             

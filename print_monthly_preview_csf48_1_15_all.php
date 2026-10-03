@@ -38,8 +38,7 @@ if($selectedMM=="12"){ $mmWords="December"; $MMmaxDay=32; }
 $printAll_Data_query = $conn->query("SELECT * FROM personnels WHERE separation_date='' OR separation_date='  /  /    ' ORDER BY lname, fname ASC");
 while($printALL_row=$printAll_Data_query->fetch()){
 
-$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]'");
-$studData_row=$studData_query->fetch();
+$studData_row = $printALL_row;
 
 
   $grandTotalamLateMin=0;

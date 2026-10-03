@@ -138,8 +138,7 @@ $printAll_Data_query = $conn->query("SELECT * FROM personnels ORDER BY lname, fn
 while($printALL_row=$printAll_Data_query->fetch()){
 
 
-$studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]'");
-$studData_row=$studData_query->fetch();
+$studData_row = $printALL_row;
 
 ?>
 <table style="width: 100%;">

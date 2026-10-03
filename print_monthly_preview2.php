@@ -119,8 +119,7 @@ $printAll_Data_query->execute([$_GET['do_id']]);
 while($printALL_row=$printAll_Data_query->fetch()){
 
 
-$studData_query = $conn->query("select * FROM personnels WHERE personnel_id='$printALL_row[personnel_id]'");
-$studData_row=$studData_query->fetch();
+$studData_row = $printALL_row;
 
 
   $grandTotalTRHr=0;

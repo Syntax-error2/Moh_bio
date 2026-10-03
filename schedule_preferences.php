@@ -232,7 +232,7 @@
                             <div class="form-group row">
                              
                               <div class="col-sm-12">
-                              <small><strong><?php echo $modDOid_row['dept_office_name']; ?> - <?php echo $_GET['shift']; ?></strong><br />
+                              <small><strong><?php echo $modDOid_row ? htmlspecialchars($modDOid_row['dept_office_name']) : 'All Departments'; ?> - <?php echo htmlspecialchars($_GET['shift'] ?? ''); ?></strong><br />
                               Department / Office - Shift</small>
                            
                               </div>
