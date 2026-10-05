@@ -292,10 +292,28 @@ $studData_row=$studData_query->fetch();
     }
     // Fetch personnel_logs
     $allPersonnelLogs = [];
-    $p_stmt = $conn->prepare("SELECT logFlow, logTime, late_status, logDate FROM personnel_logs WHERE RFTag_id = ? AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ?");
-    $p_stmt->execute([$studData_row['RFTag_id'], $startDate, $endDate]);
+    $p_stmt = $conn->prepare("
+        SELECT logFlow, logTime, late_status, logDate 
+        FROM personnel_logs 
+        WHERE (RFTag_id = ? OR RFTag_id = ?) 
+          AND (
+            (logDate LIKE '%-%' AND logDate BETWEEN ? AND ?) OR 
+            (logDate NOT LIKE '%-%' AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ?)
+          )
+          AND (client_ip = '' OR logDate LIKE '%-%')
+    ");
+    $p_stmt->execute([
+        $studData_row['RFTag_id'], 
+        $studData_row['biometric_id'], 
+        $startDate, 
+        $endDate, 
+        $startDate, 
+        $endDate
+    ]);
     while ($r = $p_stmt->fetch(PDO::FETCH_ASSOC)) {
-        $allPersonnelLogs[$r['logDate']][$r['logFlow']] = $r;
+        // Normalize logDate to YYYY-MM-DD for array key
+        $r_date = strpos($r['logDate'], '-') !== false ? $r['logDate'] : date('Y-m-d', strtotime($r['logDate']));
+        $allPersonnelLogs[$r_date][$r['logFlow']] = $r;
     }
     // -------------------------------
     

@@ -141,6 +141,7 @@
                         <tr>
                           <th>#</th>
                           <th><center>IMAGE</center></th>
+                          <th><center>DEPARTMENT</center></th>
                           <th>DETAILS</th>
                           <th>ACTION</th>
                         </tr>
@@ -153,9 +154,10 @@
                       $pl_filterDate2 = date('Y-m-d', strtotime($filterDate)); // YYYY-MM-DD
                                
                       $new_clearance_query = $conn->query("
-                          SELECT b.*, p.lname, p.fname, p.mname, p.suffix, p.img 
+                          SELECT b.*, p.lname, p.fname, p.mname, p.suffix, p.img, d.dept_office_name 
                           FROM bio_dtr b 
                           JOIN personnels p ON b.personnel_id = p.personnel_id 
+                          LEFT JOIN dept_offices d ON p.do_id = d.do_id 
                           WHERE b.log_date = '$db_filterDate' 
                           ORDER BY b.time_in ASC
                       ");
@@ -163,10 +165,11 @@
                       $all_logs = $new_clearance_query->fetchAll(PDO::FETCH_ASSOC);
 
                       $pl_query = $conn->query("
-                          SELECT pl.*, p.lname, p.fname, p.mname, p.suffix, p.img, p.personnel_id 
+                          SELECT pl.*, p.lname, p.fname, p.mname, p.suffix, p.img, p.personnel_id, d.dept_office_name 
                           FROM personnel_logs pl 
-                          JOIN personnels p ON pl.RFTag_id = p.RFTag_id AND pl.RFTag_id != ''
-                          WHERE pl.logDate = '$pl_filterDate1' OR pl.logDate = '$pl_filterDate2' 
+                          JOIN personnels p ON (pl.RFTag_id = p.RFTag_id OR pl.RFTag_id = p.biometric_id) AND pl.RFTag_id != ''
+                          LEFT JOIN dept_offices d ON p.do_id = d.do_id 
+                          WHERE (pl.logDate = '$pl_filterDate1' OR pl.logDate = '$pl_filterDate2') AND (pl.captured_img != '' OR pl.logDate LIKE '%-%')
                           ORDER BY pl.log_id ASC
                       ");
                       $personnel_logs = $pl_query->fetchAll(PDO::FETCH_ASSOC);
@@ -184,11 +187,15 @@
                               $am_merged[$pid] = $log;
                               $am_merged[$pid]['time_in'] = '';
                               $am_merged[$pid]['time_out'] = '';
+                              $am_merged[$pid]['captured_img_in'] = '';
+                              $am_merged[$pid]['captured_img_out'] = '';
                           }
                           if (!isset($pm_merged[$pid])) {
                               $pm_merged[$pid] = $log;
                               $pm_merged[$pid]['time_in'] = '';
                               $pm_merged[$pid]['time_out'] = '';
+                              $pm_merged[$pid]['captured_img_in'] = '';
+                              $pm_merged[$pid]['captured_img_out'] = '';
                           }
                           
                           if ($t_in && $t_in != '00:00:00') {
@@ -217,24 +224,30 @@
                                   $am_merged[$pid] = [
                                       'personnel_id' => $pl['personnel_id'],
                                       'lname' => $pl['lname'], 'fname' => $pl['fname'], 'mname' => $pl['mname'], 'suffix' => $pl['suffix'], 'img' => $pl['img'],
+                                      'dept_office_name' => $pl['dept_office_name'],
                                       'log_date' => date('Y-m-d', strtotime($pl['logDate'])),
-                                      'time_in' => '', 'time_out' => ''
+                                      'time_in' => '', 'time_out' => '',
+                                      'captured_img_in' => '', 'captured_img_out' => ''
                                   ];
                               }
-                              if ($pl['logFlow'] == 'AM IN') $am_merged[$pid]['time_in'] = $time_24;
-                              if ($pl['logFlow'] == 'AM OUT') $am_merged[$pid]['time_out'] = $time_24;
+                              if (!isset($am_merged[$pid]['captured_img_in'])) { $am_merged[$pid]['captured_img_in'] = ''; $am_merged[$pid]['captured_img_out'] = ''; }
+                              if ($pl['logFlow'] == 'AM IN') { $am_merged[$pid]['time_in'] = $time_24; $am_merged[$pid]['captured_img_in'] = $pl['captured_img']; }
+                              if ($pl['logFlow'] == 'AM OUT') { $am_merged[$pid]['time_out'] = $time_24; $am_merged[$pid]['captured_img_out'] = $pl['captured_img']; }
                           }
                           if ($pl['logFlow'] == 'PM IN' || $pl['logFlow'] == 'PM OUT') {
                               if (!isset($pm_merged[$pid])) {
                                   $pm_merged[$pid] = [
                                       'personnel_id' => $pl['personnel_id'],
                                       'lname' => $pl['lname'], 'fname' => $pl['fname'], 'mname' => $pl['mname'], 'suffix' => $pl['suffix'], 'img' => $pl['img'],
+                                      'dept_office_name' => $pl['dept_office_name'],
                                       'log_date' => date('Y-m-d', strtotime($pl['logDate'])),
-                                      'time_in' => '', 'time_out' => ''
+                                      'time_in' => '', 'time_out' => '',
+                                      'captured_img_in' => '', 'captured_img_out' => ''
                                   ];
                               }
-                              if ($pl['logFlow'] == 'PM IN') $pm_merged[$pid]['time_in'] = $time_24;
-                              if ($pl['logFlow'] == 'PM OUT') $pm_merged[$pid]['time_out'] = $time_24;
+                              if (!isset($pm_merged[$pid]['captured_img_in'])) { $pm_merged[$pid]['captured_img_in'] = ''; $pm_merged[$pid]['captured_img_out'] = ''; }
+                              if ($pl['logFlow'] == 'PM IN') { $pm_merged[$pid]['time_in'] = $time_24; $pm_merged[$pid]['captured_img_in'] = $pl['captured_img']; }
+                              if ($pl['logFlow'] == 'PM OUT') { $pm_merged[$pid]['time_out'] = $time_24; $pm_merged[$pid]['captured_img_out'] = $pl['captured_img']; }
                           }
                       }
                       
@@ -260,11 +273,17 @@
                         } ?> 
                       
                         <tr>
-                          <th scope="row"><?php echo $row_ctr; ?></th>
+                          <td><?php echo $row_ctr; ?></td>
                           
                           <td>
                           <center>
                           <img src="<?php echo empty($nc_row['img']) ? 'img/avatar-1.jpg' : 'personnelImg/'.$nc_row['img']; ?>" width="60" height="75" class="img-fluid rounded" />
+                          </center>
+                          </td>
+                          
+                          <td>
+                          <center>
+                            <strong><?php echo $nc_row['dept_office_name']; ?></strong>
                           </center>
                           </td>
                           
@@ -291,6 +310,7 @@
                         <tr>
                           <th>#</th>
                           <th><center>IMAGE</center></th>
+                          <th><center>DEPARTMENT</center></th>
                           <th>DETAILS</th>
                           <th>ACTION</th>
                         </tr>
@@ -312,11 +332,17 @@
                         } ?> 
                       
                         <tr>
-                          <th scope="row"><?php echo $row_ctr; ?></th>
+                          <td><?php echo $row_ctr; ?></td>
                           
                           <td>
                           <center>
                           <img src="<?php echo empty($nc_row['img']) ? 'img/avatar-1.jpg' : 'personnelImg/'.$nc_row['img']; ?>" width="60" height="75" class="img-fluid rounded" />
+                          </center>
+                          </td>
+                          
+                          <td>
+                          <center>
+                            <strong><?php echo $nc_row['dept_office_name']; ?></strong>
                           </center>
                           </td>
                           

@@ -102,9 +102,9 @@
                   <li><a class="dropdown-item" data-toggle="modal" data-target="#encodeDL<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#">Encode Daily Log</a></li>
                   <li><a class="dropdown-item" data-toggle="modal" data-target="#restDaySetup<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#">Set Rest Day</a></li>
 
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#">CS Form 48</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#">Detailed DTR</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_LV<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#">Log Validation</a></li>
+                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo htmlspecialchars($personnel_id); ?>" href="#">CS Form 48</a></li>
+                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance<?php echo htmlspecialchars($personnel_id); ?>" href="#">Detailed DTR</a></li>
+                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_LV<?php echo htmlspecialchars($personnel_id); ?>" href="#">Log Validation</a></li>
 
                 </ul>
               </li>

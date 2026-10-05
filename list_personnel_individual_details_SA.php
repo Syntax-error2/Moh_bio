@@ -93,9 +93,9 @@
                 <ul aria-labelledby="dash-x-menu" class="dropdown-menu p-0">
                   <li><a class="dropdown-item" data-toggle="modal" data-target="#encodeDL<?php echo $staff_row['RFTag_id']; ?>" href="#">Encode Daily Log</a></li>
                   <li><a class="dropdown-item" data-toggle="modal" data-target="#restDaySetup<?php echo $staff_row['RFTag_id']; ?>" href="#">Set Rest Day</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $staff_row['RFTag_id']; ?>" href="#">CS Form 48</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance<?php echo $staff_row['RFTag_id']; ?>" href="#">Detailed DTR</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_LV<?php echo $staff_row['RFTag_id']; ?>" href="#">Log Validation</a></li>
+                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $personnel_id; ?>" href="#">CS Form 48</a></li>
+                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance<?php echo $personnel_id; ?>" href="#">Detailed DTR</a></li>
+                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_LV<?php echo $personnel_id; ?>" href="#">Log Validation</a></li>
                 </ul>
               </li>
               <?php } ?>

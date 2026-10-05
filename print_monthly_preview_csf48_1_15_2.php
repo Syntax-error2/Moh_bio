@@ -251,16 +251,16 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
             foreach($bio_logs as $log) {
                 if (!empty($log['time_in']) && $log['time_in'] != '00:00:00') {
                     if ($log['time_in'] < '12:00:00' && !$bio_am_in) {
-                        $bio_am_in = ['logTime' => $log['time_in'], 'late_status' => 'on'];
+                        $bio_am_in = ['logTime' => date('h:i A', strtotime($log['time_in'])), 'late_status' => 'on'];
                     } else if ($log['time_in'] >= '12:00:00' && !$bio_pm_in) {
-                        $bio_pm_in = ['logTime' => $log['time_in'], 'late_status' => 'on'];
+                        $bio_pm_in = ['logTime' => date('h:i A', strtotime($log['time_in'])), 'late_status' => 'on'];
                     }
                 }
                 if (!empty($log['time_out']) && $log['time_out'] != '00:00:00') {
                     if ($log['time_out'] < '13:00:00' && !$bio_am_out) {
-                        $bio_am_out = ['logTime' => $log['time_out'], 'late_status' => 'on'];
+                        $bio_am_out = ['logTime' => date('h:i A', strtotime($log['time_out'])), 'late_status' => 'on'];
                     } else if ($log['time_out'] >= '13:00:00' && !$bio_pm_out) {
-                        $bio_pm_out = ['logTime' => $log['time_out'], 'late_status' => 'on'];
+                        $bio_pm_out = ['logTime' => date('h:i A', strtotime($log['time_out'])), 'late_status' => 'on'];
                     }
                 }
             }
@@ -293,7 +293,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     
     <?php
     
-    $studLogs_remarks_query = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND (logDate = :logDate OR logDate = :logDateCtr) AND (remarks!='' AND remarks!='Updated' AND remarks!='Inserted' AND remarks!='24hrs')");
+    $studLogs_remarks_query = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%') AND (remarks!='' AND remarks!='Updated' AND remarks!='Inserted' AND remarks!='24hrs')");
     $studLogs_remarks_query->execute(['RFTag_id' => $RFTag_id, 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     if($studLogs_remarks_query->rowCount()>0){
     $SRQ_row=$studLogs_remarks_query->fetch(); ?> 
@@ -304,7 +304,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     
       <?php }else{
         
-    $studLogs_sat_query = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_sat_query = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_sat_query->execute(['RFTag_id' => $RFTag_id, 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     if($studLogs_sat_query->rowCount()==0 AND ($dayName2=='Sat' OR $dayName2=='Sun')){ ?> 
     <td colspan="6" style="background-color: #ececec; text-align: center;">
@@ -333,7 +333,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     <!-- AM IN -->
     <td>
     <?php
-    $studLogs_query_AM_IN = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_query_AM_IN = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_query_AM_IN->execute(['RFTag_id' => $RFTag_id, 'logFlow' => "AM IN", 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     $has_am_in = $studLogs_query_AM_IN->rowCount() > 0;
     $studLogs_AM_IN_row = $studLogs_query_AM_IN->fetch();
@@ -410,7 +410,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     <!-- AM OUT -->
     <td>
     <?php
-    $studLogs_query_AM_OUT = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_query_AM_OUT = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_query_AM_OUT->execute(['RFTag_id' => $RFTag_id, 'logFlow' => "AM OUT", 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     $has_am_out = $studLogs_query_AM_OUT->rowCount() > 0;
     $studLogs_AM_OUT_row = $studLogs_query_AM_OUT->fetch();
@@ -463,7 +463,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
  
     <?php }else{ $time_seconds_time_am_out=0; 
     
-    $studLogs_query_PM_OUT_chk = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_query_PM_OUT_chk = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_query_PM_OUT_chk->execute(['RFTag_id' => $RFTag_id, 'logFlow' => "PM OUT", 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     $chk_has_pm_out = $studLogs_query_PM_OUT_chk->rowCount() > 0;
     if (!$chk_has_pm_out && $is_biometric && !empty($bio_pm_out)) {
@@ -492,7 +492,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     <!-- PM IN -->
     <td>
     <?php
-    $studLogs_query_PM_IN = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_query_PM_IN = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_query_PM_IN->execute(['RFTag_id' => $RFTag_id, 'logFlow' => "PM IN", 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     $has_pm_in = $studLogs_query_PM_IN->rowCount() > 0;
     $studLogs_PM_IN_row = $studLogs_query_PM_IN->fetch();
@@ -553,7 +553,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     
     <?php
     
-    $studLogs_query_PM_OUT_chk = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_query_PM_OUT_chk = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_query_PM_OUT_chk->execute(['RFTag_id' => $RFTag_id, 'logFlow' => "PM OUT", 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     $chk_has_pm_out = $studLogs_query_PM_OUT_chk->rowCount() > 0;
     if (!$chk_has_pm_out && $is_biometric && !empty($bio_pm_out)) {
@@ -572,7 +572,7 @@ $RFTag_id = !empty($printALL_row['RFTag_id']) ? $printALL_row['RFTag_id'] : $pri
     <!-- PM OUT -->
     <td>
     <?php
-    $studLogs_query_PM_OUT = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr)");
+    $studLogs_query_PM_OUT = $conn->prepare("SELECT * FROM personnel_logs WHERE RFTag_id = :RFTag_id AND logFlow = :logFlow AND (logDate = :logDate OR logDate = :logDateCtr) AND (captured_img != '' OR logDate LIKE '%-%')");
     $studLogs_query_PM_OUT->execute(['RFTag_id' => $RFTag_id, 'logFlow' => "PM OUT", 'logDate' => $logDateLog, 'logDateCtr' => $logDateCtr]);
     $has_pm_out = $studLogs_query_PM_OUT->rowCount() > 0;
     $studLogs_PM_OUT_row = $studLogs_query_PM_OUT->fetch();
@@ -810,18 +810,13 @@ Verified as to the prescribed office hours. <br />
     $officeHead_query = $conn->prepare("SELECT lname, fname, mname, suffix FROM personnels WHERE personnel_id = :personnel_id");
     $officeHead_query->execute(['personnel_id' => $do_row['officeHead_id']]);
     $oh_row=$officeHead_query->fetch();
-             
-    if($oh_row['suffix']=="-")
-    {
-        
-    echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname'];
-    
-    }else{
-        
-    echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname']." ".$oh_row['suffix'];
-    
-    }  
-                                    
+    if ($oh_row) {
+        if($oh_row['suffix']=="-") {
+            echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname'];
+        } else {
+            echo $oh_row['fname']." ".substr($oh_row['mname'], 0,1).". ".$oh_row['lname']." ".$oh_row['suffix'];
+        }
+    }
                                     
                                     
     ?>

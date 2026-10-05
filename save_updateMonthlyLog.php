@@ -126,6 +126,7 @@
         }
     }
     
+    include('sync_manual_to_bio.php');
     
     ?>
     

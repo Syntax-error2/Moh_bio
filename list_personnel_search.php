@@ -122,9 +122,9 @@ if(isset($_POST['search'])){
                             <a title="Archive personnel..." data-toggle="modal" data-target="#deletePersonnel<?php echo $personnel_id; ?>" href="#" class="dropdown-item text-danger"><i class="fa fa-archive"></i> Archive Personnel</a>
                             <div class="dropdown-divider"></div>
                             
-                            <a title="Print Civil Service Form 48..." data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> CSForm 48</a>
-                            <a title="Print detailed DTR..." data-toggle="modal" data-target="#print_monthly_attendance<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> Detailed DTR <small>(Monthly)</small></a>
-                            <a title="Print Log Validations history..." data-toggle="modal" data-target="#print_monthly_LV<?php echo htmlspecialchars($staff_row['RFTag_id']); ?>" href="#" class="dropdown-item"><i class="fa fa-image"></i> Log Validation History <small>(Monthly)</small></a>
+                            <a title="Print Civil Service Form 48..." data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $personnel_id; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> CSForm 48</a>
+                            <a title="Print detailed DTR..." data-toggle="modal" data-target="#print_monthly_attendance<?php echo $personnel_id; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> Detailed DTR <small>(Monthly)</small></a>
+                            <a title="Print Log Validations history..." data-toggle="modal" data-target="#print_monthly_LV<?php echo $personnel_id; ?>" href="#" class="dropdown-item"><i class="fa fa-image"></i> Log Validation History <small>(Monthly)</small></a>
                             
                             <?php
                             // Use prepared statement for employment status check

@@ -144,10 +144,11 @@ while($printALL_row=$printAll_Data_query->fetch()){
         
         
         if($d<10){
-            
-        $logDateCtr=$selectedMM.'/0'.$d.'/'.$selectedYYYY;
+            $logDateCtr=$selectedMM.'/0'.$d.'/'.$selectedYYYY;
+            $logDateCtr2=$selectedYYYY.'-'.$selectedMM.'-0'.$d;
         }else{
-        $logDateCtr=$selectedMM.'/'.$d.'/'.$selectedYYYY;
+            $logDateCtr=$selectedMM.'/'.$d.'/'.$selectedYYYY;
+            $logDateCtr2=$selectedYYYY.'-'.$selectedMM.'-'.$d;
         }
         
  
@@ -156,7 +157,7 @@ while($printALL_row=$printAll_Data_query->fetch()){
     <div class="row">
     
     <?php
-    $LV_query = $conn->query("select * FROM personnel_logs WHERE personnel_id='$printALL_row[personnel_id]' AND logDate='$logDateCtr'");
+    $LV_query = $conn->query("select * FROM personnel_logs WHERE personnel_id='$printALL_row[personnel_id]' AND (logDate='$logDateCtr' OR logDate='$logDateCtr2') AND (captured_img != '' OR logDate LIKE '%-%')");
     while($LV_row=$LV_query->fetch()){
     
     if($LV_row['mname']=='')

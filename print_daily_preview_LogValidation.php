@@ -149,8 +149,8 @@ include('header_print.php');
     $pl_query = $conn->query("
         SELECT pl.*, p.lname, p.fname, p.mname, p.suffix, p.img, p.personnel_id 
         FROM personnel_logs pl 
-        JOIN personnels p ON pl.RFTag_id = p.RFTag_id AND pl.RFTag_id != ''
-        WHERE pl.logDate = '$pl_filterDate1' OR pl.logDate = '$pl_filterDate2' 
+        JOIN personnels p ON (pl.RFTag_id = p.RFTag_id OR pl.RFTag_id = p.biometric_id) AND pl.RFTag_id != ''
+        WHERE (pl.logDate = '$pl_filterDate1' OR pl.logDate = '$pl_filterDate2') AND (pl.captured_img != '' OR pl.logDate LIKE '%-%')
         ORDER BY pl.log_id ASC
     ");
     $personnel_logs = $pl_query->fetchAll(PDO::FETCH_ASSOC);
