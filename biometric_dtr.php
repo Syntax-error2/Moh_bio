@@ -124,23 +124,34 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         }
 
         /* Responsiveness */
+        @media (max-width: 1200px) {
+            .navbar h4 { font-size: 0.9em; }
+            .clock { font-size: 4em; }
+            .scan-icon-container { margin-bottom: 30px; }
+            .scan-ring { width: 250px; height: 250px; }
+            .scan-icon { font-size: 8em; }
+            .status-box { padding: 12px 25px; }
+            .status-msg { font-size: 1.2em; }
+        }
         @media (max-width: 992px) {
-            body { height: auto; overflow: visible; }
+            body { height: auto; overflow: auto; }
             .main-container { flex-direction: column; height: auto; min-height: 100vh; }
-            .scanner-panel { width: 100%; min-height: 60vh; padding: 40px 20px; }
+            .scanner-panel { width: 100%; min-height: 60vh; padding: 30px 15px; }
             .monitor-panel { width: 100%; height: auto; padding: 20px; }
-            .navbar { flex-wrap: wrap; text-align: center; justify-content: center; gap: 15px; padding: 15px; }
-            .navbar .brand { flex-direction: column; gap: 8px; }
-            .clock { font-size: 4.5em; }
+            .navbar { flex-wrap: wrap; text-align: center; justify-content: center; gap: 10px; padding: 10px; }
+            .navbar .brand { flex-direction: column; gap: 5px; }
+            .navbar h4 { font-size: 0.8em; line-height: 1.2; }
+            .clock { font-size: 3.5em; }
+            .scan-ring { width: 200px; height: 200px; }
+            .scan-icon { font-size: 6em; }
         }
         @media (max-width: 576px) {
-            .clock { font-size: 3.2em; }
-            .date { font-size: 0.9em; margin-bottom: 30px; }
-            .scan-icon-container img { width: 100px !important; height: 100px !important; }
-            .scan-ring { width: 160px; height: 160px; }
-            .navbar h4 { font-size: 0.9em; line-height: 1.4; }
-            .monitor-header h3 { font-size: 1.3em; }
-            .carousel-inner { height: 400px !important; }
+            .clock { font-size: 2.8em; }
+            .date { font-size: 0.8em; margin-bottom: 20px; }
+            .scan-icon-container img { width: 120px !important; height: 120px !important; }
+            .scan-ring { width: 140px; height: 140px; }
+            .monitor-header h3 { font-size: 1.2em; }
+            .carousel-inner { height: 300px !important; }
         }
     </style>
 </head>
@@ -160,7 +171,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     <div class="main-container">
         <!-- Left Panel -->
         <div class="scanner-panel">
-            <div id="greeting" style="font-size: 1.8em; font-weight: 800; margin-bottom: -15px; color: #10b981; letter-spacing: 1px; text-transform: uppercase;">Welcome!</div>
+            <div id="greeting" style="font-size: 1.8em; font-weight: 800; margin-bottom: 5px; color: #10b981; letter-spacing: 1px; text-transform: uppercase;">Welcome!</div>
             <div class="clock" id="clock">00:00:00</div>
             <div class="date" id="date">Loading...</div>
             
@@ -170,9 +181,8 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             </div>
             
             <div class="status-box">
-                <p class="status-msg" id="statusMsg">Click Initialize to Start</p>
+                <p class="status-msg" id="statusMsg"><i class='fa fa-spinner fa-spin'></i> Initializing...</p>
             </div>
-            <button id="btnInit" class="btn btn-lg" style="margin-top: 15px; border-radius: 8px; padding: 10px 24px; font-weight: 700; background: #059669; color: white; border: none; box-shadow: 0 4px 12px rgba(5,150,105,0.3);" onclick="initScanner()">Initialize Scanner</button>
             
             <div class="emp-overlay" id="empOverlay">
                 <img src="personnelImg/default_img.jpg" id="overlayImg">
@@ -233,6 +243,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         
         $(document).ready(function() {
             loadLiveFeed();
+            initScanner();
             
             // Auto-sync fingerprints from DB every 10 seconds
             setInterval(function() {
@@ -310,20 +321,19 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
         function initScanner() {
             if (currentPortIndex >= ports.length) {
-                updateUI("<i class='fa fa-warning'></i> Scanner not detected.", "error");
+                updateUI("<i class='fa fa-warning'></i> Scanner disconnected. Retrying...", "error");
                 currentPortIndex = 0; // reset for next manual click
-                $('#btnInit').show();
+                setTimeout(initScanner, 3000); // Poll every 3 seconds if not found
                 return;
             }
             
-            $('#btnInit').hide();
-            updateUI("<i class='fa fa-spinner fa-spin'></i> Initializing...", "info");
             zkTecoUrl = "http://127.0.0.1:" + ports[currentPortIndex] + "/ZK_Finger";
             
             $.ajax({
                 url: zkTecoUrl + "/Init",
                 type: "GET",
                 dataType: "text",
+                timeout: 2000,
                 success: function (data) {
                     try {
                         var res = JSON.parse(data);
@@ -331,8 +341,8 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                             updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
                             startCapture();
                         } else {
-                            updateUI("<i class='fa fa-warning'></i> Scanner not initialized.", "error");
-                            $('#btnInit').show();
+                            currentPortIndex++;
+                            initScanner();
                         }
                     } catch(e) {
                         currentPortIndex++;
