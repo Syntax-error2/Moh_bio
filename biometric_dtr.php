@@ -170,8 +170,9 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             </div>
             
             <div class="status-box">
-                <p class="status-msg" id="statusMsg">Initializing Scanner...</p>
+                <p class="status-msg" id="statusMsg">Click Initialize to Start</p>
             </div>
+            <button id="btnInit" class="btn btn-lg" style="margin-top: 15px; border-radius: 8px; padding: 10px 24px; font-weight: 700; background: #059669; color: white; border: none; box-shadow: 0 4px 12px rgba(5,150,105,0.3);" onclick="initScanner()">Initialize Scanner</button>
             
             <div class="emp-overlay" id="empOverlay">
                 <img src="personnelImg/default_img.jpg" id="overlayImg">
@@ -310,11 +311,13 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         function initScanner() {
             if (currentPortIndex >= ports.length) {
                 updateUI("<i class='fa fa-warning'></i> Scanner not detected.", "error");
-                currentPortIndex = 0; // reset
-                setTimeout(initScanner, 5000);
+                currentPortIndex = 0; // reset for next manual click
+                $('#btnInit').show();
                 return;
             }
             
+            $('#btnInit').hide();
+            updateUI("<i class='fa fa-spinner fa-spin'></i> Initializing...", "info");
             zkTecoUrl = "http://127.0.0.1:" + ports[currentPortIndex] + "/ZK_Finger";
             
             $.ajax({
@@ -322,8 +325,19 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 type: "GET",
                 dataType: "text",
                 success: function (data) {
-                    updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
-                    startCapture();
+                    try {
+                        var res = JSON.parse(data);
+                        if (res.ret == 0) {
+                            updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
+                            startCapture();
+                        } else {
+                            updateUI("<i class='fa fa-warning'></i> Scanner not initialized.", "error");
+                            $('#btnInit').show();
+                        }
+                    } catch(e) {
+                        currentPortIndex++;
+                        initScanner();
+                    }
                 },
                 error: function () {
                     // Try next port
@@ -486,7 +500,6 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         }
 
         $(document).ready(function() {
-            initScanner();
             loadLiveFeed();
             // Auto refresh feed every 10 seconds just in case
             setInterval(loadLiveFeed, 10000);
