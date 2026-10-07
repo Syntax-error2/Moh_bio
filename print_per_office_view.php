@@ -3,13 +3,23 @@ include('session.php');
 include('dbcon.php');
 include('myFunctions.php');
 
-if (!isset($_GET['date']) || !isset($_GET['do_id'])) {
+if (!isset($_GET['do_id'])) {
     die("Parameters missing.");
 }
 
-$dateFilter = date('Y-m-d', strtotime($_GET['date']));
-$pl_filterDate = date('m/d/Y', strtotime($_GET['date']));
-$dateDisplay = date('F d, Y', strtotime($_GET['date']));
+$requestedDate = $_GET['dateFrom'] ?? $_GET['date'] ?? '';
+$date = DateTime::createFromFormat('!m/d/Y', $requestedDate);
+if (!$date || $date->format('m/d/Y') !== $requestedDate) {
+    $date = DateTime::createFromFormat('!Y-m-d', $requestedDate);
+}
+if (!$date || !in_array($requestedDate, [$date->format('m/d/Y'), $date->format('Y-m-d')], true)
+    || !ctype_digit((string)$_GET['do_id'])) {
+    http_response_code(400);
+    exit('Invalid date or office.');
+}
+$dateFilter = $date->format('Y-m-d');
+$pl_filterDate = $date->format('m/d/Y');
+$dateDisplay = $date->format('F d, Y');
 $do_id = $_GET['do_id'];
 
 // Get Office Name
@@ -20,9 +30,9 @@ $officeName = $off_name_q->fetchColumn();
 // Fetch Personnel and Logs
 $p_q = $conn->prepare("
     SELECT p.* 
-    FROM personnels p 
-    LEFT JOIN emp_status es ON p.empStat_id = es.empStat_id
-    WHERE p.do_id = :doid AND es.status = 'Active'
+    FROM personnels p
+    WHERE p.do_id = :doid
+      AND (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ')
     ORDER BY p.lname ASC
 ");
 $p_q->execute([':doid' => $do_id]);
@@ -41,8 +51,8 @@ foreach($bio_dtr as $b) {
     $logs_by_pid[$pid][] = $b;
 }
 
-$pl_q = $conn->prepare("SELECT * FROM personnel_logs WHERE logDate = :ld");
-$pl_q->execute([':ld' => $pl_filterDate]);
+$pl_q = $conn->prepare("SELECT * FROM personnel_logs WHERE (logDate = :ld1 OR logDate = :ld2) AND (captured_img != '' OR logDate LIKE '%-%')");
+$pl_q->execute([':ld1' => $pl_filterDate, ':ld2' => $dateFilter]);
 $personnel_logs = $pl_q->fetchAll(PDO::FETCH_ASSOC);
 
 $manual_logs_by_rf = [];
@@ -155,14 +165,17 @@ foreach($personnel_logs as $pl) {
                         }
                     }
                     
-                    if (!empty($rfid) && isset($manual_logs_by_rf[$rfid])) {
-                        foreach($manual_logs_by_rf[$rfid] as $ml) {
+                    $manualEntries = $manual_logs_by_rf[$rfid] ?? [];
+                    $biometricId = $nc_row['biometric_id'] ?? '';
+                    if ($biometricId !== '' && $biometricId !== $rfid) {
+                        $manualEntries = array_merge($manualEntries, $manual_logs_by_rf[$biometricId] ?? []);
+                    }
+                    foreach($manualEntries as $ml) {
                             $mlTimeStr = date("h:i a", strtotime($ml['logTime']));
                             if ($ml['logFlow'] == 'AM IN') { $am_in = $mlTimeStr; }
                             if ($ml['logFlow'] == 'AM OUT') { $am_out = $mlTimeStr; }
                             if ($ml['logFlow'] == 'PM IN') { $pm_in = $mlTimeStr; }
                             if ($ml['logFlow'] == 'PM OUT') { $pm_out = $mlTimeStr; }
-                        }
                     }
                 ?>
                 <tr>

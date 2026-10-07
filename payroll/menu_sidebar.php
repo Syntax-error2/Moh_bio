@@ -142,7 +142,8 @@
                 
                 <li><a href="../csvFile_import.php"> <i class="fa fa-file-excel-o"></i>CSV Files</a></li>
                 <li><a href="../list_dbFiles_manager.php"> <i class="fa fa-database"></i>DB Files</a></li>
-                <?php if ($session_access === 'Admin') { ?>
+                <?php if (in_array($session_access, ['Admin', 'Administrator'], true)) { ?>
+                <li><a href="../attendance_transfer.php"> <i class="fa fa-exchange"></i>Attendance Transfer</a></li>
                 <li><a href="../manage_users.php"> <i class="fa fa-users"></i>Manage Users</a></li>
                 <li><a href="../audit_logs.php"> <i class="fa fa-history"></i>Audit Trail</a></li>
                 <?php } ?>

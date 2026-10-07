@@ -252,12 +252,10 @@ $studData_row = $printALL_row;
     $endDate = sprintf("%04d-%02d-%02d", $selectedYYYY, $selectedMM, $MMmaxDay - 1);
     
     $allBioLogs = [];
-    if (!empty($studData_row['biometric_id'])) {
-        $bio_stmt = $conn->prepare("SELECT log_date, time_in, time_out FROM bio_dtr WHERE personnel_id = ? AND log_date BETWEEN ? AND ? ORDER BY time_in ASC");
-        $bio_stmt->execute([$studData_row['personnel_id'], $startDate, $endDate]);
-        while ($r = $bio_stmt->fetch(PDO::FETCH_ASSOC)) {
-            $allBioLogs[$r['log_date']][] = $r;
-        }
+    $bio_stmt = $conn->prepare("SELECT log_date, time_in, time_out FROM bio_dtr WHERE personnel_id = ? AND log_date BETWEEN ? AND ? ORDER BY time_in ASC");
+    $bio_stmt->execute([$studData_row['personnel_id'], $startDate, $endDate]);
+    while ($r = $bio_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $allBioLogs[$r['log_date']][] = $r;
     }
     
     // Fetch schedule
@@ -312,7 +310,7 @@ $studData_row = $printALL_row;
         $logDateCtr = $selectedYYYY . '-' . $selectedMM . '-' . $dayPad;
         $displayDateCtr = $selectedMM . '/' . $dayPad . '/' . substr($selectedYYYY, 2, 2);
         
-        $is_biometric = !empty($studData_row['biometric_id']);
+        $is_biometric = !empty($allBioLogs[$logDateCtr]);
         $bio_am_in = false;
         $bio_am_out = false;
         $bio_pm_in = false;

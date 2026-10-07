@@ -3,29 +3,36 @@ include('session.php');
 include('dbcon.php');
 include('myFunctions.php');
 
-if (!isset($_GET['date'])) {
-    die("Date parameter missing.");
+$requestedDate = $_GET['dateFrom'] ?? $_GET['date'] ?? '';
+$date = DateTime::createFromFormat('!m/d/Y', $requestedDate);
+if (!$date || $date->format('m/d/Y') !== $requestedDate) {
+    $date = DateTime::createFromFormat('!Y-m-d', $requestedDate);
+}
+if (!$date || !in_array($requestedDate, [$date->format('m/d/Y'), $date->format('Y-m-d')], true)) {
+    http_response_code(400);
+    exit('Invalid date.');
 }
 
-$dateFilter = date('Y-m-d', strtotime($_GET['date']));
-$plFilterDate1 = date('m/d/Y', strtotime($_GET['date']));
-$plFilterDate2 = date('Y-m-d', strtotime($_GET['date']));
-$dateDisplay = date('F d, Y', strtotime($_GET['date']));
+$dateFilter = $date->format('Y-m-d');
+$plFilterDate1 = $date->format('m/d/Y');
+$plFilterDate2 = $dateFilter;
+$dateDisplay = $date->format('F d, Y');
 
 // Fetch the summary
 $query = $conn->prepare("
     SELECT 
         d.dept_office_name, 
         COUNT(DISTINCT p.personnel_id) AS total_personnel,
-        COUNT(DISTINCT CASE WHEN (b.time_in < '12:00:00' AND b.time_in != '00:00:00') OR (b.time_out < '12:00:00' AND b.time_out != '00:00:00') OR (pl.logFlow = 'AM IN' OR pl.logFlow = 'AM OUT') THEN p.personnel_id ELSE NULL END) AS am_present,
-        COUNT(DISTINCT CASE WHEN (b.time_in >= '12:00:00') OR (b.time_out >= '12:00:00' AND b.time_out != '00:00:00') OR (pl.logFlow = 'PM IN' OR pl.logFlow = 'PM OUT') THEN p.personnel_id ELSE NULL END) AS pm_present,
-        COUNT(DISTINCT p.personnel_id) - COUNT(DISTINCT CASE WHEN b.personnel_id IS NOT NULL OR pl.RFTag_id IS NOT NULL THEN p.personnel_id ELSE NULL END) AS absent
+        COUNT(DISTINCT CASE WHEN (b.time_in < '12:00:00' AND b.time_in != '00:00:00') OR (b.time_out < '13:00:00' AND b.time_out != '00:00:00') OR pl.logFlow IN ('AM IN', 'AM OUT') THEN p.personnel_id END) AS am_present,
+        COUNT(DISTINCT CASE WHEN b.time_in >= '12:00:00' OR b.time_out >= '13:00:00' OR pl.logFlow IN ('PM IN', 'PM OUT') THEN p.personnel_id END) AS pm_present,
+        COUNT(DISTINCT p.personnel_id) - COUNT(DISTINCT CASE WHEN (b.time_in IS NOT NULL AND b.time_in != '00:00:00') OR (b.time_out IS NOT NULL AND b.time_out != '00:00:00') OR pl.logFlow IN ('AM IN', 'AM OUT', 'PM IN', 'PM OUT') THEN p.personnel_id END) AS absent
     FROM dept_offices d
     LEFT JOIN personnels p ON d.do_id = p.do_id
-    LEFT JOIN emp_status es ON p.empStat_id = es.empStat_id
+        AND (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ')
     LEFT JOIN bio_dtr b ON p.personnel_id = b.personnel_id AND b.log_date = :dateFilter
-    LEFT JOIN personnel_logs pl ON p.RFTag_id = pl.RFTag_id AND p.RFTag_id != '' AND (pl.logDate = :plFilterDate1 OR pl.logDate = :plFilterDate2)
-    WHERE es.status = 'Active'
+    LEFT JOIN personnel_logs pl ON (p.RFTag_id = pl.RFTag_id OR p.biometric_id = pl.RFTag_id)
+        AND pl.RFTag_id != '' AND (pl.logDate = :plFilterDate1 OR pl.logDate = :plFilterDate2)
+        AND (pl.captured_img != '' OR pl.logDate LIKE '%-%')
     GROUP BY d.do_id, d.dept_office_name
     ORDER BY d.dept_office_name ASC
 ");

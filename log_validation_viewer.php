@@ -15,33 +15,12 @@
   
     $day=date("l"); //Mon-Sun
     
-    if(isset($_POST['filterDate'])){
-    $filterDate=$_POST['reportDate'];
-     
-    }else{
-        
-    $filterDate=date('m/d/Y');
-   
-    }
-    
-    if(isset($_POST['print_daily_LV'])){ ?>
-    
-    <script>
-    window.open('print_daily_preview_LogValidation.php?dateFrom=<?php echo $filterDate; ?>', '_blank');
-    window.location='log_validation_viewer.php';
-    </script>
-    
-    <?php } ?>
-
-    <?php
-    if(isset($_POST['print_daily_summary'])){ ?>
-    
-    <script>
-    window.open('print_daily_summary.php?date=<?php echo $filterDate; ?>', '_blank');
-    window.location='log_validation_viewer.php';
-    </script>
-    
-    <?php } ?>
+    $requestedDate = $_GET['dateFrom'] ?? $_POST['reportDate'] ?? date('m/d/Y');
+    $parsedDate = DateTime::createFromFormat('!m/d/Y', $requestedDate);
+    $filterDate = $parsedDate && $parsedDate->format('m/d/Y') === $requestedDate
+        ? $requestedDate
+        : date('m/d/Y');
+    ?>
   <body>
   
   <?php include('menu_sidebar.php'); ?>
@@ -79,7 +58,7 @@
               <div id="new-updates" class="card updates recent-updated">
                 <div id="updates-header" class="card-header d-flex justify-content-between align-items-center">
                   
-                  <form method="POST">
+                  <form method="GET" action="log_validation_viewer.php">
                   <table>
                   <tr>
                   
@@ -88,32 +67,34 @@
                   </td>
                   
                   <td style="border: none; background-color: white;">
-                  <select name="reportDate" class="form-control">
+                  <select name="dateFrom" class="form-control">
                   <option><?php echo $filterDate; ?></option>
                    
                   <?php
-                  $currentDate="";
-                  $opt_query = $conn->query("SELECT DISTINCT DATE_FORMAT(log_date, '%m/%d/%Y') as logDate FROM bio_dtr ORDER BY log_date DESC");
+                  $opt_query = $conn->query("SELECT day FROM (
+                      SELECT log_date AS day FROM bio_dtr
+                      UNION
+                      SELECT STR_TO_DATE(logDate, '%m/%d/%Y') AS day FROM personnel_logs
+                  ) AS log_days WHERE day IS NOT NULL ORDER BY day DESC");
                   while ($opt_row = $opt_query->fetch()) 
                   { 
-                    if($filterDate==$opt_row['logDate']){
+                    $optionDate = date('m/d/Y', strtotime($opt_row['day']));
+                    if($filterDate==$optionDate){
                         
                     }else{ ?>
                     
-                    <option><?php echo $opt_row['logDate']; ?></option>
+                    <option><?php echo $optionDate; ?></option>
                     
                     <?php
-                    
-                    $currentDate=$opt_row['logDate'];
                     
                     } } ?>
                   </select>
                   </td>
                   
                   <td style="border: none; background-color: white;">
-                  <button name="filterDate" class="btn btn-primary" title="Filter Date"><i class="fa fa-filter"></i></button>
-                  <button name="print_daily_LV" class="btn btn-info" style="color: white;" title="Print daily log validation list..."><i class="fa fa-print"></i></button>
-                  <button name="print_daily_summary" class="btn btn-warning" style="color: white;" title="Print daily attendance summary per office..."><i class="fa fa-file-text-o"></i></button>
+                  <button type="submit" class="btn btn-primary" title="Filter Date"><i class="fa fa-filter"></i></button>
+                  <button type="submit" formaction="print_daily_preview_LogValidation.php" formtarget="_blank" class="btn btn-info" style="color: white;" title="Print daily log validation list..."><i class="fa fa-print"></i></button>
+                  <button type="submit" formaction="print_daily_summary.php" formtarget="_blank" class="btn btn-warning" style="color: white;" title="Print daily attendance summary per office..."><i class="fa fa-file-text-o"></i></button>
                   </td>
                   </tr>
                   </table>

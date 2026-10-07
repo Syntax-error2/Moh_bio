@@ -1,126 +1,28 @@
-<!DOCTYPE html>
-<html>
+<?php
+include('session.php');
 
-<?php 
-include('session.php');  
-//error_reporting(0);
+$requestedDate = $_GET['dateFrom'] ?? '';
+$date = DateTime::createFromFormat('!m/d/Y', $requestedDate);
+if (!$date || $date->format('m/d/Y') !== $requestedDate) {
+    http_response_code(400);
+    exit('Invalid date.');
+}
 
- 
-  $selectedMM=substr($_GET['dateFrom'], 0,2);
-  $selectedDD=substr($_GET['dateFrom'], 3,2);
-  $selectedYYYY=substr($_GET['dateFrom'], 6,4);
-
-
-  
-  
-                 
-                if($selectedMM=="01")
-                {
-                    
-                    $mmWords="January";
-                    $MMmaxDay=32;
-                }
-                
-                if($selectedMM=="02")
-                {
-                    $mmWords="February";
-                    
-                    $leap = date('L', mktime(0, 0, 0, 1, 1, $selectedYYYY));
-            
-                    if($leap==0)
-                    {
-                    $MMmaxDay=29;    
-                    }else{
-                    $MMmaxDay=30;        
-                    }
-                    
-                }
-                
-                
-                if($selectedMM=="03")
-                {
-                    $mmWords="March";
-                    $MMmaxDay=32;    
-                }
-                
-                
-                if($selectedMM=="04")
-                {
-                    $mmWords="April";
-                    $MMmaxDay=31;    
-                }
-                
-                
-                if($selectedMM=="05")
-                {
-                    $mmWords="May";
-                    $MMmaxDay=32;  
-
-                }
-                
-                
-                if($selectedMM=="06")
-                {
-                    $mmWords="June";
-                    $MMmaxDay=31;
-                }
-                
-                
-                
-                if($selectedMM=="07")
-                {
-                    $mmWords="July";
-                    $MMmaxDay=32;
-                }
-                
-                
-                if($selectedMM=="08")
-                {
-                    $mmWords="August";
-                    $MMmaxDay=32;
-                }
-                
-                
-                if($selectedMM=="09")
-                {
-                    $mmWords="September";
-                    $MMmaxDay=31;
-                }
-                
-                
-                if($selectedMM=="10")
-                {
-                    $mmWords="October";
-                    $MMmaxDay=32;
-                }
-                
-                
-                if($selectedMM=="11")
-                {
-                    $mmWords="November";
-                    $MMmaxDay=31;
-                }
-                
-                
-                if($selectedMM=="12")
-                {
-                    $mmWords="December";
-                    $MMmaxDay=32;
-                }
-  
-           
-        
-include('header_print.php');
-
+$db_filterDate = $date->format('Y-m-d');
+$pl_filterDate1 = $date->format('m/d/Y');
+$pl_filterDate2 = $db_filterDate;
 ?>
 
+<!DOCTYPE html>
+<html>
+<?php include('header_print.php'); ?>
 <body onload="window.print()">
 <?php include('header_print_letterHead.php'); ?>
 <hr />
 
 <center>
 <h3>DAILY LOG VALIDATION REPORT</h3>
-<h4><?php echo $mmWords.' '.$selectedDD.', '.$selectedYYYY; ?></h4>
+<h4><?php echo htmlspecialchars($date->format('F d, Y')); ?></h4>
 </center>
 
 <hr />
@@ -131,97 +33,82 @@ include('header_print.php');
     <div class="row">
     
     <?php
-    $db_filterDate = date('Y-m-d', strtotime($_GET['dateFrom']));
-    $pl_filterDate1 = date('m/d/Y', strtotime($_GET['dateFrom'])); // mm/dd/yyyy
-    $pl_filterDate2 = date('Y-m-d', strtotime($_GET['dateFrom'])); // YYYY-MM-DD
-
     // 1. Fetch bio logs
-    $LV_query = $conn->query("
+    $LV_query = $conn->prepare("
         SELECT b.*, p.lname, p.fname, p.mname, p.suffix, p.img 
         FROM bio_dtr b 
         JOIN personnels p ON b.personnel_id = p.personnel_id 
-        WHERE b.log_date = '$db_filterDate' 
+        WHERE b.log_date = :log_date
         ORDER BY b.time_in ASC
     ");
+    $LV_query->execute([':log_date' => $db_filterDate]);
     $bio_logs = $LV_query->fetchAll(PDO::FETCH_ASSOC);
 
     // 2. Fetch manual logs
-    $pl_query = $conn->query("
+    $pl_query = $conn->prepare("
         SELECT pl.*, p.lname, p.fname, p.mname, p.suffix, p.img, p.personnel_id 
         FROM personnel_logs pl 
         JOIN personnels p ON (pl.RFTag_id = p.RFTag_id OR pl.RFTag_id = p.biometric_id) AND pl.RFTag_id != ''
-        WHERE (pl.logDate = '$pl_filterDate1' OR pl.logDate = '$pl_filterDate2') AND (pl.captured_img != '' OR pl.logDate LIKE '%-%')
+        WHERE (pl.logDate = :date1 OR pl.logDate = :date2) AND (pl.captured_img != '' OR pl.logDate LIKE '%-%')
         ORDER BY pl.log_id ASC
     ");
+    $pl_query->execute([':date1' => $pl_filterDate1, ':date2' => $pl_filterDate2]);
     $personnel_logs = $pl_query->fetchAll(PDO::FETCH_ASSOC);
 
     $merged_logs = [];
-    
-    // Process bio logs
-    foreach($bio_logs as $log) {
-        $pid = $log['personnel_id'];
-        if (!isset($merged_logs[$pid])) { $merged_logs[$pid] = []; }
-        $log['source'] = 'bio';
-        $merged_logs[$pid][] = $log;
-    }
+    $emptyLog = static function (array $person): array {
+        return [
+            'lname' => $person['lname'], 'fname' => $person['fname'],
+            'mname' => $person['mname'], 'suffix' => $person['suffix'], 'img' => $person['img'],
+            'am_in' => '', 'am_out' => '', 'pm_in' => '', 'pm_out' => '',
+            'bio' => false, 'manual' => false,
+        ];
+    };
 
-    // Process manual logs
-    foreach($personnel_logs as $pl) {
-        $pid = $pl['personnel_id'];
-        $time_24 = date('H:i:s', strtotime($pl['logTime']));
-        
+    foreach ($bio_logs as $log) {
+        $pid = $log['personnel_id'];
         if (!isset($merged_logs[$pid])) {
-            $merged_logs[$pid] = [];
+            $merged_logs[$pid] = $emptyLog($log);
         }
-        
-        // Find if we already have an AM or PM manual log for this person to merge with
-        $is_am = in_array($pl['logFlow'], ['AM IN', 'AM OUT']);
-        $is_pm = in_array($pl['logFlow'], ['PM IN', 'PM OUT']);
-        
-        $found = false;
-        foreach ($merged_logs[$pid] as &$existing_log) {
-            if ($existing_log['source'] == 'manual') {
-                $has_am = ($existing_log['time_in'] && $existing_log['time_in'] < '12:00:00') || ($existing_log['time_out'] && $existing_log['time_out'] < '13:00:00') || $existing_log['logFlow'] == 'AM IN' || $existing_log['logFlow'] == 'AM OUT';
-                $has_pm = ($existing_log['time_in'] && $existing_log['time_in'] >= '12:00:00') || ($existing_log['time_out'] && $existing_log['time_out'] >= '13:00:00') || $existing_log['logFlow'] == 'PM IN' || $existing_log['logFlow'] == 'PM OUT';
-                
-                if (($is_am && $has_am) || ($is_pm && $has_pm)) {
-                    // Merge into existing card
-                    if ($pl['logFlow'] == 'AM IN' || $pl['logFlow'] == 'PM IN') {
-                        $existing_log['time_in'] = $time_24;
-                    }
-                    if ($pl['logFlow'] == 'AM OUT' || $pl['logFlow'] == 'PM OUT') {
-                        $existing_log['time_out'] = $time_24;
-                    }
-                    $found = true;
-                    break;
-                }
+        $merged_logs[$pid]['bio'] = true;
+        if ($log['time_in'] && $log['time_in'] !== '00:00:00') {
+            $slot = $log['time_in'] < '12:00:00' ? 'am_in' : 'pm_in';
+            if ($merged_logs[$pid][$slot] === '') {
+                $merged_logs[$pid][$slot] = $log['time_in'];
             }
         }
-        
-        if (!$found) {
-            $log_entry = [
-                'personnel_id' => $pl['personnel_id'],
-                'lname' => $pl['lname'], 'fname' => $pl['fname'], 'mname' => $pl['mname'], 'suffix' => $pl['suffix'], 'img' => $pl['img'],
-                'log_date' => date('Y-m-d', strtotime($pl['logDate'])),
-                'time_in' => '', 'time_out' => '',
-                'source' => 'manual',
-                'logFlow' => $pl['logFlow']
-            ];
-            
-            if ($pl['logFlow'] == 'AM IN' || $pl['logFlow'] == 'PM IN') { $log_entry['time_in'] = $time_24; }
-            if ($pl['logFlow'] == 'AM OUT' || $pl['logFlow'] == 'PM OUT') { $log_entry['time_out'] = $time_24; }
-            
-            $merged_logs[$pid][] = $log_entry;
+        if ($log['time_out'] && $log['time_out'] !== '00:00:00') {
+            $slot = $log['time_out'] < '13:00:00' ? 'am_out' : 'pm_out';
+            if ($merged_logs[$pid][$slot] === '') {
+                $merged_logs[$pid][$slot] = $log['time_out'];
+            }
         }
     }
 
-    // Flatten back to array
-    $final_logs = [];
-    foreach($merged_logs as $pid => $logs) {
-        foreach($logs as $l) {
-            $final_logs[] = $l;
+    // Manual entries override the corresponding scanner time, as in the viewer.
+    $manualSlots = ['AM IN' => 'am_in', 'AM OUT' => 'am_out', 'PM IN' => 'pm_in', 'PM OUT' => 'pm_out'];
+    foreach ($personnel_logs as $pl) {
+        if (!isset($manualSlots[$pl['logFlow']])) {
+            continue;
         }
+        $timestamp = strtotime($pl['logTime']);
+        if ($timestamp === false) {
+            continue;
+        }
+        $pid = $pl['personnel_id'];
+        if (!isset($merged_logs[$pid])) {
+            $merged_logs[$pid] = $emptyLog($pl);
+        }
+        $merged_logs[$pid][$manualSlots[$pl['logFlow']]] = date('H:i:s', $timestamp);
+        $merged_logs[$pid]['manual'] = true;
     }
+
+    $final_logs = array_values(array_filter($merged_logs, static function (array $log): bool {
+        return $log['am_in'] !== '' || $log['am_out'] !== '' || $log['pm_in'] !== '' || $log['pm_out'] !== '';
+    }));
+    usort($final_logs, static function (array $a, array $b): int {
+        return [$a['lname'], $a['fname']] <=> [$b['lname'], $b['fname']];
+    });
 
     foreach($final_logs as $LV_row) {
     
@@ -236,8 +123,6 @@ include('header_print.php');
                             $finalMName=$suffix.substr($LV_row['mname'], 0, 1).'.';
                         }
                         
-                        $printALL_row = $LV_row; // To keep compatibility with below HTML
-                        
     ?>
     
     
@@ -246,8 +131,8 @@ include('header_print.php');
         <tr>
         <td style="border: none;">
         <center>
-        <?php if (isset($LV_row['source']) && $LV_row['source'] == 'manual'): ?>
-            <span class="badge badge-info" style="background-color: #17a2b8; color: white;">Manual Encode</span>
+        <?php if ($LV_row['manual']): ?>
+            <span class="badge badge-info" style="background-color: #17a2b8; color: white;"><?php echo $LV_row['bio'] ? 'Bio + Manual' : 'Manual Encode'; ?></span>
         <?php else: ?>
             <span class="badge badge-secondary">Bio Scanner</span>
         <?php endif; ?>
@@ -255,27 +140,20 @@ include('header_print.php');
         </td>
         <td style="border: none;">
         <center>
-        <img src="<?php echo empty($LV_row['img']) ? 'img/avatar-1.jpg' : 'personnelImg/'.$LV_row['img']; ?>" width="60" height="75" class="img-fluid rounded" />
+        <img src="<?php echo htmlspecialchars(empty($LV_row['img']) ? 'img/avatar-1.jpg' : 'personnelImg/'.$LV_row['img']); ?>" width="60" height="75" class="img-fluid rounded" />
         </center>
         </td>
         </tr>
-        
+
         <tr>
         <td colspan="2" style="border: none;">
         <small>
-        <strong>Fullname: </strong><?php echo $printALL_row['lname'].", ".$printALL_row['fname']." ".$finalMName; ?><br />
+        <strong>Fullname: </strong><?php echo htmlspecialchars($LV_row['lname'].", ".$LV_row['fname']." ".$finalMName); ?><br />
         <?php 
-        $tIn = $LV_row['time_in'];
-        if ($tIn && $tIn != '00:00:00') {
-            $inStr = date('h:i a', strtotime($tIn));
-            $inLbl = (strtotime($tIn) < strtotime('12:00:00')) ? 'AM IN' : 'PM IN';
-            echo "{$inStr} ( {$inLbl} )<br/>";
-        }
-        $tOut = $LV_row['time_out'];
-        if ($tOut && $tOut != '00:00:00') {
-            $outStr = date('h:i a', strtotime($tOut));
-            $outLbl = (strtotime($tOut) < strtotime('13:00:00')) ? 'AM OUT' : 'PM OUT';
-            echo "{$outStr} ( {$outLbl} )";
+        foreach (['am_in' => 'AM IN', 'am_out' => 'AM OUT', 'pm_in' => 'PM IN', 'pm_out' => 'PM OUT'] as $slot => $label) {
+            if ($LV_row[$slot] !== '') {
+                echo htmlspecialchars(date('h:i a', strtotime($LV_row[$slot]))).' ( '.$label.' )<br />';
+            }
         }
         ?>
         </small>
@@ -296,5 +174,3 @@ include('header_print.php');
 
 </body>
 </html>
-       
-            

@@ -13,29 +13,15 @@
  
     $day=date("l"); //Mon-Sun
     
-    if(isset($_POST['filterDateBtn'])){
-        $filterDate=$_POST['reportDate'];
-        $filterOffice=$_POST['reportOffice'];
-    }else{
-        $filterDate=date('m/d/Y');
-        $filterOffice="";
+    $requestedDate = $_GET['dateFrom'] ?? $_POST['reportDate'] ?? date('m/d/Y');
+    $parsedDate = DateTime::createFromFormat('!m/d/Y', $requestedDate);
+    $filterDate = $parsedDate && $parsedDate->format('m/d/Y') === $requestedDate
+        ? $requestedDate
+        : date('m/d/Y');
+    $filterOffice = $_GET['do_id'] ?? $_POST['reportOffice'] ?? '';
+    if ($filterOffice !== '' && !ctype_digit((string)$filterOffice)) {
+        $filterOffice = '';
     }
-    
-    if(isset($_POST['print_per_office'])){ 
-        $printDate = $_POST['reportDate'];
-        $printOffice = $_POST['reportOffice'];
-        if ($printOffice != '') {
-    ?>
-    
-    <script>
-    window.open('print_per_office_view.php?date=<?php echo $printDate; ?>&do_id=<?php echo $printOffice; ?>', '_blank');
-    window.location='log_validation_per_office.php';
-    </script>
-    
-    <?php } else {
-            echo "<script>alert('Please select an office to print!'); window.location='log_validation_per_office.php';</script>";
-        }
-    } 
     ?>
   <body>
   
@@ -74,7 +60,7 @@
               <div id="new-updates" class="card updates recent-updated">
                 <div id="updates-header" class="card-header d-flex justify-content-between align-items-center">
                   
-                  <form method="POST" style="width: 100%;">
+                  <form method="GET" action="log_validation_per_office.php" style="width: 100%;">
                   <table style="width: 100%;">
                   <tr>
                   
@@ -83,31 +69,35 @@
                   </td>
                   
                   <td style="border: none; background-color: white; width: 25%;">
-                  <select name="reportDate" class="form-control">
+                  <select name="dateFrom" class="form-control">
                   <option><?php echo $filterDate; ?></option>
                    
                   <?php
-                  $currentDate="";
-                  $opt_query = $conn->query("SELECT DISTINCT DATE_FORMAT(log_date, '%m/%d/%Y') as logDate FROM bio_dtr ORDER BY log_date DESC");
+                  $opt_query = $conn->query("SELECT day FROM (
+                      SELECT log_date AS day FROM bio_dtr
+                      UNION
+                      SELECT STR_TO_DATE(logDate, '%m/%d/%Y') AS day FROM personnel_logs
+                  ) AS log_days WHERE day IS NOT NULL ORDER BY day DESC");
                   while ($opt_row = $opt_query->fetch()) 
                   { 
-                    if($filterDate==$opt_row['logDate']){
+                    $optionDate = date('m/d/Y', strtotime($opt_row['day']));
+                    if($filterDate==$optionDate){
                         
                     }else{ ?>
-                    <option><?php echo $opt_row['logDate']; ?></option>
+                    <option><?php echo $optionDate; ?></option>
                     <?php
-                    $currentDate=$opt_row['logDate'];
                     } } ?>
                   </select>
                   </td>
 
                   <td style="border: none; background-color: white; width: 35%;">
-                  <select name="reportOffice" class="form-control" required>
+                  <select name="do_id" class="form-control" required>
                   <?php 
                   if(isset($filterOffice) && $filterOffice != '') { 
-                      $off_name_q = $conn->query("SELECT dept_office_name FROM dept_offices WHERE do_id='$filterOffice'");
+                      $off_name_q = $conn->prepare("SELECT dept_office_name FROM dept_offices WHERE do_id = :do_id");
+                      $off_name_q->execute([':do_id' => $filterOffice]);
                       $off_name = $off_name_q->fetchColumn();
-                      echo "<option value='$filterOffice'>$off_name</option>"; 
+                      echo '<option value="'.htmlspecialchars($filterOffice).'">'.htmlspecialchars($off_name ?: '').'</option>';
                   } else { 
                       echo "<option value=''>-- Select Office --</option>"; 
                   } 
@@ -123,8 +113,8 @@
                   </td>
                   
                   <td style="border: none; background-color: white; width: 20%; text-align: right;">
-                  <button name="filterDateBtn" class="btn btn-primary" title="Filter"><i class="fa fa-filter"></i></button>
-                  <button name="print_per_office" class="btn btn-info" style="color: white;" title="Print per office view..."><i class="fa fa-print"></i></button>
+                  <button type="submit" class="btn btn-primary" title="Filter"><i class="fa fa-filter"></i></button>
+                  <button type="submit" formaction="print_per_office_view.php" formtarget="_blank" class="btn btn-info" style="color: white;" title="Print per office view..."><i class="fa fa-print"></i></button>
                   </td>
                   </tr>
                   </table>
@@ -146,9 +136,9 @@
                     // Fetch active personnel
                     $p_q = $conn->prepare("
                         SELECT p.* 
-                        FROM personnels p 
-                        LEFT JOIN emp_status es ON p.empStat_id = es.empStat_id
-                        WHERE p.do_id = :doid AND es.status = 'Active'
+                        FROM personnels p
+                        WHERE p.do_id = :doid
+                          AND (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ')
                         ORDER BY p.lname ASC
                     ");
                     $p_q->execute([':doid' => $filterOffice]);
@@ -169,7 +159,7 @@
                     }
                     
                     // Fetch manual logs
-                    $pl_q = $conn->prepare("SELECT * FROM personnel_logs WHERE logDate = :ld1 OR logDate = :ld2");
+                    $pl_q = $conn->prepare("SELECT * FROM personnel_logs WHERE (logDate = :ld1 OR logDate = :ld2) AND (captured_img != '' OR logDate LIKE '%-%')");
                     $pl_q->execute([':ld1' => $pl_filterDate1, ':ld2' => $pl_filterDate2]);
                     $personnel_logs = $pl_q->fetchAll(PDO::FETCH_ASSOC);
                     
@@ -207,14 +197,17 @@
                             }
                         }
                         
-                        if (!empty($rfid) && isset($manual_logs_by_rf[$rfid])) {
-                            foreach($manual_logs_by_rf[$rfid] as $ml) {
+                        $manualEntries = $manual_logs_by_rf[$rfid] ?? [];
+                        $biometricId = $nc_row['biometric_id'] ?? '';
+                        if ($biometricId !== '' && $biometricId !== $rfid) {
+                            $manualEntries = array_merge($manualEntries, $manual_logs_by_rf[$biometricId] ?? []);
+                        }
+                        foreach($manualEntries as $ml) {
                                 $mlTimeStr = date("h:i:s a", strtotime($ml['logTime']));
                                 if ($ml['logFlow'] == 'AM IN') { $am_in = $mlTimeStr; }
                                 if ($ml['logFlow'] == 'AM OUT') { $am_out = $mlTimeStr; }
                                 if ($ml['logFlow'] == 'PM IN') { $pm_in = $mlTimeStr; }
                                 if ($ml['logFlow'] == 'PM OUT') { $pm_out = $mlTimeStr; }
-                            }
                         }
                         
                         $img_src = empty($nc_row['img']) ? 'img/avatar-1.jpg' : 'personnelImg/'.$nc_row['img'];

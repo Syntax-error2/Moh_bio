@@ -101,3 +101,17 @@ CREATE TABLE IF NOT EXISTS personnel_overtime_requests (
   created_at timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (ot_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Archive active Job Order personnel in moh_bio without deleting their records.
+-- The verification query should return 0 after the update.
+UPDATE moh_bio.personnels
+SET separation_date = DATE_FORMAT(CURDATE(), '%m/%d/%Y')
+WHERE empStat_id = 4
+  AND separation_date IS NULL;
+
+SELECT COUNT(*) AS active_job_orders
+FROM moh_bio.personnels
+WHERE empStat_id = 4
+  AND (separation_date IS NULL
+       OR separation_date = ''
+       OR separation_date = '  /  /    ');

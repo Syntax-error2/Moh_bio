@@ -16,7 +16,22 @@ window.location = 'index.php';
 }
 
 $session_id=$_SESSION['id'];
-$session_access=$_SESSION['useraccess'];
+$user_query = $conn->prepare('SELECT * FROM useraccount WHERE user_id = :user_id');
+$user_query->execute(['user_id' => $session_id]);
+$user_row = $user_query->fetch();
+if (!$user_row) {
+    unset($_SESSION['id'], $_SESSION['useraccess'], $_SESSION['allowed_modules']);
+    if (!headers_sent()) {
+        header('Location: index.php');
+    } else {
+        echo '<script>window.location = "index.php";</script>';
+    }
+    exit();
+}
+
+// Use the current database role for access checks; the session value may be stale.
+$session_access = $user_row['access'];
+$_SESSION['useraccess'] = $session_access;
 $breadcrumb_home = $session_access === 'User' ? 'home_user.php' : 'home.php';
 
 if ($session_access === 'User') {
@@ -54,22 +69,10 @@ if ($session_access === 'User') {
     }
 }
  
-$user_query = $conn->prepare('SELECT * FROM useraccount WHERE user_id = :user_id');
-$user_query->execute(['user_id' => $session_id]);
-$user_row = $user_query->fetch();
-
-if ($user_row) {
-    // Override stale session access with fresh DB access (e.g. migrating 'Administrator' to 'Admin')
-    $session_access = $user_row['access'];
-    $_SESSION['useraccess'] = $user_row['access'];
-    
-    if ($user_row['access'] === 'Admin' || $user_row['access'] === 'Administrator') {
-        $_SESSION['allowed_modules'] = ['hris', 'payroll']; // Admin gets everything
-    } else {
-        $_SESSION['allowed_modules'] = explode(',', (string)($user_row['module_access'] ?? ''));
-    }
+if ($session_access === 'Admin' || $session_access === 'Administrator') {
+    $_SESSION['allowed_modules'] = ['hris', 'payroll']; // Admin gets everything
 } else {
-    $_SESSION['allowed_modules'] = [];
+    $_SESSION['allowed_modules'] = explode(',', (string)($user_row['module_access'] ?? ''));
 }
 
 $user_personnel_id=$user_row['personnel_id'];

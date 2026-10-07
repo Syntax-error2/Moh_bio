@@ -41,47 +41,36 @@ function processMonthlyLeaveCredits($conn, $admin_id = null) {
         $dateFrom = $firstDay->format('Y-m-d');
         $dateTo = $lastDay->format('Y-m-d');
         
-        // Check if this month has already been processed
-        $checkQuery = $conn->prepare("
-            SELECT COUNT(*) as processed_count 
-            FROM monthly_leave_credits_log 
-            WHERE year = :year AND month = :month
+        // Select only eligible personnel who have not received this month's credit.
+        $personnelQuery = $conn->prepare("
+            SELECT p.personnel_id, p.lname, p.fname, p.mname, es.emp_stat_name
+            FROM personnels p
+            JOIN emp_status es ON p.empStat_id = es.empStat_id
+            LEFT JOIN monthly_leave_credits_log ml
+              ON ml.personnel_id = p.personnel_id AND ml.year = :year AND ml.month = :month
+            WHERE (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ')
+              AND es.emp_stat_name IN ('Permanent', 'Casual')
+              AND ml.id IS NULL
+            ORDER BY p.lname, p.fname
         ");
-        $checkQuery->execute([':year' => $year, ':month' => $month]);
-        $result = $checkQuery->fetch(PDO::FETCH_ASSOC);
-        
-        if ($result['processed_count'] > 0) {
-            // Already processed
+        $personnelQuery->execute([':year' => $year, ':month' => $month]);
+        $personnel = $personnelQuery->fetchAll(PDO::FETCH_ASSOC);
+        if (!$personnel) {
             return [
                 'success' => true,
-                'message' => "Monthly leave credits for {$monthName} {$year} already processed.",
+                'message' => "Monthly leave credits for {$monthName} {$year} already processed or no eligible personnel.",
                 'already_processed' => true,
                 'count' => 0
             ];
         }
-        
-        // Get all active personnel with Permanent or Casual status
-        // (those without separation date and with employment status of Permanent or Casual)
-        $personnelQuery = $conn->query("
-            SELECT p.personnel_id, p.lname, p.fname, p.mname, es.emp_stat_name
-            FROM personnels p
-            LEFT JOIN emp_status es ON p.empStat_id = es.empStat_id
-            WHERE (p.(separation_date IS NULL OR separation_date = '' OR separation_date = '  /  /    ') 
-               OR p.separation_date = '' 
-               OR p.separation_date = '  /  /    ')
-            AND (es.emp_stat_name = 'Permanent' OR es.emp_stat_name = 'Casual')
-            ORDER BY p.lname, p.fname
-        ");
         
         $processedCount = 0;
         $errors = [];
         
         $conn->beginTransaction();
         
-        while ($personnel = $personnelQuery->fetch(PDO::FETCH_ASSOC)) {
-            $personnelId = $personnel['personnel_id'];
-            
-            try {
+        foreach ($personnel as $person) {
+            $personnelId = $person['personnel_id'];
                 // Insert into leave_card table
                 $particulars = "Month of {$monthName} {$year}";
                 
@@ -162,12 +151,6 @@ function processMonthlyLeaveCredits($conn, $admin_id = null) {
                 ]);
                 
                 $processedCount++;
-                
-            } catch (PDOException $e) {
-                // Log individual errors but continue processing
-                $errors[] = "Error processing personnel ID {$personnelId}: " . $e->getMessage();
-                error_log("Monthly Leave Credits Error for personnel {$personnelId}: " . $e->getMessage());
-            }
         }
         
         $conn->commit();
@@ -182,7 +165,7 @@ function processMonthlyLeaveCredits($conn, $admin_id = null) {
             'errors' => $errors
         ];
         
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         if ($conn->inTransaction()) {
             $conn->rollBack();
         }

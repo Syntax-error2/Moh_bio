@@ -576,12 +576,12 @@
                                         
                                             <div class="row">
                                               <div class="col-6">
-                                                <input name="period_from" type="date" value="<?php echo date('Y-m-01', strtotime($currentDate)); ?>" class="form-control" />
+                                                <input name="period_from" type="date" value="<?php echo date('Y-m-01'); ?>" class="form-control" />
                                                 <small class="form-text">From</small>
                                               </div>
                                               
                                               <div class="col-6">
-                                                <input name="period_to" type="date" value="<?php echo date('Y-m-t', strtotime($currentDate)); ?>" class="form-control" />
+                                                <input name="period_to" type="date" value="<?php echo date('Y-m-t'); ?>" class="form-control" />
                                                 <small class="form-text">To</small>
                                               </div> 
                                             </div>

@@ -85,6 +85,9 @@
                     <tr>
                     <td style="background-color: white;  border: none;">
                     <strong style="margin-left: 8px; font-size: 18px;">ATTENDANCE REPORTS</strong>
+                    <?php if (in_array($session_access, ['Admin', 'Administrator'], true)): ?>
+                    <a href="attendance_transfer.php" class="btn btn-outline-primary btn-sm" style="margin-left: 16px;">Export / Import Attendance</a>
+                    <?php endif; ?>
                     </td>
                     </tr>
                     </table>

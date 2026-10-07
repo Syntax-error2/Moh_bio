@@ -2,7 +2,8 @@
 <html>
 <?php
 
-include('session.php');  
+include('session.php');
+require_once __DIR__ . '/attendance_report_bio.php';
 //error_reporting(0);
 
   $get_RFTag_id=$_GET['RFTag_id'];
@@ -262,7 +263,7 @@ $RFTag_id = !empty($studData_row['RFTag_id']) ? $studData_row['RFTag_id'] : $stu
         
         $dailyOvertime = 0;
         
-        $is_biometric = !empty($studData_row['biometric_id']);
+        $is_biometric = attendance_has_bio($conn, (int)$studData_row['personnel_id']);
         $bio_am_in = false;
         $bio_am_out = false;
         $bio_pm_in = false;
@@ -849,7 +850,7 @@ Verified as to the prescribed office hours. <br />
     
     
     $officeHead_query = $conn->prepare("SELECT lname, fname, mname, suffix FROM personnels WHERE personnel_id = :personnel_id");
-    $officeHead_query->execute(['personnel_id' => $do_row['officeHead_id']]);
+    $officeHead_query->execute(['personnel_id' => ($do_row['officeHead_id'] ?? 0)]);
     $oh_row=$officeHead_query->fetch();
              
     if($oh_row['suffix']=="-")
