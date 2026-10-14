@@ -245,17 +245,27 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             loadLiveFeed();
             initScanner();
             
-            // Auto-sync fingerprints from DB every 10 seconds
+            // Refresh enrollments without competing with every scan.
+            var templateRefreshInFlight = false;
             setInterval(function() {
+                if (templateRefreshInFlight) return;
+                templateRefreshInFlight = true;
                 $.ajax({
                     url: 'fetch_biometric_templates.php',
                     type: 'GET',
                     dataType: 'json',
+                    ifModified: true,
+                    cache: true,
+                    timeout: 10000,
                     success: function(data) {
-                        registeredTemplates = data;
+                        // A 304 response has no body; keep the current template set.
+                        if (Array.isArray(data)) setRegisteredTemplates(data);
+                    },
+                    complete: function() {
+                        templateRefreshInFlight = false;
                     }
                 });
-            }, 10000);
+            }, 30000);
         });
         // Clock
         setInterval(() => {
@@ -287,7 +297,17 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         var currentPortIndex = 0;
         var zkTecoUrl = "";
         var registeredTemplates = <?php echo json_encode($flatTemplates); ?>;
+        var joinedTemplates = '';
         var captureTimer = null;
+        var captureRequestInFlight = false;
+        var capturePollFailures = 0;
+        var captureStarted = 0;
+
+        function setRegisteredTemplates(templates) {
+            registeredTemplates = Array.isArray(templates) ? templates : [];
+            joinedTemplates = registeredTemplates.map(function(t) { return t.fingerprint_template; }).join('|');
+        }
+        setRegisteredTemplates(registeredTemplates);
 
         function updateUI(status, type, empName = '', imgSrc = '', logType = '') {
             $('#statusMsg').html(status);
@@ -321,7 +341,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
         function initScanner() {
             if (currentPortIndex >= ports.length) {
-                updateUI("<i class='fa fa-warning'></i> Scanner disconnected. Retrying...", "error");
+                updateUI("<i class='fa fa-warning'></i> Scanner not detected. Check the scanner bridge on this computer.", "error");
                 currentPortIndex = 0; // reset for next manual click
                 setTimeout(initScanner, 3000); // Poll every 3 seconds if not found
                 return;
@@ -333,11 +353,12 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 url: zkTecoUrl + "/Init",
                 type: "GET",
                 dataType: "text",
-                timeout: 2000,
+                timeout: 5000,
                 success: function (data) {
                     try {
                         var res = JSON.parse(data);
                         if (res.ret == 0) {
+                            capturePollFailures = 0;
                             updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
                             startCapture();
                         } else {
@@ -358,32 +379,57 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         }
 
         function startCapture() {
+            clearTimeout(captureTimer);
+            captureTimer = null;
+            captureStarted = performance.now();
             $.ajax({
                 url: zkTecoUrl + "/BeginCapture",
                 type: "GET",
+                timeout: 10000,
                 success: function() {
                     pollCapture();
+                },
+                error: function() {
+                    updateUI("<i class='fa fa-warning'></i> Scanner reconnecting...", "error");
+                    setTimeout(initScanner, 2000);
                 }
             });
         }
 
         function pollCapture() {
-            captureTimer = setInterval(function() {
-                $.ajax({
-                    url: zkTecoUrl + "/GetTemplate",
-                    type: "GET",
-                    dataType: "text",
-                    success: function (data) {
-                        try {
-                            var res = JSON.parse(data);
-                            if (res.ret == 0 && res.template) {
-                                clearInterval(captureTimer);
-                                verifyFingerprint(res.template);
-                            }
-                        } catch (e) {}
+            captureTimer = null;
+            if (captureRequestInFlight) return;
+            captureRequestInFlight = true;
+            var continuePolling = true;
+            $.ajax({
+                url: zkTecoUrl + "/GetTemplate",
+                type: "GET",
+                dataType: "text",
+                timeout: 30000,
+                success: function (data) {
+                    capturePollFailures = 0;
+                    try {
+                        var res = JSON.parse(data);
+                        if (res.ret == 0 && res.template) {
+                            continuePolling = false;
+                            console.debug('Fingerprint capture took ' + Math.round(performance.now() - captureStarted) + ' ms');
+                            verifyFingerprint(res.template);
+                        }
+                    } catch (e) {}
+                },
+                error: function() {
+                    capturePollFailures++;
+                    if (capturePollFailures >= 2) {
+                        continuePolling = false;
+                        updateUI("<i class='fa fa-warning'></i> Scanner reconnecting...", "error");
+                        setTimeout(initScanner, 2000);
                     }
-                });
-            }, 500);
+                },
+                complete: function () {
+                    captureRequestInFlight = false;
+                    if (continuePolling) captureTimer = setTimeout(pollCapture, 500);
+                }
+            });
         }
 
         function verifyFingerprint(liveTemplate) {
@@ -395,18 +441,21 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 return;
             }
 
-            var regTemplatesArray = registeredTemplates.map(function(t) { return t.fingerprint_template; });
-            var regTemplatesJoined = regTemplatesArray.join('|');
+            var templatesForScan = registeredTemplates;
+            var templatesPayload = joinedTemplates;
+            var verificationStarted = performance.now();
 
             $.ajax({
                 url: zkTecoUrl + "/VerifyMulti",
                 type: "POST",
-                data: { capTemplate: liveTemplate, regTemplates: regTemplatesJoined },
+                data: { capTemplate: liveTemplate, regTemplates: templatesPayload },
+                timeout: 30000,
                 success: function (data) {
+                    console.debug('Fingerprint verification took ' + Math.round(performance.now() - verificationStarted) + ' ms for ' + templatesForScan.length + ' templates');
                     try {
                         var res = typeof data === 'string' ? JSON.parse(data) : data;
-                        if (res.ret == 0 && res.match_index >= 0) {
-                            var target = registeredTemplates[res.match_index]; var targetId = target.biometric_id ? target.biometric_id : (target.RFTag_id ? target.RFTag_id : target.personnel_id);
+                        if (res.ret == 0 && res.match_index >= 0 && templatesForScan[res.match_index]) {
+                            var target = templatesForScan[res.match_index]; var targetId = target.biometric_id ? target.biometric_id : (target.RFTag_id ? target.RFTag_id : target.personnel_id);
                             logAttendanceToDatabase(targetId);
                         } else {
                             updateUI("<i class='fa fa-times'></i> Unrecognized Fingerprint.", "error");
@@ -426,12 +475,15 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
         function logAttendanceToDatabase(targetId) {
             updateUI("<i class='fa fa-spinner fa-spin'></i> Logging DTR...", "info");
-            
+            var loggingStarted = performance.now();
             $.ajax({
                 url: 'process_biometric_dtr.php',
                 type: 'POST',
                 data: { RFTag_id: targetId, log_source: 'BIO' },
+                timeout: 15000,
                 success: function(responseStr) {
+                    console.debug('DTR logging took ' + Math.round(performance.now() - loggingStarted) + ' ms');
+                    var restartDelay = 1000;
                     try {
                         var response = JSON.parse(responseStr);
                         
@@ -473,6 +525,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         } else {
                             // Error from process script
                             updateUI("<i class='fa fa-times'></i> " + response.message, "error");
+                            restartDelay = 3000;
                             if (response.sound === 'invalid') {
                                 PopupCenterInvalid();
                             }
@@ -481,20 +534,24 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         console.log("JSON Parse Error on response:", responseStr);
                         console.error(e);
                         updateUI("<i class='fa fa-times'></i> Scan Error", "error");
+                        restartDelay = 3000;
                         PopupCenterInvalid();
                     }
                     
-                    // Resume capture after 2 seconds
+                    // Keep the result visible briefly while allowing the next person to scan.
                     setTimeout(() => {
                         $('#empOverlay').hide();
                         $('#iconContainer').show();
                         updateUI("<i class='fa fa-hand-pointer-o'></i> Ready to scan...", "info");
                         startCapture();
-                    }, 2000);
+                    }, restartDelay);
                 },
-                error: function() {
-                    updateUI("<i class='fa fa-times'></i> Server Error", "error");
-                    setTimeout(startCapture, 2000);
+                error: function(xhr, status) {
+                    // A timeout may happen after the server saved the log. Never resubmit it automatically.
+                    updateUI(status === 'timeout'
+                        ? "<i class='fa fa-warning'></i> Attendance not confirmed. Check the latest log before rescanning."
+                        : "<i class='fa fa-times'></i> Server Error. Check the latest log before rescanning.", "error");
+                    setTimeout(startCapture, 5000);
                 }
             });
         }
