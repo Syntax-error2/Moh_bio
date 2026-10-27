@@ -94,7 +94,11 @@
                                     <select name="remarks" class="form-control">
                                     <option>-</option>
                                     <option>VACATION LEAVE</option>
+                                    <option value="Mandatory/Forced Leave">Mandatory/Forced Leave</option>
                                     <option>SICK LEAVE</option>
+                                    <option>WELLNESS LEAVE</option>
+                                    <option>EMERGENCY LEAVE</option>
+                                    <option>TERMINAL LEAVE</option>
                                     <option>MATERNITY LEAVE (RA 8282)</option>
                                     <option>PATERNITY LEAVE (RA 8187)</option>
                                     <option>PARENTAL LEAVE for SOLO PARENTS (RA 8972)</option>
@@ -127,27 +131,84 @@
                                 </div>
                                 <script>
                                 jQuery(document).ready(function($){
+                                    function isForcedLeaveSelected($modal) {
+                                        var r = $modal.find('select[name="remarks"]').val();
+                                        return (r === 'Mandatory/Forced Leave' || r === 'Forced Leave' || r === 'Force Leave');
+                                    }
+
                                     $('.my-form .add-box').click(function(){
-                                        var n = $('.text-box').length + 1;
+                                        var $modal = $(this).closest('.modal');
+                                        var currentCount = $modal.find('.text-box').length;
+                                        if (isForcedLeaveSelected($modal) && currentCount >= 5) {
+                                            alert('Mandatory/Forced Leave is strictly limited to a maximum of 5 days only!');
+                                            return false;
+                                        }
+                                        var n = currentCount + 1;
                                         if( 30 < n ) {
-                                            alert('Maximum number of contestants reach!');
+                                            alert('Maximum number of dates reached!');
                                             return false;
                                         }
                                         var box_html = $('<p class="text-box"><label for="box' + n + '">Date No. <span class="box-number">' + n + '</span></label> <input type="date" class="form-control" name="con' + n + '" id="box' + n + '" required="true" /><a style="background-color: red; border: 1px solid black; color: white; padding: 4px 8px 4px 8px; cursor: pointer; margin-top:4px;" class="remove-box"><small>Remove</small></a></p>');
                                         box_html.hide();
-                                        $('.my-form p.text-box:last').after(box_html);
+                                        $modal.find('.my-form p.text-box:last').after(box_html);
                                         box_html.fadeIn('slow');
                                         return false;
                                     });
                                     $('.my-form').on('click', '.remove-box', function(){
+                                        var $modal = $(this).closest('.modal');
                                         $(this).parent().css( 'background-color', '#FF6C6C' );
                                         $(this).parent().fadeOut("slow", function() {
                                             $(this).remove();
-                                            $('.box-number').each(function(index){
+                                            $modal.find('.box-number').each(function(index){
                                                 $(this).text( index + 1 );
                                             });
                                         });
                                         return false;
+                                    });
+
+                                    $('select[name="remarks"]').on('change', function(){
+                                        var $modal = $(this).closest('.modal');
+                                        if (isForcedLeaveSelected($modal)) {
+                                            var $noDays = $modal.find('input[name="no_of_days"]');
+                                            $noDays.attr('max', '5');
+                                            if (parseInt($noDays.val(), 10) > 5) {
+                                                $noDays.val(5);
+                                            }
+                                            var $boxes = $modal.find('.text-box');
+                                            if ($boxes.length > 5) {
+                                                alert('Mandatory/Forced Leave allows a maximum of 5 days only. Extra date fields have been removed.');
+                                                $boxes.slice(5).remove();
+                                                $modal.find('.box-number').each(function(index){
+                                                    $(this).text( index + 1 );
+                                                });
+                                            }
+                                        } else {
+                                            $modal.find('input[name="no_of_days"]').attr('max', '200');
+                                        }
+                                    });
+
+                                    $('input[name="no_of_days"]').on('input change', function(){
+                                        var $modal = $(this).closest('.modal');
+                                        if (isForcedLeaveSelected($modal)) {
+                                            var val = parseInt($(this).val(), 10);
+                                            if (val > 5) {
+                                                alert('Mandatory/Forced Leave is strictly limited to a maximum of 5 days only!');
+                                                $(this).val(5);
+                                            }
+                                        }
+                                    });
+
+                                    $('form').on('submit', function(e){
+                                        var $modal = $(this).closest('.modal');
+                                        if ($modal.length && isForcedLeaveSelected($modal)) {
+                                            var daysVal = parseInt($modal.find('input[name="no_of_days"]').val(), 10) || 0;
+                                            var boxLen = $modal.find('.text-box').length;
+                                            if (daysVal > 5 || boxLen > 5) {
+                                                alert('Error: Mandatory/Forced Leave is strictly limited to a maximum of 5 days only!');
+                                                e.preventDefault();
+                                                return false;
+                                            }
+                                        }
                                     });
                                 });
                                 </script>

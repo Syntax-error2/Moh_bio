@@ -33,14 +33,44 @@ if(isset($_POST['log_id']) && isset($_POST['field'])) {
     }
     elseif($field == 'vl_earned') {
         $val = floatval($value);
-        $up = $conn->prepare("UPDATE leave_credit_logs SET vl_amount = ? WHERE log_id = ?");
+        $up = $conn->prepare("UPDATE leave_credit_logs SET vl_amount = ?, log_type = 'Monthly Earn' WHERE log_id = ?");
+        $up->execute([$val, $log_id]);
+    }
+    elseif($field == 'vl_balance') {
+        $target_val = floatval($value);
+        $stmt_all = $conn->prepare("SELECT log_id, period, vl_amount FROM leave_credit_logs WHERE personnel_id = ?");
+        $stmt_all->execute([$row['personnel_id']]);
+        $all_logs = $stmt_all->fetchAll(PDO::FETCH_ASSOC);
+        usort($all_logs, function($a, $b) {
+            $tsA = strtotime(str_replace('-', '/', trim(explode(' - ', $a['period'] ?? '')[0])));
+            $tsB = strtotime(str_replace('-', '/', trim(explode(' - ', $b['period'] ?? '')[0])));
+            if(!$tsA) $tsA = 0; if(!$tsB) $tsB = 0;
+            if ($tsA == $tsB) return $a['log_id'] <=> $b['log_id'];
+            return $tsA <=> $tsB;
+        });
+        $prev_vl = 0.0;
+        foreach($all_logs as $l) {
+            if($l['log_id'] == $log_id) break;
+            $prev_vl += (float)$l['vl_amount'];
+            if($prev_vl < 0) $prev_vl = 0;
+        }
+        $val = $target_val - $prev_vl;
+        $up = $conn->prepare("UPDATE leave_credit_logs SET vl_amount = ?, log_type = 'Manual Adjustment' WHERE log_id = ?");
         $up->execute([$val, $log_id]);
     }
     elseif($field == 'vl_w_pay') {
-        $val = -1 * abs(floatval($value));
-        if(empty($value)) $val = 0;
-        $up = $conn->prepare("UPDATE leave_credit_logs SET vl_amount = ? WHERE log_id = ?");
-        $up->execute([$val, $log_id]);
+        require_once('official_duty.php');
+        $w_val = abs(floatval($value));
+        $is_special = isNonDeductibleSpecialLeave($row['particulars'] ?? '', $row['remarks'] ?? '');
+        if ($is_special) {
+            $up = $conn->prepare("UPDATE leave_credit_logs SET vl_amount = 0.000, vl_w_pay = ? WHERE log_id = ?");
+            $up->execute([$w_val, $log_id]);
+        } else {
+            $val = -1 * $w_val;
+            if(empty($value)) $val = 0;
+            $up = $conn->prepare("UPDATE leave_credit_logs SET vl_amount = ?, vl_w_pay = ? WHERE log_id = ?");
+            $up->execute([$val, $w_val, $log_id]);
+        }
     }
     elseif($field == 'vl_wout_pay') {
         $val = floatval($value);
@@ -49,14 +79,44 @@ if(isset($_POST['log_id']) && isset($_POST['field'])) {
     }
     elseif($field == 'sl_earned') {
         $val = floatval($value);
-        $up = $conn->prepare("UPDATE leave_credit_logs SET sl_amount = ? WHERE log_id = ?");
+        $up = $conn->prepare("UPDATE leave_credit_logs SET sl_amount = ?, log_type = 'Monthly Earn' WHERE log_id = ?");
+        $up->execute([$val, $log_id]);
+    }
+    elseif($field == 'sl_balance') {
+        $target_val = floatval($value);
+        $stmt_all = $conn->prepare("SELECT log_id, period, sl_amount FROM leave_credit_logs WHERE personnel_id = ?");
+        $stmt_all->execute([$row['personnel_id']]);
+        $all_logs = $stmt_all->fetchAll(PDO::FETCH_ASSOC);
+        usort($all_logs, function($a, $b) {
+            $tsA = strtotime(str_replace('-', '/', trim(explode(' - ', $a['period'] ?? '')[0])));
+            $tsB = strtotime(str_replace('-', '/', trim(explode(' - ', $b['period'] ?? '')[0])));
+            if(!$tsA) $tsA = 0; if(!$tsB) $tsB = 0;
+            if ($tsA == $tsB) return $a['log_id'] <=> $b['log_id'];
+            return $tsA <=> $tsB;
+        });
+        $prev_sl = 0.0;
+        foreach($all_logs as $l) {
+            if($l['log_id'] == $log_id) break;
+            $prev_sl += (float)$l['sl_amount'];
+            if($prev_sl < 0) $prev_sl = 0;
+        }
+        $val = $target_val - $prev_sl;
+        $up = $conn->prepare("UPDATE leave_credit_logs SET sl_amount = ?, log_type = 'Manual Adjustment' WHERE log_id = ?");
         $up->execute([$val, $log_id]);
     }
     elseif($field == 'sl_w_pay') {
-        $val = -1 * abs(floatval($value));
-        if(empty($value)) $val = 0;
-        $up = $conn->prepare("UPDATE leave_credit_logs SET sl_amount = ? WHERE log_id = ?");
-        $up->execute([$val, $log_id]);
+        require_once('official_duty.php');
+        $w_val = abs(floatval($value));
+        $is_special = isNonDeductibleSpecialLeave($row['particulars'] ?? '', $row['remarks'] ?? '');
+        if ($is_special) {
+            $up = $conn->prepare("UPDATE leave_credit_logs SET sl_amount = 0.000, sl_w_pay = ? WHERE log_id = ?");
+            $up->execute([$w_val, $log_id]);
+        } else {
+            $val = -1 * $w_val;
+            if(empty($value)) $val = 0;
+            $up = $conn->prepare("UPDATE leave_credit_logs SET sl_amount = ?, sl_w_pay = ? WHERE log_id = ?");
+            $up->execute([$val, $w_val, $log_id]);
+        }
     }
     elseif($field == 'sl_wout_pay') {
         $val = floatval($value);

@@ -1,6 +1,7 @@
 <?php
 include('dbcon.php');
 require_once('session.php');
+require_once('official_duty.php');
 
 $personnel_id = $_GET['personnel_id'];
 
@@ -15,12 +16,13 @@ $stmt->execute([$personnel_id]);
 $staff = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $name = strtoupper($staff['lname'] . ', ' . $staff['fname'] . ' ' . $staff['mname']);
+$seal_path = file_exists('img/moh seal.jpg') ? 'img/moh seal.jpg' : (!empty($sf_row['logo']) ? 'img/' . $sf_row['logo'] : 'img/97763-moh-seal.jpg');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="img/moh seal.jpg">
+    <link rel="shortcut icon" href="<?php echo $seal_path; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Leave Card - <?php echo $name; ?></title>
     <style>
@@ -121,36 +123,153 @@ $name = strtoupper($staff['lname'] . ', ' . $staff['fname'] . ' ' . $staff['mnam
             background-color: transparent;
             font-weight: bold;
         }
-        .btn-print {
+        /* Top Navigation Toolbar */
+        .leave-card-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 12px 25px 16px 25px;
+            padding: 10px 18px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            position: relative;
+            z-index: 100;
+        }
+        .tb-left, .tb-center, .tb-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tb-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 45px;
-            height: 45px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 50%;
-            font-size: 20px;
+            gap: 7px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid transparent;
             cursor: pointer;
-            float: right;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 10;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: 0.2s;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.4;
+            white-space: nowrap;
         }
-        .btn-print:hover {
-            background: #0056b3;
-            transform: scale(1.05);
+        .tb-btn:hover {
+            text-decoration: none;
+            transform: translateY(-1px);
         }
-        .clearfix::after {
-            content: "";
-            clear: both;
-            display: table;
+        .tb-btn:active {
+            transform: translateY(0);
+        }
+        .tb-btn-light {
+            background: #f8fafc;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+        .tb-btn-light:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+        .tb-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .tb-chip i {
+            color: #0284c7;
+        }
+        .tb-chip-name {
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .tb-chip-sub {
+            color: #64748b;
+        }
+        /* Segmented control for sorting order */
+        .tb-segmented-control {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+        }
+        .tb-control-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            padding: 0 8px 0 6px;
+        }
+        .tb-segment {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 13px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 7px;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .tb-segment:hover {
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+        }
+        .tb-segment.active {
+            background: #0f172a;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+        .tb-segment.active i {
+            color: #38bdf8;
+        }
+        /* Right action buttons */
+        .tb-btn-excel {
+            background: #107c41;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(16, 124, 65, 0.25);
+        }
+        .tb-btn-excel:hover {
+            background: #0d6535;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 124, 65, 0.35);
+        }
+        .tb-btn-print {
+            background: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+        }
+        .tb-btn-print:hover {
+            background: #0369a1;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+        }
+        /* Suppress duplicate fixed button from universal_excel_export.php */
+        .export-btn-container {
+            display: none !important;
         }
         @media print {
-            .btn-print { display: none; }
+            .leave-card-toolbar, .btn-print, .btn-order, .no-print, .export-btn-container { 
+                display: none !important; 
+            }
             @page { size: A4 landscape; margin: 5mm; }
             body { 
                 background-color: transparent !important; /* let physical paper provide color */
@@ -162,7 +281,45 @@ $name = strtoupper($staff['lname'] . ', ' . $staff['fname'] . ' ' . $staff['mnam
 </head>
 <body>
 
-<div class="clearfix" style="padding-top: 10px; padding-right: 10px;"><a href="javascript:window.print()" class="btn-print" title="Print this Card"><i class="fa fa-print"></i></a></div>
+<?php
+$order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 'desc' : 'asc';
+?>
+
+<div class="leave-card-toolbar no-print">
+    <div class="tb-left">
+        <a href="list_personnel_individual_details_LC.php?dept=<?php echo urlencode($staff['do_id'] ?? ''); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>" class="tb-btn tb-btn-light" title="Return to Personnel Leave Management">
+            <i class="fa fa-arrow-left"></i> <span>Back to Leave Record</span>
+        </a>
+        <div class="tb-chip">
+            <i class="fa fa-id-card-o"></i>
+            <span class="tb-chip-name"><?php echo htmlspecialchars($staff['fname'] . ' ' . $staff['lname']); ?></span>
+            <?php if (!empty($staff['do_name'])) { ?>
+                <span class="tb-chip-sub">&bull; <?php echo htmlspecialchars($staff['do_name']); ?></span>
+            <?php } ?>
+        </div>
+    </div>
+
+    <div class="tb-center">
+        <div class="tb-segmented-control">
+            <span class="tb-control-label"><i class="fa fa-sort"></i> Order:</span>
+            <a href="print_leave_card.php?personnel_id=<?php echo htmlspecialchars($personnel_id); ?>&order=asc" class="tb-segment <?php echo $order === 'asc' ? 'active' : ''; ?>" title="Oldest logs first (Chronological)">
+                <i class="fa fa-sort-amount-asc"></i> <span>Start to Last (Asc)</span>
+            </a>
+            <a href="print_leave_card.php?personnel_id=<?php echo htmlspecialchars($personnel_id); ?>&order=desc" class="tb-segment <?php echo $order === 'desc' ? 'active' : ''; ?>" title="Newest logs first (Reverse chronological)">
+                <i class="fa fa-sort-amount-desc"></i> <span>Newest First (Desc)</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="tb-right">
+        <button type="button" class="tb-btn tb-btn-excel" onclick="exportUniversalExcel(event)" title="Export Leave Card to Excel">
+            <i class="fa fa-file-excel-o"></i> <span>Export to Excel</span>
+        </button>
+        <button type="button" class="tb-btn tb-btn-print" onclick="window.print()" title="Print Leave Card (A4 Landscape)">
+            <i class="fa fa-print"></i> <span>Print Card</span>
+        </button>
+    </div>
+</div>
 
 <!-- Entire top section wrapper with background -->
 <div class="top-section-wrapper" style="position: relative; overflow: hidden; padding: 15px 30px; padding-bottom: 5px;">
@@ -171,7 +328,7 @@ $name = strtoupper($staff['lname'] . ', ' . $staff['fname'] . ' ' . $staff['mnam
         <table style="width: 100%; border: none; margin-bottom: 0;">
             <tr style="border: none;">
                 <td style="width: 80px; border: none; text-align: left; vertical-align: middle;">
-                    <img src="img/moh seal.jpg" class="logo-img" style="width: 65px; height: 65px;">
+                    <img src="<?php echo $seal_path; ?>" class="logo-img" style="width: 65px; height: 65px;">
                 </td>
                 <td style="border: none; text-align: left; vertical-align: middle;">
                     <div class="republic-text" style="font-size: 12px; line-height: 1.2;">
@@ -271,24 +428,27 @@ $name = strtoupper($staff['lname'] . ', ' . $staff['fname'] . ' ' . $staff['mnam
         $log_query = $conn->prepare("SELECT * FROM leave_credit_logs WHERE personnel_id=? ORDER BY log_id ASC");
         $log_query->execute([$personnel_id]);
         $logs = $log_query->fetchAll(PDO::FETCH_ASSOC);
+        $logs = array_values(array_filter($logs, function ($log) {
+            return !isZeroValueOfficialDutyLeaveLog($log);
+        }));
 
-usort($logs, function($a, $b) {
-    // Get start date of period
-    $a_p = trim(explode(' - ', $a['period'])[0]);
-    $b_p = trim(explode(' - ', $b['period'])[0]);
-    $tsA = strtotime(str_replace('-', '/', $a_p));
-    $tsB = strtotime(str_replace('-', '/', $b_p));
-    
-    // If invalid date, fallback to 0
-    if(!$tsA) $tsA = 0;
-    if(!$tsB) $tsB = 0;
-    
-    // Primary sort by date, secondary sort by log_id (so manual adjustments on same day go after accruals)
-    if ($tsA == $tsB) {
-        return $a['log_id'] <=> $b['log_id'];
-    }
-    return $tsA <=> $tsB;
-});
+        usort($logs, function($a, $b) {
+            // Get start date of period
+            $a_p = trim(explode(' - ', $a['period'])[0]);
+            $b_p = trim(explode(' - ', $b['period'])[0]);
+            $tsA = strtotime(str_replace('-', '/', $a_p));
+            $tsB = strtotime(str_replace('-', '/', $b_p));
+            
+            // If invalid date, fallback to 0
+            if(!$tsA) $tsA = 0;
+            if(!$tsB) $tsB = 0;
+            
+            // Primary sort by date, secondary sort by log_id (so manual adjustments on same day go after accruals)
+            if ($tsA == $tsB) {
+                return $a['log_id'] <=> $b['log_id'];
+            }
+            return $tsA <=> $tsB;
+        });
 
         $vl_run = 0.000;
         $sl_run = 0.000;
@@ -302,26 +462,45 @@ usort($logs, function($a, $b) {
             $logs[$key]['sl_run_calc'] = $sl_run;
         }
 
-        // Reverse the array to show descending by date
-        $logs = array_reverse($logs);
+        // Default order is Ascending (from the start date to last date)
+        if ($order === 'desc') {
+            $logs = array_reverse($logs);
+        }
 
         $rowCount = count($logs);
         $minRows = 28; // Adjusted for landscape height
         
         foreach($logs as $log) {
-            $vl_earned = ($log['vl_amount'] > 0) ? $log['vl_amount'] : '';
+            $log_type_clean = strtolower(trim((string)$log['log_type']));
+            $particulars_clean = strtolower(trim((string)$log['particulars']));
+            $is_monthly_earn = ($log_type_clean === 'monthly earn' || $particulars_clean === 'accrual' || stripos((string)$log['remarks'], 'auto-accrual') !== false);
+
+            $period = !empty($log['period']) ? $log['period'] : date('m-d-y', strtotime($log['date_logged']));
+            $particulars = !empty($log['particulars']) ? $log['particulars'] : $log['log_type'];
+
+            $is_special_leave = isNonDeductibleSpecialLeave($particulars, $log['remarks']);
+
+            $vl_earned = ($is_monthly_earn && $log['vl_amount'] > 0) ? $log['vl_amount'] : '';
             $vl_w_pay = ($log['vl_amount'] < 0) ? abs($log['vl_amount']) : '';
             $vl_wout_pay = (!empty($log["vl_wout_pay"]) && $log["vl_wout_pay"] > 0) ? $log["vl_wout_pay"] : "";
 
-            $sl_earned = ($log['sl_amount'] > 0) ? $log['sl_amount'] : '';
+            $sl_earned = ($is_monthly_earn && $log['sl_amount'] > 0) ? $log['sl_amount'] : '';
             $sl_w_pay = ($log['sl_amount'] < 0) ? abs($log['sl_amount']) : '';
             $sl_wout_pay = (!empty($log["sl_wout_pay"]) && $log["sl_wout_pay"] > 0) ? $log["sl_wout_pay"] : "";
 
+            // Non-deductible special leaves (Wellness, Maternity, Paternity, Solo Parent, Rehab, Emergency)
+            // reflect their days with pay without deducting from running balances
+            if ($is_special_leave && (float)$log['vl_amount'] == 0 && (float)$log['sl_amount'] == 0) {
+                $days = getSpecialLeaveDays($log, $conn);
+                if (!empty($log['sl_w_pay']) && (float)$log['sl_w_pay'] > 0) {
+                    $sl_w_pay = (float)$log['sl_w_pay'];
+                } else {
+                    $vl_w_pay = $days;
+                }
+            }
+
             $vl_run = $log['vl_run_calc'];
             $sl_run = $log['sl_run_calc'];
-            
-            $period = !empty($log['period']) ? $log['period'] : date('m-d-y', strtotime($log['date_logged']));
-            $particulars = !empty($log['particulars']) ? $log['particulars'] : $log['log_type'];
         ?>
         <tr>
             <?php 
@@ -377,4 +556,3 @@ usort($logs, function($a, $b) {
 <?php include_once('universal_excel_export.php'); ?>
 </body>
 </html>
-
