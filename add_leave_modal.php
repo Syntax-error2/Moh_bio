@@ -82,11 +82,16 @@
                                     </div>
                                   </div>
                                   <div style="display:none; margin-top: 10px;" id="emergency_leave_info" class="col-md-12">
-                                    <div class="alert alert-info py-2 px-3 mb-0" style="font-size: 0.88rem; border-left: 4px solid #17a2b8; background-color: #e8f4f8; color: #0c5460;">
-                                      <strong><i class="fa fa-exclamation-circle"></i> Emergency Leave:</strong><br>
-                                      &bull; Special emergency privilege &mdash; <strong>No deduction</strong> from Vacation or Sick Leave credits.
-                                    </div>
-                                  </div>
+                                     <div class="alert alert-info py-2 px-3 mb-0" style="font-size: 0.88rem; border-left: 4px solid #17a2b8; background-color: #e8f4f8; color: #0c5460;">
+                                       <strong><i class="fa fa-exclamation-circle"></i> Emergency Leave:</strong><br>
+                                       &bull; Special emergency privilege &mdash; <strong>No deduction</strong> from Vacation or Sick Leave credits.
+                                     </div>
+                                   </div>
+                                   <div style="display:none; margin-top: 10px;" id="terminal_leave_info" class="col-md-12">
+                                     <div class="alert alert-info py-2 px-3 mb-0" style="font-size: 0.88rem; border-left: 4px solid #0284c7; background-color: #f0f9ff; color: #0369a1;">
+                                       <strong><i class="fa fa-certificate"></i> Terminal Leave:</strong><br>
+                                       &bull; Remarks will be automatically recorded as <strong>"Certified Correct"</strong> in the Leave Card.
+                                     </div>
                                     
                                 </div>
                               </div>

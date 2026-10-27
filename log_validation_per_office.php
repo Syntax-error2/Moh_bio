@@ -358,17 +358,43 @@
                         // 1. Official Travel takes precedence
                         if ($travel_info) {
                             $is_on_travel = true;
-                            $status = 'ON TRAVEL';
-                            $remark_label = !empty($travel_info['travel_type']) && $travel_info['travel_type'] != '-' ? $travel_info['travel_type'] : 'OFFICIAL BUSINESS TRIP';
+                            $raw_type = !empty($travel_info['travel_type']) && $travel_info['travel_type'] != '-' ? $travel_info['travel_type'] : 'OFFICIAL BUSINESS TRIP';
+                            if (stripos($raw_type, 'PASS SLIP') !== false || stripos($travel_info['description'] ?? '', 'PASS SLIP') !== false) {
+                                $remark_label = 'PASS SLIP';
+                            } else {
+                                $remark_label = $raw_type;
+                            }
+                            $is_pass_slip = ($remark_label === 'PASS SLIP');
+                            
+                            $ps_time_info = '';
+                            if (!empty($travel_info['time_out']) && !empty($travel_info['time_in'])) {
+                                $ps_time_info = $travel_info['time_out'] . ' - ' . $travel_info['time_in'];
+                            } elseif (!empty($travel_info['time_out'])) {
+                                $ps_time_info = 'Out: ' . $travel_info['time_out'];
+                            } elseif (!empty($travel_info['time_in'])) {
+                                $ps_time_info = 'In: ' . $travel_info['time_in'];
+                            }
+                            
+                            $status = $is_pass_slip ? ($has_scans ? 'PASS SLIP (PRESENT)' : 'PASS SLIP') : 'ON TRAVEL';
                             $details = trim(($travel_info['purpose'] ?? '') . ' ' . (!empty($travel_info['location']) ? 'at ' . $travel_info['location'] : ''));
+                            if (!empty($ps_time_info)) {
+                                $details = "[$ps_time_info] " . $details;
+                            }
+                            
                             $total_travel++;
+                            if ($is_pass_slip && $has_scans) {
+                                $total_present++;
+                                if ($has_am) $total_am_present++;
+                                if ($has_pm) $total_pm_present++;
+                            }
+                            
                             $travel_leave_list[] = [
                                 'row_ctr' => ($total_travel + $total_leave),
                                 'fullname' => $fullname,
                                 'img' => empty($nc_row['img']) ? 'img/avatar-1.jpg' : 'personnelImg/'.$nc_row['img'],
                                 'pid' => $pid,
-                                'status' => 'ON TRAVEL',
-                                'type' => $remark_label,
+                                'status' => $status,
+                                'type' => $remark_label . (!empty($ps_time_info) ? ' ('.$ps_time_info.')' : ''),
                                 'details' => $details,
                                 'code' => $travel_info['travel_code'] ?? ''
                             ];
@@ -393,22 +419,37 @@
                         } 
                         // 3. Travel/Leave notation in personnel logs
                         elseif ($log_remark) {
-                            $cat = getRemarkCategory($log_remark['remarks'], $log_remark['travel_leave_code']);
-                            if ($cat === 'TRAVEL') {
+                            $rem_text = $log_remark['remarks'] ?? '';
+                            $is_ps_rem = (stripos($rem_text, 'PASS SLIP') !== false);
+                            if ($is_ps_rem) {
                                 $is_on_travel = true;
-                                $status = 'ON TRAVEL';
-                                $remark_label = !empty($log_remark['remarks']) ? $log_remark['remarks'] : 'OFFICIAL TRAVEL';
+                                $is_pass_slip = true;
+                                $remark_label = $rem_text;
+                                $status = $has_scans ? 'PASS SLIP (PRESENT)' : 'PASS SLIP';
                                 $total_travel++;
-                            } elseif ($cat === 'LEAVE') {
-                                $is_on_leave = true;
-                                $status = 'ON LEAVE';
-                                $remark_label = !empty($log_remark['remarks']) ? $log_remark['remarks'] : 'LEAVE';
-                                $total_leave++;
+                                if ($has_scans) {
+                                    $total_present++;
+                                    if ($has_am) $total_am_present++;
+                                    if ($has_pm) $total_pm_present++;
+                                }
                             } else {
-                                $is_on_travel = true;
-                                $status = 'ON DUTY / SPECIAL';
-                                $remark_label = $log_remark['remarks'];
-                                $total_travel++;
+                                $cat = getRemarkCategory($log_remark['remarks'], $log_remark['travel_leave_code']);
+                                if ($cat === 'TRAVEL') {
+                                    $is_on_travel = true;
+                                    $status = 'ON TRAVEL';
+                                    $remark_label = !empty($log_remark['remarks']) ? $log_remark['remarks'] : 'OFFICIAL TRAVEL';
+                                    $total_travel++;
+                                } elseif ($cat === 'LEAVE') {
+                                    $is_on_leave = true;
+                                    $status = 'ON LEAVE';
+                                    $remark_label = !empty($log_remark['remarks']) ? $log_remark['remarks'] : 'LEAVE';
+                                    $total_leave++;
+                                } else {
+                                    $is_on_travel = true;
+                                    $status = 'ON DUTY / SPECIAL';
+                                    $remark_label = $log_remark['remarks'];
+                                    $total_travel++;
+                                }
                             }
                             $details = $log_remark['remarks'] . (!empty($log_remark['travel_leave_code']) ? ' ['.$log_remark['travel_leave_code'].']' : '');
                             $travel_leave_list[] = [
@@ -447,6 +488,8 @@
                         $badge_tag = '';
                         if ($is_whole_absent) {
                             $badge_tag = '<br><span class="badge badge-danger text-white mt-1" style="font-size: 11px;"><i class="fa fa-user-times mr-1"></i>ABSENT</span>';
+                        } elseif (!empty($is_pass_slip)) {
+                            $badge_tag = '<br><span class="badge badge-info text-white mt-1" style="font-size: 11px; background-color: #17a2b8;"><i class="fa fa-clock-o mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
                         } elseif ($is_on_travel) {
                             $badge_tag = '<br><span class="badge badge-info text-white mt-1" style="font-size: 11px; background-color: #17a2b8;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
                         } elseif ($is_on_leave) {
@@ -473,8 +516,16 @@
                             $am_in_display = '<span class="badge badge-danger" style="font-size: 12px; padding: 5px 8px;">ABSENT</span>';
                             $am_out_display = '<span class="text-muted">---</span>';
                         } elseif ($is_on_travel) {
-                            $am_in_display = '<span class="badge badge-info text-white" style="font-size: 11px; padding: 4px 6px; background-color: #17a2b8;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
-                            $am_out_display = '<span class="text-muted">---</span>';
+                            if (!empty($is_pass_slip) && $has_am) {
+                                $am_in_display = $am_in;
+                                $am_out_display = $am_out;
+                            } elseif (!empty($is_pass_slip) && $has_scans) {
+                                $am_in_display = '<span class="badge badge-info text-white" style="font-size: 11px; padding: 4px 6px; background-color: #17a2b8;"><i class="fa fa-clock-o mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
+                                $am_out_display = '<span class="text-muted">---</span>';
+                            } else {
+                                $am_in_display = '<span class="badge badge-info text-white" style="font-size: 11px; padding: 4px 6px; background-color: #17a2b8;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
+                                $am_out_display = '<span class="text-muted">---</span>';
+                            }
                         } elseif ($is_on_leave) {
                             $am_in_display = '<span class="badge badge-warning text-dark" style="font-size: 11px; padding: 4px 6px; background-color: #ffc107;"><i class="fa fa-calendar-minus-o mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
                             $am_out_display = '<span class="text-muted">---</span>';
@@ -491,8 +542,16 @@
                             $pm_in_display = '<span class="badge badge-danger" style="font-size: 12px; padding: 5px 8px;">ABSENT</span>';
                             $pm_out_display = '<span class="text-muted">---</span>';
                         } elseif ($is_on_travel) {
-                            $pm_in_display = '<span class="badge badge-info text-white" style="font-size: 11px; padding: 4px 6px; background-color: #17a2b8;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
-                            $pm_out_display = '<span class="text-muted">---</span>';
+                            if (!empty($is_pass_slip) && $has_pm) {
+                                $pm_in_display = $pm_in;
+                                $pm_out_display = $pm_out;
+                            } elseif (!empty($is_pass_slip) && $has_scans) {
+                                $pm_in_display = '<span class="badge badge-info text-white" style="font-size: 11px; padding: 4px 6px; background-color: #17a2b8;"><i class="fa fa-clock-o mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
+                                $pm_out_display = '<span class="text-muted">---</span>';
+                            } else {
+                                $pm_in_display = '<span class="badge badge-info text-white" style="font-size: 11px; padding: 4px 6px; background-color: #17a2b8;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
+                                $pm_out_display = '<span class="text-muted">---</span>';
+                            }
                         } elseif ($is_on_leave) {
                             $pm_in_display = '<span class="badge badge-warning text-dark" style="font-size: 11px; padding: 4px 6px; background-color: #ffc107;"><i class="fa fa-calendar-minus-o mr-1"></i>'.htmlspecialchars($remark_label).'</span>';
                             $pm_out_display = '<span class="text-muted">---</span>';
@@ -511,10 +570,17 @@
                             $all_am_in = '<strong style="color: #dc3545;">ABSENT</strong>';
                             $all_pm_in = '<strong style="color: #dc3545;">ABSENT</strong>';
                         } elseif ($is_on_travel) {
-                            $all_status = '<span class="badge badge-info text-white" style="font-size: 12px; padding: 5px 8px; background-color: #17a2b8;">ON TRAVEL</span>';
-                            $all_row_bg = 'style="background-color: #f0f7ff;"';
-                            $all_am_in = '<strong style="color: #007bff; font-size: 11px;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</strong>';
-                            $all_pm_in = '<strong style="color: #007bff; font-size: 11px;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</strong>';
+                            if (!empty($is_pass_slip) && $has_scans) {
+                                $all_status = '<span class="badge badge-info text-white" style="font-size: 12px; padding: 5px 8px; background-color: #17a2b8;">PASS SLIP</span>';
+                                $all_row_bg = 'style="background-color: #f0f7ff;"';
+                                $all_am_in = ($am_in !== '---') ? $am_in : '<span class="badge badge-info text-white" style="font-size: 10px;">PASS SLIP</span>';
+                                $all_pm_in = ($pm_in !== '---') ? $pm_in : '<span class="badge badge-info text-white" style="font-size: 10px;">PASS SLIP</span>';
+                            } else {
+                                $all_status = '<span class="badge badge-info text-white" style="font-size: 12px; padding: 5px 8px; background-color: #17a2b8;">ON TRAVEL</span>';
+                                $all_row_bg = 'style="background-color: #f0f7ff;"';
+                                $all_am_in = '<strong style="color: #007bff; font-size: 11px;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</strong>';
+                                $all_pm_in = '<strong style="color: #007bff; font-size: 11px;"><i class="fa fa-briefcase mr-1"></i>'.htmlspecialchars($remark_label).'</strong>';
+                            }
                         } elseif ($is_on_leave) {
                             $all_status = '<span class="badge badge-warning text-dark" style="font-size: 12px; padding: 5px 8px; background-color: #ffc107;">ON LEAVE</span>';
                             $all_row_bg = 'style="background-color: #fffdf0;"';

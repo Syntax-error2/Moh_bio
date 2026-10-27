@@ -4,9 +4,9 @@
   <?php
   
    include('session.php');
-    include('dbcon.php');
    
    include('header.php');
+   require_once('official_duty.php');
    
    ?>
 
@@ -32,88 +32,43 @@
     <?php include('navbar_header.php'); ?>
     
     <?php
-    // Sanitize and validate GET parameters
-    $personnel_id = $_GET['personnel_id'] ?? '';
-    $dept_id = $_GET['dept'] ?? '';
+    $staff_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$_GET[personnel_id]'");
+    $staff_row = $staff_query->fetch();
     
-    try {
-      $staff_stmt = $conn->prepare("SELECT * FROM personnels WHERE personnel_id = :personnel_id");
-      $staff_stmt->execute([':personnel_id' => $personnel_id]);
-      $staff_query = $staff_stmt;
-      $staff_row = $staff_query->fetch();
-        
-      $shift_stmt = $conn->prepare("SELECT * FROM shifts WHERE shift_id = :shift_id");
-      $shift_stmt->execute([':shift_id' => $staff_row['shift_id']]);
-      $emp_stat_query5 = $shift_stmt;
-      $es_row5=$emp_stat_query5->fetch();
-    } catch (PDOException $e) {
-        error_log("Error fetching personnel data: " . $e->getMessage());
-    }
+    $emp_stat_query5 = $conn->query("SELECT * from shifts WHERE shift_id='$staff_row[shift_id]'");
+    $es_row5=$emp_stat_query5->fetch();
     ?>
     <!-- Breadcrumb-->
       <div class="breadcrumb-holder">
         <div class="container-fluid">
           <ul class="breadcrumb">
             <li style="color: blue"><strong style="margin-right: 4px;"><?php echo $schoolName; ?> | </strong></li>
-            <li class="breadcrumb-item"><a href="<?php echo $breadcrumb_home; ?>">Home</a></li>
-            <li class="breadcrumb-item active">Personnels</li>
-            <li class="breadcrumb-item active">Educational Background</li>
+            <li class="breadcrumb-item"><a href="home.php">Home</a></li>
+            <li class="breadcrumb-item"><a href="list_personnel.php?dept=<?php echo $_GET['dept']; ?>">List of Personnel</a></li>
+            <li class="breadcrumb-item active"><?php
+                          
+                 
+                                    if($staff_row['suffix']=="-")
+                                    {
+
+                                    echo $staff_row['fname']." ".substr($staff_row['mname'], 0,1).". ".$staff_row['lname'];
+                                    
+                                    }else{
+                                        
+                                    echo $staff_row['fname']." ".substr($staff_row['mname'], 0,1).". ".$staff_row['lname']." ".$staff_row['suffix'];
+                                    
+                                    } 
+                                     
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    ?> - Educational Background</li>
           </ul>
-          
         </div>
       </div>
- 
-          <!-- SUB-MENU -->
-          <div class="">
-            <ul class="nav nav-pills breadcrumb p-2 pl-4">
-              
-              <li class="nav-item pl-2">
-                <a class="nav-link disabled text-bold" aria-disabled="true">PERSONNELS</a>
-              </li>
-              
-              <li class="nav-item dropdown">
-                <a id="dash-x-menu" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link active language dropdown-toggle">Profile</a>
-                <ul aria-labelledby="dash-x-menu" class="dropdown-menu p-0">
-                  <li><a class="dropdown-item" href="list_personnel_individual_details.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Personnel Data</a></li>
-                  <li><a class="dropdown-item active" href="list_personnel_individual_details_EB.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Educational Background</a></li>
-                  <li><a class="dropdown-item" href="list_personnel_individual_details_SA.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Seminars Attended</a></li>
-                </ul>
-              </li>
-              
-              <li class="nav-item dropdown">
-                <a id="dash-x-menu" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link language dropdown-toggle">Leave Management</a>
-                <ul aria-labelledby="dash-x-menu" class="dropdown-menu p-0">
-                  <li><a class="dropdown-item" href="leave_application.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Leave Applications</a></li>
-                  <li><a class="dropdown-item" href="leave_card.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Leave Card</a></li>
-                </ul>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="list_personnel_individual_details_SR.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Service Record</a>
-              </li>
-
-              <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="list_personnel_individual_details_files.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Files</a>
-              </li>
-
-              <?php if ($session_access !== 'User') { ?>
-              <li class="nav-item dropdown">
-                <a id="dash-x-menu" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link language dropdown-toggle">Quick Options</a>
-                <ul aria-labelledby="dash-x-menu" class="dropdown-menu p-0">
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#encodeDL<?php echo $staff_row['RFTag_id']; ?>" href="#">Encode Daily Log</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#restDaySetup<?php echo $staff_row['RFTag_id']; ?>" href="#">Set Rest Day</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $personnel_id; ?>" href="#">CS Form 48</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_attendance<?php echo $personnel_id; ?>" href="#">Detailed DTR</a></li>
-                  <li><a class="dropdown-item" data-toggle="modal" data-target="#print_monthly_LV<?php echo $personnel_id; ?>" href="#">Log Validation</a></li>
-                </ul>
-              </li>
-              <?php } ?>
-
-              
-            </ul>
-             
-          </div>
-          <!-- END SUB-MENU -->
       
       
       
@@ -122,27 +77,12 @@
       <section class="mt-30px mb-30px">
         <div class="container-fluid">
           <div class="row">
-            <div class="col-lg-8">
-              <h2>Educational Background</h2>
-              <p class="text-small text-secondary">Manage personnel educational records</p>
-            </div>
-
-            <div class="col-lg-4 text-right">
-              <?php if ($session_access !== 'User') { ?>
-                <a class="btn btn-primary" style="color: white;" href="add_educ_bg_modal.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"><i class="fa fa-plus"></i> EDUCATIONAL BACKGROUND</a>
-              <?php } ?>
-              <a class="btn btn-info" style="color: white;" title="Print personnel's Educational Background..." href="printPersonnelDataSheet_detailed_EB.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>&pDataReportType=PERSONAL INFORMATION" target="_blank"><i class="fa fa-print"></i></a>
-            </div>
-
-            <div class="col-lg-12 mb-3">
-              <?php include('personnel_top_panel.php'); ?>
-            </div>
-
             <div class="col-lg-12 col-md-12">
             
             
             <?php include('encode_daily_log_modal.php'); ?>
             <?php include('restDay_modal.php'); ?>
+            <?php include('update_shift_single_modal.php'); ?>
             <?php include('updateMonthlyLog_modal.php'); ?>
             <?php include('print_monthly_attendance_modal_csf48.php'); ?>
             <?php include('print_monthly_attendance_modal.php'); ?>
@@ -151,8 +91,67 @@
             
               <!-- kinder 1     -->
               <div id="new-updates" class="card updates recent-updated">
+                <div id="updates-header" class="card-header d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center flex-wrap">
+                    <a data-toggle="collapse" data-parent="#new-updates" href="#updates-boxKinder" aria-expanded="true" aria-controls="updates-boxKinder" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center;">
+                      <img src="personnelImg/<?php echo $staff_row['img']; ?>" width="50" height="50" class="img-fluid" style="margin-right: 10px; border: 2px solid green;" />
+                      <h4 style="margin: 0; display: inline;">
+                        <?php
+                        if($staff_row['suffix']=="-") {
+                          echo $staff_row['fname']." ".substr($staff_row['mname'], 0,1).". ".$staff_row['lname'];
+                        } else {
+                          echo $staff_row['fname']." ".substr($staff_row['mname'], 0,1).". ".$staff_row['lname']." ".$staff_row['suffix'];
+                        }
+                        ?>
+                      </h4>
+                    </a>
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm ml-2" data-toggle="modal" data-target="#updateShiftSingleModal" onclick="$('#updateShiftSingleModal').modal('show'); return false;" title="Click to change work shift / schedule..." style="cursor: pointer; font-size: 13px; padding: 3px 8px; font-weight: bold; <?php if($es_row5['type']==='Regular Shift'){ ?> color: green; border-color: green; <?php }elseif($es_row5['type']==='Night Shift'){ ?> color: blue; border-color: blue; <?php }elseif($es_row5['type']==='24 Hours Shift'){ ?> color: brown; border-color: brown; <?php }elseif($es_row5['type']==='Open Time'){ ?> color: purple; border-color: purple; <?php }else{ ?> color: red; border-color: red; <?php } ?>">
+                      <i class="fa fa-pencil-square-o"></i> ( <?php echo $es_row5 ? htmlspecialchars($es_row5['shift_name']) : 'N/A'; ?> - <?php echo $es_row5 ? htmlspecialchars($es_row5['type']) : 'N/A'; ?> )
+                    </button>
+                  </div>
+                  
+                  <a data-toggle="collapse" data-parent="#new-updates" href="#updates-boxKinder" aria-expanded="true" aria-controls="updates-boxKinder"><i class="fa fa-angle-down"></i></a>
+                </div>
+                
                 <div id="updates-boxKinder" role="tabpanel" class="collapse show">
                 
+                <div class="col-lg-12" style="margin-top: 12px;">
+                
+                <a title="Encode log..." style="color: black !important; margin-top: 3px;" data-toggle="modal" data-target="#encodeDL<?php echo $staff_row['RFTag_id']; ?>" href="#" class="btn btn-warning btn-sm"><i class="fa fa-clock-o"></i> ENCODE DAILY LOG</a> 
+                
+                <a title="Rest day settings..." style="color: black !important; margin-top: 3px;" data-toggle="modal" data-target="#restDaySetup<?php echo $staff_row['RFTag_id']; ?>" href="#" class="btn btn-info btn-sm"><i class="fa fa-heartbeat"></i> SET REST DAY</a> 
+                         
+                <!-- REPORTS -->
+                <button data-toggle="dropdown" type="button" class="btn btn-outline-primary dropdown-toggle btn-sm" style="margin-top: 3px;"><i class="fa fa-print"></i>  REPORTS <i class="caret"></i></button>
+                            
+                <div class="dropdown-menu">
+                            
+                <a title="Print Civil Service Form 48..." data-toggle="modal" data-target="#print_monthly_attendance_csf48<?php echo $staff_row['RFTag_id']; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> CSForm 48</a>
+                <a title="Print detailed DTR..." data-toggle="modal" data-target="#print_monthly_attendance<?php echo $staff_row['RFTag_id']; ?>" href="#" class="dropdown-item"><i class="fa fa-print"></i> Detailed DTR <small>(Monthly)</small></a>
+                <a title="Print Log Validations history..." data-toggle="modal" data-target="#print_monthly_LV<?php echo $staff_row['RFTag_id']; ?>" href="#" class="dropdown-item"><i class="fa fa-image"></i> Log Validation History <small>(Monthly)</small></a>
+                
+                </div>
+                <!-- END REPORTS -->  
+                </div>
+                
+                <div class="col-lg-12" style="margin-top: 12px;">
+                <a class="btn btn-outline-primary" href="list_personnel_individual_details.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> PERSONAL INFORMATION</a>
+                <a class="btn btn-primary" style="color: white; font-weight: bold;" href="list_personnel_individual_details_EB.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> EDUCATIONAL BACKGROUND</a>
+                <a class="btn btn-outline-primary" href="list_personnel_individual_details_SA.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> SEMINARS ATTENDED</a>                  <a class="btn btn-outline-primary" href="list_personnel_individual_details_SR.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> SERVICE RECORD</a>
+                  <?php
+                  $has_leave_credits = personnelHasLeaveCredits($conn, $staff_row);
+                  if($has_leave_credits) { ?>
+                    <a class="btn btn-outline-primary" href="list_personnel_individual_details_LC.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> LEAVE CREDITS</a>
+                    <a href="javascript:void(0);" id="btnOpenCertModal" class="btn btn-info" style="color: white; margin-left: 2px;" title="Leave Credit Certification" data-toggle="modal" data-target="#certModal" onclick="$('#certModal').modal('show'); return false;"><i class="fa fa-certificate"></i></a>
+                  <?php } ?>
+                <a class="btn btn-info" style="color: white;" title="Print personnel data sheet..." href="printPersonnelDataSheet_detailed.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>&pDataReportType=PERSONAL INFORMATION" target="_blank"><i class="fa fa-print"></i></a>
+                </div>
+                
+                <div class="col-lg-12" style="margin-top: 12px;">
+                <a class="btn btn-primary" style="color: white;" href="add_educ_bg_modal.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"><i class="fa fa-plus"></i> EDUCATIONAL BACKGROUND</a>
+                <a class="btn btn-info" style="color: white;" title="Print personnel's Educational Background..." href="printPersonnelDataSheet_detailed_EB.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>&pDataReportType=PERSONAL INFORMATION" target="_blank"><i class="fa fa-print"></i></a> 
+                </div>
  
                         
                      
@@ -174,23 +173,18 @@
                                 <?php
                                 $subjK_ctr=0;
                                 
-                                try {
-                                  $peb_stmt = $conn->prepare("SELECT * FROM personnel_educ_bg WHERE personnel_id = :personnel_id ORDER BY eb_id ASC");
-                                  $peb_stmt->execute([':personnel_id' => $personnel_id]);
-                                  $peb_query = $peb_stmt;
-                                  while ($peb_row = $peb_query->fetch())
-                                    {
-                                        ?>
+                                $peb_query = $conn->query("SELECT * FROM personnel_educ_bg WHERE personnel_id='$_GET[personnel_id]' ORDER BY eb_id ASC");
+                                while ($peb_row = $peb_query->fetch())
+                                {
+                                    ?>
                                     
      
                
                             <tr>
                             
                             <td style="width: 80px;">
-                            <?php if ($session_access !== 'User') { ?>
-                              <a title="Edit data..." style="color: white !important; margin-top: 3px;" data-toggle="modal" data-target="#editPersonnel_educ_bg<?php echo $peb_row['eb_id']; ?>" href="#" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></a>
-                              <a title="Delete data..." style="color: white !important; margin-top: 3px;" data-toggle="modal" data-target="#deletePersonnel_educ_bg<?php echo $peb_row['eb_id']; ?>" href="#" class="btn btn-danger btn-sm"><i class="fa fa-times"></i></a>
-                            <?php } ?>
+                            <a title="Edit data..." style="color: white !important; margin-top: 3px;" data-toggle="modal" data-target="#editPersonnel_educ_bg<?php echo $peb_row['eb_id']; ?>" href="#" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></a>
+                            <a title="Delete data..." style="color: white !important; margin-top: 3px;" data-toggle="modal" data-target="#deletePersonnel_educ_bg<?php echo $peb_row['eb_id']; ?>" href="#" class="btn btn-danger btn-sm"><i class="fa fa-times"></i></a>
                             </td>
                         
                             <td><?php echo $peb_row['degree']; ?></td>
@@ -202,12 +196,7 @@
                             
                             <?php include('edit_Personnel_educ_bg_modal.php'); ?>
                             
-                             <?php 
-                                    }
-                                } catch (PDOException $e) {
-                                    error_log("Error fetching educational background: " . $e->getMessage());
-                                }
-                             ?>
+                             <?php } ?>
                            
                           </tbody>
                         </table>
@@ -233,8 +222,14 @@
     </div>
 
 
+    <?php if ($has_leave_credits) { include('leave_certification_modal.php'); } ?>
     <?php include('scripts_files.php'); ?>
-
+    <script>
+    $(document).on('click', '#btnOpenCertModal', function(e) {
+        e.preventDefault();
+        $('#certModal').modal('show');
+    });
+    </script>
 
   </body>
 </html>

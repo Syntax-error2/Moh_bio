@@ -35,27 +35,6 @@
               </ul>
             </div>
           </div>      
-
-          <style>
-          .page-title-block { margin-bottom: 18px; }
-          .page-title-block h2 { margin-bottom: 4px; font-weight: 700; color: #243447; }
-          .page-title-block p { margin-bottom: 0; color: #6b7a88; }
-          .page-cta-group .btn { margin-left: 8px; }
-          </style>
-
-          <section class="mt-30px mb-30px">
-            <div class="container-fluid">
-              <div class="row page-title-block align-items-center">
-                <div class="col-lg-8 col-md-8">
-                  <h2>Travel Order Details</h2>
-                  <p>Review personnel, dates, and travel metadata for this travel code</p>
-                </div>
-                <div class="col-lg-4 col-md-4 text-right page-cta-group">
-                  <a href="list_travel_order.php" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Back to Bulletin</a>
-                </div>
-              </div>
-            </div>
-          </section>
  
       <section class="mt-30px mb-30px">
         <div class="container-fluid">
@@ -66,7 +45,7 @@
       
             <?php
             
-            $opt_query = $conn->query("SELECT DISTINCT travel_date FROM personnel_official_travel_logs ORDER BY travel_date DESC") ;
+            $opt_query = $conn->query("SELECT DISTINCT travel_date FROM personnel_official_travel_logs ORDER BY travel_date DESC");
  
             ?>
             
@@ -111,7 +90,9 @@
                       description,
                       location,
                       travel_type,
-                      numDays  FROM personnel_official_travel_logs WHERE travel_code='$_GET[travel_code]'");
+                      numDays,
+                      COALESCE(time_out, '') as time_out,
+                      COALESCE(time_in, '') as time_in  FROM personnel_official_travel_logs WHERE travel_code='$_GET[travel_code]'");
                       $nc_row = $new_clearance_query->fetch();
                       $row_ctr=$row_ctr+1;
                       
@@ -132,7 +113,14 @@
                           <td><?php echo $nc_row['purpose']; ?></td>
                           <td><?php echo $nc_row['description']; ?></td>
                           <td><?php echo $nc_row['location']; ?></td>
-                          <td><?php echo $nc_row['travel_type']; ?></td>
+                          <td>
+                            <?php echo $nc_row['travel_type']; ?>
+                            <?php if (!empty($nc_row['time_out']) || !empty($nc_row['time_in'])) { 
+                                $t_str = trim(($nc_row['time_out'] ?? '') . ' - ' . ($nc_row['time_in'] ?? ''), ' -');
+                            ?>
+                            <br><small class="text-primary" style="font-weight: 600;"><i class="fa fa-clock-o"></i> <?php echo htmlspecialchars($t_str); ?></small>
+                            <?php } ?>
+                          </td>
                           </tr>
                           </table>
                           </td>
@@ -161,12 +149,13 @@
                           <th style="width: 10px;"></th>
                           </tr>
                           <?php
-                          $pi_query = $conn->query("SELECT travel_log_id, personnel_id FROM personnel_official_travel_logs WHERE travel_code='$nc_row[travel_code]'");
+                          $pi_query = $conn->prepare("SELECT travel_log_id, personnel_id FROM personnel_official_travel_logs WHERE travel_code=? AND purpose=? AND travel_date=?");
+                          $pi_query->execute([$nc_row['travel_code'], $nc_row['purpose'], $nc_row['travel_date']]);
                           while($pi_row = $pi_query->fetch()){ ?>
                           <tr>
                           <td>
                           <?php
-                          $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'") ;
+                          $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'");
                           $sd_row=$studData_query->fetch();
                           
                           if($sd_row['suffix']=="-")
@@ -234,14 +223,14 @@
                                 
                                     <div class="col-md-12">
                                     <input type="text" class="form-control" name="personnel_RFTag_id" placeholder="Search personnel fullname" list="perDataList" id="boxx1" required="true" />
-                                    <small>Personnel RFID Tag | Fullname</small>
+                                    <small>Personnel Biometric ID | Fullname</small>
                                     <datalist id="perDataList">
                                         <?php
                                         
                                         $fnameList_query = $conn->query("SELECT DISTINCT RFTag_id, lname, fname, mname FROM personnels");
                                         while($fnlq_row = $fnameList_query->fetch()){ ?>
                                         
-                                        <option value="<?php echo $fnlq_row['RFTag_id'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?>"><?php echo $fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?></small></option>
+                                        <option value="<?php echo $fnlq_row['RFTag_id'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?>"><?php echo $fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?></option>
                                         
                                         <?php } ?>
                                     </datalist>
@@ -413,14 +402,42 @@
                                 
                          
                                 <div class="col-md-12">
-                                    <select name="remarks" class="form-control">
+                                    <select name="remarks" id="editRemarks_<?php echo $nc_row['travel_code']; ?>" class="form-control" onchange="toggleEditPassSlip('<?php echo $nc_row['travel_code']; ?>', this.value)">
                                     <option><?php echo $nc_row['travel_type']; ?></option>
                                     <option>OFFICIAL BUSINESS TRIP</option>
                                     <option>SEMINAR</option>
+                                    <option>PASS SLIP</option>
                                     </select>
                                     <small class="form-text">Select Notation Type</small>
                                 </div>
                                 <br />
+                                
+                                <div id="editPassSlipSection_<?php echo $nc_row['travel_code']; ?>" class="col-md-12" style="<?php echo ($nc_row['travel_type'] == 'PASS SLIP' || stripos($nc_row['description'] ?? '', 'PASS SLIP') !== false) ? '' : 'display: none;'; ?>">
+                                    <div style="background-color: #f0f7ff; border: 1px solid #b8daff; border-radius: 4px; padding: 10px;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label style="font-weight: 600; font-size: 12px; color: #004085;"><i class="fa fa-clock-o text-warning"></i> Time Out (Oras Magwa):</label>
+                                                <input type="text" placeholder="e.g. 09:00 AM" name="pass_slip_time_out" value="<?php echo htmlspecialchars($nc_row['time_out'] ?? ''); ?>" class="form-control" />
+                                                <small class="form-text text-muted">Departure from office</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="font-weight: 600; font-size: 12px; color: #004085;"><i class="fa fa-clock-o text-success"></i> Time In (Oras Magbalik):</label>
+                                                <input type="text" placeholder="e.g. 11:30 AM" name="pass_slip_time_in" value="<?php echo htmlspecialchars($nc_row['time_in'] ?? ''); ?>" class="form-control" />
+                                                <small class="form-text text-muted">Return to office</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                                
+                                <script type="text/javascript">
+                                function toggleEditPassSlip(code, val) {
+                                    var sec = document.getElementById('editPassSlipSection_' + code);
+                                    if (sec) {
+                                        sec.style.display = (val === 'PASS SLIP') ? 'block' : 'none';
+                                    }
+                                }
+                                </script>
                                 
                                 <div class="col-md-12">
                                     <input type="checkbox" name="add_201_sr" /> <small>Add to 201 Seminar Records (Applicable for Seminar only)</small>

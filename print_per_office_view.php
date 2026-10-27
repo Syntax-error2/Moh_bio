@@ -218,16 +218,39 @@ foreach($personnels as $nc_row) {
     $status = 'PRESENT';
     $remark_label = '';
     $is_on_travel = false;
+    $is_pass_slip = false;
+    $ps_time_info = '';
     $is_on_leave = false;
     $is_whole_absent = false;
 
     // 1. Official Travel takes precedence
     if ($travel_info) {
         $is_on_travel = true;
-        $status = 'ON TRAVEL';
-        $remark_label = !empty($travel_info['travel_type']) && $travel_info['travel_type'] != '-' ? $travel_info['travel_type'] : 'OFFICIAL BUSINESS TRIP';
+        $raw_type = !empty($travel_info['travel_type']) && $travel_info['travel_type'] != '-' ? $travel_info['travel_type'] : 'OFFICIAL BUSINESS TRIP';
+        if (stripos($raw_type, 'PASS SLIP') !== false || stripos($travel_info['description'] ?? '', 'PASS SLIP') !== false) {
+            $remark_label = 'PASS SLIP';
+        } else {
+            $remark_label = $raw_type;
+        }
+        $is_pass_slip = ($remark_label === 'PASS SLIP');
+        
+        $ps_time_info = '';
+        if (!empty($travel_info['time_out']) && !empty($travel_info['time_in'])) {
+            $ps_time_info = $travel_info['time_out'] . ' - ' . $travel_info['time_in'];
+        } elseif (!empty($travel_info['time_out'])) {
+            $ps_time_info = 'Out: ' . $travel_info['time_out'];
+        } elseif (!empty($travel_info['time_in'])) {
+            $ps_time_info = 'In: ' . $travel_info['time_in'];
+        }
+        
+        $status = $is_pass_slip ? ($has_scans ? 'PASS SLIP (PRESENT)' : 'PASS SLIP') : 'ON TRAVEL';
         $total_travel++;
-        $travel_leave_names[] = $fullname . ' (' . $remark_label . ')';
+        if ($is_pass_slip && $has_scans) {
+            $total_present++;
+            if ($has_am) $total_am_present++;
+            if ($has_pm) $total_pm_present++;
+        }
+        $travel_leave_names[] = $fullname . ' (' . $remark_label . (!empty($ps_time_info) ? ' '.$ps_time_info : '') . ')';
     } 
     // 2. Approved Leave takes precedence
     elseif ($leave_info) {
@@ -240,7 +263,19 @@ foreach($personnels as $nc_row) {
     // 3. Travel/Leave notation in personnel logs
     elseif ($log_remark) {
         $cat = getRemarkCategory($log_remark['remarks'], $log_remark['travel_leave_code']);
-        if ($cat === 'TRAVEL') {
+        $is_ps_log = (stripos($log_remark['remarks'] ?? '', 'PASS SLIP') !== false || stripos($log_remark['travel_leave_code'] ?? '', 'PS') !== false);
+        if ($is_ps_log) {
+            $is_on_travel = true;
+            $is_pass_slip = true;
+            $remark_label = 'PASS SLIP';
+            $status = $has_scans ? 'PASS SLIP (PRESENT)' : 'PASS SLIP';
+            $total_travel++;
+            if ($has_scans) {
+                $total_present++;
+                if ($has_am) $total_am_present++;
+                if ($has_pm) $total_pm_present++;
+            }
+        } elseif ($cat === 'TRAVEL') {
             $is_on_travel = true;
             $status = 'ON TRAVEL';
             $remark_label = !empty($log_remark['remarks']) ? $log_remark['remarks'] : 'OFFICIAL TRAVEL';
@@ -283,6 +318,8 @@ foreach($personnels as $nc_row) {
         'has_pm' => $has_pm,
         'is_present' => $has_scans,
         'is_on_travel' => $is_on_travel,
+        'is_pass_slip' => $is_pass_slip,
+        'ps_time_info' => $ps_time_info,
         'is_on_leave' => $is_on_leave,
         'is_whole_absent' => $is_whole_absent,
         'status' => $status,
@@ -440,6 +477,8 @@ foreach($personnels as $nc_row) {
                     $is_absent = $row['is_whole_absent'];
                     $is_travel = $row['is_on_travel'];
                     $is_leave = $row['is_on_leave'];
+                    $is_pass_slip = !empty($row['is_pass_slip']);
+                    $has_scans = !empty($row['is_present']);
                     
                     if ($is_absent) {
                         $row_class = 'class="absent-row"';
@@ -448,11 +487,19 @@ foreach($personnels as $nc_row) {
                         $display_pm_in = '<strong class="absent-text">ABSENT</strong>';
                         $display_pm_out = '<span class="text-muted">---</span>';
                     } elseif ($is_travel) {
-                        $row_class = 'class="travel-row"';
-                        $display_am_in = '<strong class="travel-text" style="font-size: 11px;">' . htmlspecialchars($row['remark_label']) . '</strong>';
-                        $display_am_out = '<span class="text-muted">---</span>';
-                        $display_pm_in = '<strong class="travel-text" style="font-size: 11px;">' . htmlspecialchars($row['remark_label']) . '</strong>';
-                        $display_pm_out = '<span class="text-muted">---</span>';
+                        if ($is_pass_slip && $has_scans) {
+                            $row_class = 'style="background-color: #f0f7ff;"';
+                            $display_am_in = ($row['am_in'] !== '---') ? $row['am_in'] : '<span class="text-muted">---</span>';
+                            $display_am_out = ($row['am_out'] !== '---') ? $row['am_out'] : '<span class="text-muted">---</span>';
+                            $display_pm_in = ($row['pm_in'] !== '---') ? $row['pm_in'] : '<span class="text-muted">---</span>';
+                            $display_pm_out = ($row['pm_out'] !== '---') ? $row['pm_out'] : '<span class="text-muted">---</span>';
+                        } else {
+                            $row_class = 'class="travel-row"';
+                            $display_am_in = '<strong class="travel-text" style="font-size: 11px;">' . htmlspecialchars($row['remark_label']) . '</strong>';
+                            $display_am_out = '<span class="text-muted">---</span>';
+                            $display_pm_in = '<strong class="travel-text" style="font-size: 11px;">' . htmlspecialchars($row['remark_label']) . '</strong>';
+                            $display_pm_out = '<span class="text-muted">---</span>';
+                        }
                     } elseif ($is_leave) {
                         $row_class = 'class="leave-row"';
                         $display_am_in = '<strong class="leave-text" style="font-size: 11px;">' . htmlspecialchars($row['remark_label']) . '</strong>';
@@ -474,7 +521,11 @@ foreach($personnels as $nc_row) {
                         <?php if ($is_absent) { ?>
                             <span class="badge badge-danger text-danger ml-2" style="font-size: 11px; font-weight: bold;">[ABSENT]</span>
                         <?php } elseif ($is_travel) { ?>
-                            <span class="badge text-primary ml-2" style="font-size: 10px; font-weight: bold;">[ON TRAVEL: <?php echo htmlspecialchars($row['remark_label']); ?>]</span>
+                            <?php if ($is_pass_slip) { ?>
+                                <span class="badge text-info ml-2" style="font-size: 10px; font-weight: bold; border: 1px solid #17a2b8;">[PASS SLIP<?php echo !empty($row['ps_time_info']) ? ' ('.$row['ps_time_info'].')' : ''; ?>]</span>
+                            <?php } else { ?>
+                                <span class="badge text-primary ml-2" style="font-size: 10px; font-weight: bold;">[ON TRAVEL: <?php echo htmlspecialchars($row['remark_label']); ?>]</span>
+                            <?php } ?>
                         <?php } elseif ($is_leave) { ?>
                             <span class="badge ml-2" style="font-size: 10px; font-weight: bold; color: #856404;">[ON LEAVE: <?php echo htmlspecialchars($row['remark_label']); ?>]</span>
                         <?php } elseif (!empty($row['remark_label'])) { ?>

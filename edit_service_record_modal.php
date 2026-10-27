@@ -4,7 +4,7 @@
     
                         <!-- EDIT editPersonnel_educ_bg Modal -->
                           <div id="editService_record<?php echo $sr_row['sr_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
-                            <div role="document" class="modal-dialog modal-lg">
+                            <div role="document" class="modal-dialog">
                               <div class="modal-content">
                               <form action="save_add_personnel_tables.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>" method="POST">
                               
@@ -82,9 +82,7 @@
                                                 <datalist id="DSGTN_list">
                                                 <?php
                                                 
-                                                $dsgtnList_stmt = $conn->prepare("SELECT des_name FROM designation");
-                                                $dsgtnList_stmt->execute();
-                                                $dsgtnList_query = $dsgtnList_stmt;
+                                                $dsgtnList_query = $conn->query("SELECT des_name FROM designation");
                                                 while($dsgtn_row = $dsgtnList_query->fetch()){ ?>
                                                 
                                                 <option value="<?php echo $dsgtn_row['des_name']; ?>"><?php echo $dsgtn_row['des_name']; ?></option>
@@ -95,18 +93,8 @@
                                               </div>
                                               
                                               <div class="col-md-12">
-                                                <input value="<?php echo $sr_row['roa_status']; ?>" name="roa_status" list="STATUS_list_<?php echo $sr_row['sr_id']; ?>" type="text" class="form-control" />
+                                                <input value="<?php echo $sr_row['roa_status']; ?>" name="roa_status" type="text" class="form-control" />
                                                 <small class="form-text">Status</small>
-                                                
-                                                <datalist id="STATUS_list_<?php echo $sr_row['sr_id']; ?>">
-                                                <?php
-                                                $statusList_stmt = $conn->prepare("SELECT emp_stat_name FROM emp_status ORDER BY emp_stat_name");
-                                                $statusList_stmt->execute();
-                                                $statusList_query = $statusList_stmt;
-                                                while($status_row = $statusList_query->fetch()){ ?>
-                                                  <option value="<?php echo $status_row['emp_stat_name']; ?>"><?php echo $status_row['emp_stat_name']; ?></option>
-                                                <?php } ?>
-                                                </datalist>
                                               </div> 
                                               
                                             </div>
@@ -119,23 +107,9 @@
                                             <div class="row">
                                             
                                               <div class="col-md-12">
-                                                <input value="<?php echo $sr_row['monthly_salary']; ?>" name="monthly_salary" id="monthly_salary_<?php echo $sr_row['sr_id']; ?>" type="number" step="0.001" min="0" class="form-control monthly-salary-input" />
-                                                <small class="form-text">Monthly Salary</small>
+                                                <input value="<?php echo $sr_row['salary']; ?>" name="salary" type="text" class="form-control" />
+                                                <small class="form-text">Salary</small>
                                               </div>
-                                              
-                                              <div class="col-md-12">
-                                                <input value="<?php echo $sr_row['annual_salary']; ?>" name="annual_salary" id="annual_salary_<?php echo $sr_row['sr_id']; ?>" type="number" step="0.001" min="0" class="form-control annual-salary-input" readonly style="background-color: #f0f0f0;" />
-                                                <small class="form-text">Annual Salary (Auto-computed)</small>
-                                              </div>
-                                              
-                                            </div>
-                                            
-                                          </div>
-                                          
-                                          
-                                          <div class="col-sm-12">
-                                          
-                                            <div class="row">
                                               
                                               <div class="col-md-12">
                                                 <input value="<?php echo $sr_row['office_appointment']; ?>" name="office_appointment" list="OA_list" type="text" class="form-control" />
@@ -144,9 +118,7 @@
                                                 <datalist id="OA_list">
                                                 <?php
                                                 
-                                                $fnameList_stmt = $conn->prepare("SELECT dept_office_name FROM dept_offices");
-                                                $fnameList_stmt->execute();
-                                                $fnameList_query = $fnameList_stmt;
+                                                $fnameList_query = $conn->query("SELECT dept_office_name FROM dept_offices");
                                                 while($fnlq_row = $fnameList_query->fetch()){ ?>
                                                 
                                                 <option value="<?php echo $fnlq_row['dept_office_name']; ?>"><?php echo $fnlq_row['dept_office_name']; ?></option>

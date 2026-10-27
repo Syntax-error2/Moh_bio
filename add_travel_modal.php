@@ -19,9 +19,7 @@
                         
                         <?php
                               
-                          $pcfg_stmt = $conn->prepare("SELECT * FROM travel_num_generator");
-                          $pcfg_stmt->execute();
-                          $pcfg_query = $pcfg_stmt;
+                              $pcfg_query = $conn->query("SELECT * FROM travel_num_generator");
                               $pcfg_row = $pcfg_query->fetch();
                          
                              
@@ -55,15 +53,45 @@
                             <div class="col-lg-12">
                                 <div class="row">
                                   <div class="col-md-12">
-                                    <select name="remarks" class="form-control">
+                                    <select name="remarks" id="travelNotationSelect" class="form-control" onchange="toggleTravelNotationFields(this.value)">
                                     <option>--Please Select--</option>
                                     <option>OFFICIAL BUSINESS TRIP</option>
                                     <option>SEMINAR</option>
+                                    <option>PASS SLIP</option>
                                     </select>
                                     <small class="form-text">Select Notation Type</small>
                                   </div>
                                 </div>
                               </div>
+                              
+                              <div id="passSlipTimeSection" class="col-lg-12" style="display: none; margin-top: 5px; margin-bottom: 12px;">
+                                <div style="background-color: #f0f7ff; border: 1px solid #b8daff; border-radius: 4px; padding: 10px;">
+                                  <div class="row">
+                                    <div class="col-md-6">
+                                      <label style="font-weight: 600; font-size: 12px; color: #004085;"><i class="fa fa-clock-o text-warning"></i> Time Out (Oras Magwa):</label>
+                                      <input type="time" name="pass_slip_time_out" id="ps_time_out" class="form-control" />
+                                      <small class="form-text text-muted">Departure from office</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label style="font-weight: 600; font-size: 12px; color: #004085;"><i class="fa fa-clock-o text-success"></i> Time In (Oras Magbalik):</label>
+                                      <input type="time" name="pass_slip_time_in" id="ps_time_in" class="form-control" />
+                                      <small class="form-text text-muted">Return to office</small>
+                                    </div>
+                                    <div class="col-md-12 mt-2">
+                                      <small class="text-info" style="font-size: 11px;"><i class="fa fa-info-circle"></i> <strong>Note:</strong> Pass Slip is for short trips during work hours. Personnel can still scan/log attendance on the DTR before leaving and after returning.</small>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <script type="text/javascript">
+                              function toggleTravelNotationFields(val) {
+                                  var psSec = document.getElementById('passSlipTimeSection');
+                                  if (psSec) {
+                                      psSec.style.display = (val === 'PASS SLIP') ? 'block' : 'none';
+                                  }
+                              }
+                              </script>
                               
                               <div class="col-md-12">
                                  <div class="my-formx">
@@ -81,12 +109,10 @@
                                 <datalist id="perDataList">
                                     <?php
                                     
-                                    $fnameList_stmt = $conn->prepare("SELECT DISTINCT RFTag_id, lname, fname, mname FROM personnels");
-                                    $fnameList_stmt->execute();
-                                    $fnameList_query = $fnameList_stmt;
+                                    $fnameList_query = $conn->query("SELECT personnel_id, lname, fname, mname FROM personnels");
                                     while($fnlq_row = $fnameList_query->fetch()){ ?>
                                     
-                                    <option value="<?php echo $fnlq_row['RFTag_id'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?>"><?php echo $fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?></small></option>
+                                    <option value="<?php echo $fnlq_row['personnel_id'].' | '.$fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?>"><?php echo $fnlq_row['lname'].', '.$fnlq_row['fname'].' '.$fnlq_row['mname']; ?></option>
                                     
                                     <?php } ?>
                                 </datalist>
@@ -185,10 +211,11 @@
                                 <div class="col-lg-12">
                                 <div class="row">
                                   <div class="col-md-6">
-                                    <input type="checkbox" name="add_to" /> <small>Add as Travel Order</small><br />
+                                    <input type="checkbox" name="add_to" checked="true" /> <small>Add as Travel Order</small><br />
                                     <small>Travel Code: <?php echo $pcf_mm.'-'.$new_pcs.'-'.date('Y'); ?></small>
                                     
                                     <input value="<?php echo $pc_sequence; ?>" name="new_tng_sequence" type="hidden" />
+                                    <input value="<?php echo $pcf_mm; ?>" name="new_tng_mm" type="hidden" />
                                     <input type="hidden" name="travel_code" value="<?php echo $pcf_mm.'-'.$new_pcs.'-'.date('Y'); ?>"/>
                                     
                                   </div>
