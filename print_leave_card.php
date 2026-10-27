@@ -16,13 +16,12 @@ $stmt->execute([$personnel_id]);
 $staff = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $name = strtoupper($staff['lname'] . ', ' . $staff['fname'] . ' ' . $staff['mname']);
-$seal_path = file_exists('img/moh seal.jpg') ? 'img/moh seal.jpg' : (!empty($sf_row['logo']) ? 'img/' . $sf_row['logo'] : 'img/97763-moh-seal.jpg');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="<?php echo $seal_path; ?>">
+    <link rel="shortcut icon" href="img/72123-mob_seal.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Leave Card - <?php echo $name; ?></title>
     <style>
@@ -261,10 +260,56 @@ $seal_path = file_exists('img/moh seal.jpg') ? 'img/moh seal.jpg' : (!empty($sf_
             background: #0369a1;
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
-        }
         /* Suppress duplicate fixed button from universal_excel_export.php */
         .export-btn-container {
             display: none !important;
+        }
+        /* Certified True Copy Stamp */
+        .certified-stamp-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            padding-right: 25px;
+            position: relative;
+            z-index: 2;
+            page-break-inside: avoid;
+        }
+        .certified-stamp-box {
+            width: 290px;
+            border: 3.5px solid #0f2b48;
+            border-radius: 10px;
+            padding: 10px 14px 12px 14px;
+            color: #0f2b48;
+            font-family: Arial, Helvetica, sans-serif;
+            box-sizing: border-box;
+            background: transparent;
+        }
+        .stamp-title {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            line-height: 1.25;
+        }
+        .stamp-field {
+            display: flex;
+            align-items: flex-end;
+            margin-top: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .stamp-label {
+            white-space: nowrap;
+            padding-right: 4px;
+            letter-spacing: 0.5px;
+        }
+        .stamp-dots {
+            flex-grow: 1;
+            border-bottom: 2px dotted #0f2b48;
+            height: 12px;
+            margin-bottom: 1px;
         }
         @media print {
             .leave-card-toolbar, .btn-print, .btn-order, .no-print, .export-btn-container { 
@@ -275,6 +320,15 @@ $seal_path = file_exists('img/moh seal.jpg') ? 'img/moh seal.jpg' : (!empty($sf_
                 background-color: transparent !important; /* let physical paper provide color */
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important;
+            }
+            .certified-stamp-box {
+                border-color: #0f2b48 !important;
+                color: #0f2b48 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .stamp-dots {
+                border-bottom-color: #0f2b48 !important;
             }
         }
     </style>
@@ -328,13 +382,13 @@ $order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 
         <table style="width: 100%; border: none; margin-bottom: 0;">
             <tr style="border: none;">
                 <td style="width: 80px; border: none; text-align: left; vertical-align: middle;">
-                    <img src="<?php echo $seal_path; ?>" class="logo-img" style="width: 65px; height: 65px;">
+                    <img src="img/72123-mob_seal.png" class="logo-img" style="width: 65px; height: 65px;">
                 </td>
                 <td style="border: none; text-align: left; vertical-align: middle;">
                     <div class="republic-text" style="font-size: 12px; line-height: 1.2;">
                         <div>Republic of the Philippines</div>
                         <div>Province of Negros Occidental</div>
-                        <div>Municipality of Hinoba-an</div>
+                        <div>Municipality of Binalbagan</div>
                         <div style="font-weight: bold; font-size: 11px;">HUMAN RESOURCE MANAGEMENT OFFICE</div>
                     </div>
                 </td>
@@ -425,30 +479,45 @@ $order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 
     </thead>
     <tbody>
         <?php
+        if (function_exists('syncPersonnelUnloggedLeaves')) {
+            syncPersonnelUnloggedLeaves($conn, $personnel_id);
+        }
         $log_query = $conn->prepare("SELECT * FROM leave_credit_logs WHERE personnel_id=? ORDER BY log_id ASC");
         $log_query->execute([$personnel_id]);
         $logs = $log_query->fetchAll(PDO::FETCH_ASSOC);
         $logs = array_values(array_filter($logs, function ($log) {
-            return !isZeroValueOfficialDutyLeaveLog($log);
+            if (isZeroValueOfficialDutyLeaveLog($log)) {
+                return false;
+            }
+            // Exclude legacy pre-2026 RFID leave applications (keep records encoded in the new system)
+            if ($log['log_type'] === 'Leave Application' && stripos($log['remarks'], 'Applied for') !== false && stripos($log['remarks'], '[HR Encoded]') === false) {
+                $p = trim(explode(' - ', $log['period'])[0]);
+                $ts = strtotime(str_replace('-', '/', $p));
+                $y = $ts ? (int)date('Y', $ts) : 0;
+                if ($y > 0 && $y < 2026) {
+                    return false;
+                }
+            }
+            return true;
         }));
 
-        usort($logs, function($a, $b) {
-            // Get start date of period
-            $a_p = trim(explode(' - ', $a['period'])[0]);
-            $b_p = trim(explode(' - ', $b['period'])[0]);
-            $tsA = strtotime(str_replace('-', '/', $a_p));
-            $tsB = strtotime(str_replace('-', '/', $b_p));
-            
-            // If invalid date, fallback to 0
-            if(!$tsA) $tsA = 0;
-            if(!$tsB) $tsB = 0;
-            
-            // Primary sort by date, secondary sort by log_id (so manual adjustments on same day go after accruals)
-            if ($tsA == $tsB) {
-                return $a['log_id'] <=> $b['log_id'];
-            }
-            return $tsA <=> $tsB;
-        });
+usort($logs, function($a, $b) {
+    // Get start date of period
+    $a_p = trim(explode(' - ', $a['period'])[0]);
+    $b_p = trim(explode(' - ', $b['period'])[0]);
+    $tsA = strtotime(str_replace('-', '/', $a_p));
+    $tsB = strtotime(str_replace('-', '/', $b_p));
+    
+    // If invalid date, fallback to 0
+    if(!$tsA) $tsA = 0;
+    if(!$tsB) $tsB = 0;
+    
+    // Primary sort by date, secondary sort by log_id (so manual adjustments on same day go after accruals)
+    if ($tsA == $tsB) {
+        return $a['log_id'] <=> $b['log_id'];
+    }
+    return $tsA <=> $tsB;
+});
 
         $vl_run = 0.000;
         $sl_run = 0.000;
@@ -462,13 +531,37 @@ $order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 
             $logs[$key]['sl_run_calc'] = $sl_run;
         }
 
+        $has_terminal_leave = false;
+        foreach ($logs as $l) {
+            if (stripos($l['particulars'] ?? '', 'terminal') !== false ||
+                stripos($l['log_type'] ?? '', 'terminal') !== false ||
+                stripos($l['remarks'] ?? '', 'terminal') !== false) {
+                $has_terminal_leave = true;
+                break;
+            }
+        }
+        if (!$has_terminal_leave) {
+            $chk_tl_log = $conn->prepare("SELECT log_id FROM leave_credit_logs WHERE personnel_id = ? AND (particulars LIKE '%terminal%' OR log_type LIKE '%terminal%' OR remarks LIKE '%terminal%') LIMIT 1");
+            $chk_tl_log->execute([$personnel_id]);
+            if ($chk_tl_log->fetch()) {
+                $has_terminal_leave = true;
+            }
+        }
+        if (!$has_terminal_leave) {
+            $chk_tl_app = $conn->prepare("SELECT lap_id FROM leave_applicants WHERE applicant_id = ? AND (leave_type LIKE '%terminal%' OR leave_type_desc LIKE '%terminal%') LIMIT 1");
+            $chk_tl_app->execute([$personnel_id]);
+            if ($chk_tl_app->fetch()) {
+                $has_terminal_leave = true;
+            }
+        }
+
         // Default order is Ascending (from the start date to last date)
         if ($order === 'desc') {
             $logs = array_reverse($logs);
         }
 
         $rowCount = count($logs);
-        $minRows = 28; // Adjusted for landscape height
+        $minRows = $has_terminal_leave ? 20 : 28; // Adjusted for landscape height with stamp
         
         foreach($logs as $log) {
             $log_type_clean = strtolower(trim((string)$log['log_type']));
@@ -481,12 +574,24 @@ $order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 
             $is_special_leave = isNonDeductibleSpecialLeave($particulars, $log['remarks']);
 
             $vl_earned = ($is_monthly_earn && $log['vl_amount'] > 0) ? $log['vl_amount'] : '';
-            $vl_w_pay = ($log['vl_amount'] < 0) ? abs($log['vl_amount']) : '';
-            $vl_wout_pay = (!empty($log["vl_wout_pay"]) && $log["vl_wout_pay"] > 0) ? $log["vl_wout_pay"] : "";
+            $vl_w_pay = (!empty($log['vl_w_pay']) && (float)$log['vl_w_pay'] > 0) ? (float)$log['vl_w_pay'] : (($log['vl_amount'] < 0) ? abs($log['vl_amount']) : '');
+            $vl_wout_pay = (!empty($log["vl_wout_pay"]) && (float)$log["vl_wout_pay"] > 0) ? $log["vl_wout_pay"] : "";
 
             $sl_earned = ($is_monthly_earn && $log['sl_amount'] > 0) ? $log['sl_amount'] : '';
-            $sl_w_pay = ($log['sl_amount'] < 0) ? abs($log['sl_amount']) : '';
-            $sl_wout_pay = (!empty($log["sl_wout_pay"]) && $log["sl_wout_pay"] > 0) ? $log["sl_wout_pay"] : "";
+            $sl_w_pay = (!empty($log['sl_w_pay']) && (float)$log['sl_w_pay'] > 0) ? (float)$log['sl_w_pay'] : (($log['sl_amount'] < 0) ? abs($log['sl_amount']) : '');
+            $sl_wout_pay = (!empty($log["sl_wout_pay"]) && (float)$log["sl_wout_pay"] > 0) ? $log["sl_wout_pay"] : "";
+
+            // Approved leave applications are paid leaves: tanan sa absence with pay, zero sa without pay
+            if ($log_type_clean === 'leave application' || stripos($particulars_clean, 'leave') !== false) {
+                if (!empty($vl_wout_pay) && (float)$vl_wout_pay > 0) {
+                    $vl_w_pay = ((float)$vl_w_pay > 0 ? (float)$vl_w_pay : 0) + (float)$vl_wout_pay;
+                    $vl_wout_pay = '';
+                }
+                if (!empty($sl_wout_pay) && (float)$sl_wout_pay > 0) {
+                    $sl_w_pay = ((float)$sl_w_pay > 0 ? (float)$sl_w_pay : 0) + (float)$sl_wout_pay;
+                    $sl_wout_pay = '';
+                }
+            }
 
             // Non-deductible special leaves (Wellness, Maternity, Paternity, Solo Parent, Rehab, Emergency)
             // reflect their days with pay without deducting from running balances
@@ -510,14 +615,42 @@ $order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 
         $p_parts = explode(' - ', $period);
         $period_from = trim($p_parts[0]);
         $period_to = trim($p_parts[1]);
-    } else {
+    }
+    
+    // If period_to is empty, automatically compute appropriate end date
+    if ($period_to === '' && $period_from !== '') {
         if(strtolower($log['log_type']) == 'leave application' || stripos($log['particulars'], 'leave') !== false) {
             $period_to = $period_from;
+        } else {
+            $clean_from = str_replace('-', '/', $period_from);
+            $ts_from = strtotime($clean_from);
+            if ($ts_from) {
+                $sep = (strpos($period_from, '/') !== false) ? '/' : '-';
+                $p_parts = explode($sep, $period_from);
+                if (isset($p_parts[0]) && strlen(trim($p_parts[0])) == 4) {
+                    $period_to = date("Y{$sep}m{$sep}t", $ts_from);
+                } else {
+                    $m_len = isset($p_parts[0]) ? strlen(trim($p_parts[0])) : 2;
+                    $y_len = isset($p_parts[2]) ? strlen(trim($p_parts[2])) : (isset($p_parts[1]) ? strlen(trim($p_parts[1])) : 2);
+                    $m_fmt = ($m_len == 1) ? 'n' : 'm';
+                    $y_fmt = ($y_len == 4) ? 'Y' : 'y';
+                    $period_to = date("{$m_fmt}{$sep}t{$sep}{$y_fmt}", $ts_from);
+                }
+            }
         }
     }
     $remarks_display = htmlspecialchars($log['remarks']);
     // Remove "Manual adjustment by HR" from remarks case-insensitively
     $remarks_display = trim(str_ireplace('Manual adjustment by HR', '', $remarks_display));
+    // Remove LWOP text from remarks for leave applications
+    $remarks_display = trim(preg_replace('/\s*\(Plus\s+[\d\.]+\s+LWOP\)/i', '', $remarks_display));
+    
+    // Automatically display Certified Correct for Terminal Leave if empty or generic
+    if (stripos($particulars, 'terminal') !== false || stripos($log['log_type'], 'terminal') !== false || stripos($remarks_display, 'terminal') !== false) {
+        if ($remarks_display === '' || stripos($remarks_display, 'applied for') !== false || stripos($remarks_display, 'encoded') !== false || stripos($remarks_display, 'certified correct') !== false) {
+            $remarks_display = 'Certified Correct';
+        }
+    }
     
     // Remove "Balance Forwarded" from particulars if it's a manual entry
     $particulars_display = htmlspecialchars($particulars);
@@ -553,6 +686,27 @@ $order = isset($_GET['order']) && strtolower(trim($_GET['order'])) === 'desc' ? 
     </tbody>
 </table>
 
-<?php include_once('universal_excel_export.php'); ?>
+<?php if ($has_terminal_leave) { ?>
+<div class="certified-stamp-container">
+    <div class="certified-stamp-box">
+        <div class="stamp-title">CERTIFIED TRUE COPY OF</div>
+        <div class="stamp-title">AN ORIGINAL DOCUMENT</div>
+        <div class="stamp-field">
+            <span class="stamp-label">SIGNED</span>
+            <span class="stamp-dots"></span>
+        </div>
+        <div class="stamp-field">
+            <span class="stamp-label">DATE</span>
+            <span class="stamp-dots"></span>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
+<?php 
+$hide_floating_excel_btn = true;
+include_once('universal_excel_export.php'); 
+?>
 </body>
 </html>
+

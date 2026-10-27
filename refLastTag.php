@@ -3,9 +3,9 @@
 <html>
 <head>
 
-<title><?php echo $sf_row['institution_name'] ?? 'Institution Name'; ?></title>
+<title>MOB - DTR v. 1.0</title>
 
-<meta name="description" content="Human Resource Management System">
+<meta name="description" content="Biometric Attendance Monitoring with SMS">
 
 <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.css">
@@ -20,151 +20,181 @@
 
 
 function get_client_ip7() {
+    static $cached_ip = null;
+    if ($cached_ip !== null) return $cached_ip;
     $ipaddress7 = '';
-    if (getenv('HTTP_CLIENT_IP'))
-        $ipaddress7 = getenv('HTTP_CLIENT_IP');
-    else if(getenv('HTTP_X_FORWARDED_FOR'))
-        $ipaddress7 = getenv('HTTP_X_FORWARDED_FOR');
-    else if(getenv('HTTP_X_FORWARDED'))
-        $ipaddress7 = getenv('HTTP_X_FORWARDED');
-    else if(getenv('HTTP_FORWARDED_FOR'))
-        $ipaddress7 = getenv('HTTP_FORWARDED_FOR');
-    else if(getenv('HTTP_FORWARDED'))
-       $ipaddress7 = getenv('HTTP_FORWARDED');
+    if (!empty($_SERVER['HTTP_CLIENT_IP']))
+        $ipaddress7 = $_SERVER['HTTP_CLIENT_IP'];
+    else if(!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+        $ipaddress7 = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    else if(!empty($_SERVER['HTTP_X_FORWARDED']))
+        $ipaddress7 = $_SERVER['HTTP_X_FORWARDED'];
+    else if(!empty($_SERVER['HTTP_FORWARDED_FOR']))
+        $ipaddress7 = $_SERVER['HTTP_FORWARDED_FOR'];
+    else if(!empty($_SERVER['HTTP_FORWARDED']))
+       $ipaddress7 = $_SERVER['HTTP_FORWARDED'];
+    else if(!empty($_SERVER['REMOTE_ADDR']))
+        $ipaddress7 = $_SERVER['REMOTE_ADDR'];
     else if(getenv('REMOTE_ADDR'))
         $ipaddress7 = getenv('REMOTE_ADDR');
     else
         $ipaddress7 = 'UNKNOWN';
+    $cached_ip = $ipaddress7;
     return $ipaddress7;
 }
 
-
-if(get_client_ip7()=="::1")
+if(get_client_ip7()=="::1" || get_client_ip7()=="127.0.0.1")
 {
-  $machine_ip7=gethostbyname(trim(`hostname`));  
+  $machine_ip7=gethostbyname(gethostname());  
 }else{
   $machine_ip7=get_client_ip7();
 }
- 
-$chk_comp_ip_query = $conn->prepare('SELECT client_id FROM client_computer WHERE ipAddress = :ipAddress');
-$chk_comp_ip_query->execute(['ipAddress' => $machine_ip7]);
 
-if($chk_comp_ip_query->rowCount()>0){
+
+    try
+    {
+        $client_ip = get_client_ip7();
+        if ($client_ip == '::1' || $client_ip == '127.0.0.1') {
+            $enr_path = __DIR__ . '/data.enr';
+        } else {
+            $enr_path = "\\\\" . $client_ip . "\\mob_bio\\data.enr";
+        }
+
+        $blank='';
+        $dataFile=@fopen($enr_path, "w");
+        if($dataFile) { fwrite($dataFile, $blank); }
+        if($dataFile) { fclose($dataFile); }
+    }
+    catch (Exception $e){}
     
 $conn->query("UPDATE client_computer SET display_time=0, announcement_img=0, RFID_tag='' WHERE ipAddress='$machine_ip7'");
 
 $conn->query("DELETE FROM personnel_logs WHERE client_ip='$machine_ip7' AND logFlow=''");
-
-}
-
+ 
 ?>
 
 
 <?php include('refLastTagCSS.php'); ?>
+ 
+ 
+
 
 </head>
 
 <body>
 
 
-<div class="kiosk-shell">
-    <div id="rcorners4" class="kiosk-card kiosk-header-card">
-        <table style="width: 100%;">
-            <tr>
-                <td style="vertical-align: middle; width: 5%; text-align:center;">
-                    <div id="my_camera"></div>
-                    <input name="submitSnapshot" type="button" value="Take Snapshot" onclick="take_snapshot()" style="display: none;" />
-                </td>
-                <td>
-                    <table align="center" style="height: 100%;">
-                        <tr>
-                            <td rowspan="3" align="center">
-                                <a href="index.php"><img src="img/<?php echo $sf_row['logo']; ?>" width="75" height="75" style="border: solid 1px #fff; border-radius: 50px;" /></a>
-                            </td>
-                            <td>&nbsp;&nbsp;&nbsp;</td>
-                            <td align="center">
-                                <strong style="font-size: 30px; color: #1a1a1a; font-weight: 700;"><?php echo $sf_row['institution_name'] ?? 'Institution Name'; ?></strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;&nbsp;&nbsp;</td>
-                            <td align="center" style="font-size: 18px; color: #1a1a1a;"><?php echo ($sf_row['division'] ?? '').' District'.' - '.($sf_row['address'] ?? '').' '.($sf_row['zip_code'] ?? ''); ?></td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;&nbsp;&nbsp;</td>
-                            <td align="center" style="font-size: 14px; color: #1a1a1a;">
-                            <?php
-                            echo $sf_row['emailAddress']."<strong>&nbsp;&nbsp;&middot;&nbsp;&nbsp;</strong>".$sf_row['contactNumber'];
-                            ?>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
+<div id="my_camera" style="display: none;"></div>
+<input name="submitSnapshot" type="button" value="Take Snapshot" onclick="take_snapshot()" style="display: none;" />
+<!-- <div id="results">Your captured image will appear here...</div> -->
+     
+<div id="wrapper">
+  
+<div id="left">
 
-    <div class="kiosk-main-grid">
-        <div class="kiosk-left-col">
+<div id="rcorners4">
+<table style="width: 100%;">
+<tr>
 
-            <div class="kiosk-card kiosk-activity-card">
-                <div id="screenDTimer"></div>
-                <div id="screen"></div>
 
-                <form id="addForm" style="height: 100%; margin: 0;">
-                    <input type="hidden" name="image" class="image-tag" />
-                    <div id="screen2"></div>
-                </form>
-            </div>
+<td>
 
-            <?php if($chk_comp_ip_query->rowCount()>0){ ?>
-            <div id="rcorners5" class="kiosk-card">
-                <div class="input-group barcode-log-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text barcode-log-icon"><i class="fa fa-barcode"></i></span>
-                    </div>
+<table align="center" style="height: 100%; margin-bottom: 77px;">
+<tr>
+<td rowspan="3" align="center">
+ 
+<a href="index.php"><img src="img/<?php echo $sf_row['logo']; ?>" width="100" height="100" /></a>
+ 
+</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td align="center">
+<strong style="font-size: 30px; color: white;"><?php echo $sf_row['schoolName']; ?></strong>
+</td>
+</tr>
 
-                    <input id="profile_id" name="profile_id" required="" autocomplete="off" class="form-control barcode-log-input" placeholder="Enter ID code and press Enter Key to log..." />
-
-                    <div class="input-group-append">
-                        <button id="search_btn" type="button" onclick="checkLRNStatus();" class="btn barcode-log-btn"><i class="fa fa-search"></i></button>
-                    </div>
-                </div>
-            </div>
-            <?php }else{ ?>
-            <div id="rcorners5" class="kiosk-card" style="justify-content: center;">
-                <h5 style="font-weight: 400; color: gray; margin: 0;">This computer is not registered as Log Client</h5>
-            </div>
-            <?php } ?>
-
-        </div>
-
-        <div class="kiosk-right-col">
-            <div id="rcorners3" class="kiosk-card">
-                <div id="clock"></div>
-                <div id="screenRefDate"></div>
-            </div>
-
-            <div class="kiosk-card kiosk-announcement-card">
-                <h1>News & Announcements</h1>
-                <div id="screenAnnouncements"></div>
-            </div>
-        </div>
-
-    </div>
-</div>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td align="center" style="font-size: 22px; color: white;"><?php echo $sf_row['division']." District".' - '.$sf_row['address']; ?></td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;</td>
 
  
 
-<!-- INVALID SNACK BARS -->
-<div id="snackbar">ID CODE NOT FOUND</div>
+<td align="center" style="font-size: 14px; color: white;">
+<?php
+echo "<strong><i class='fa fa-envelope'></i> </strong>".$sf_row['emailAddress']."<strong> &middot; <i class='fa fa-phone'></i> </strong>".$sf_row['contactNumber'];
+?>
+</td>
+</tr>
+ 
+</table>
+
+
+
+ 
+</td>
+ 
+
+ 
+</tr>
+</table>
+
+</div>
+
+<div id="screenDTimer"></div>
+
+<div id="screen"></div>
+
+<form id="addForm">
+
+<input type="hidden" name="image" class="image-tag" />
+
+<div id="screen2"> </div>
+      
+</form>
+ 
+ 
+<div id="rcorners5">
+<h2 style="margin-bottom: 0px;" align="center">GOOD DAY! PLEASE SCAN FINGERPRINT TO LOG</h2>
+<p align="center" style="font-size: small; margin: 2px;">
+Biometric problem? <a href="#" style="color: yellow;">Please log your time at <strong>guard on duty</strong></a>.
+</p>
+ 
+</div>
+
+
+ 
+ 
+
+
+</div>
+ 
+<div id="right">
+ 
+    <div id="rcorners3" style="height: 30%;">
+    
+    <div align="center" style="font-size: 68px; color: #01074b;" id="clock"> </div>
+   
+    <div id="screenRefDate" align="center" style="font-size: 32px; color: #01074b;"></div>
+     
+    </div>
+
+    <div id="screen22"> </div>
+  
+
+</div>
+
+</div>
+
+<!-- INVALID SNACK BAR -->
+<div id="snackbar">TAG NOT FOUND</div>
 <div id="snackbar2">CAN'T LOG AT THIS TIME</div>
 <div id="snackbar4">SCHEDULE NOT FOUND</div>
 <div id="snackbar5">NO AM OUT LOG</div>
 <div id="snackbar6">PROCESSING...</div>
-<!-- END INVALID SNACK BARS -->
 
-<!--
+ 
 <marquee>
 <p style="margin-top: 2px; margin-bottom: 0px;">
 <?php 
@@ -183,10 +213,15 @@ echo $news_row['news_contents'].'&nbsp;&nbsp;<i class="fa fa-circle" style="font
 </p>
 </marquee>
 
--->
 
-<?php $conn=null; ?>
 
+<?php
+
+$clientComp_query=null;
+$news_query=null;
+$conn=null;
+
+?>
 </body>
 
 
@@ -195,69 +230,14 @@ echo $news_row['news_contents'].'&nbsp;&nbsp;<i class="fa fa-circle" style="font
 
 <script src="js/1.0.25_webcam.min.js"></script>
 
-
-
-
-
 <script>
-
-    function changeAnnouncementSlide(direction){
-        $.ajax({
-            type: 'POST',
-            url: 'set_announcement_slide.php',
-            dataType: 'json',
-            data: { direction: direction },
-            success: function(){
-                $("#screen2").load('displayTags.php');
-            }
-        });
-    }
-
-    function setAnnouncementSlide(index){
-        $.ajax({
-            type: 'POST',
-            url: 'set_announcement_slide.php',
-            dataType: 'json',
-            data: { index: index },
-            success: function(){
-                $("#screen2").load('displayTags.php');
-            }
-        });
-    }
-
-    function checkLRNStatus(){
-        
-    var profile_id=$("#profile_id").val();// value in field profile_id
-    
-    $.ajax({
-        type:'POST',
-            url:'check_id_code.php',// put your real file name 
-            data:{profile_id: profile_id},
-            success:function(){
-                document.getElementById('profile_id').value = '';
-                document.getElementById('search_btn').style.display = 'inline-block';
-                //document.getElementById('search_load').style.display = 'none';
-            }
-     });
-    }
-    
-    
-    //Press Enter Ker to trigger function checkLRNStatus()
-    var input = document.getElementById("profile_id");
-    input.addEventListener("keyup", function(event) {
-      if (event.keyCode === 13) {
-       event.preventDefault();
-       document.getElementById("search_btn").click();
-      }
-    });
-    
-    
 $(document).ready(function(){
 	setInterval(function(){
 		$("#screenDTimer").load('displayTimer.php')
 
     }, 1000);
 });
+
 
 
 $(document).ready(function(){
@@ -288,12 +268,11 @@ $(document).ready(function(){
 
 
 $(document).ready(function(){
-    function loadAnnouncements(){
-        $("#screenAnnouncements").load('displayAnnouncements.php');
-    }
-
-    loadAnnouncements();
-    setInterval(loadAnnouncements, 15000);
+	setInterval(function(){
+	 
+        $("#screen22").load('displayTags2.php')
+ 
+    }, 1000);
 });
 
 
@@ -310,10 +289,7 @@ var d = new Date(<?php echo time() * 1000 ?>);
     hrs = (hrs > 12) ? hrs - 12 : hrs;
      hrs = (hrs == 0) ? 12 : hrs; 
      var ctime = hrs + ":" + mins + ":" + secs + " " + apm;
-      var clockEl = document.getElementById("clock");
-      if (clockEl) {
-          clockEl.textContent = ctime;
-      }
+      document.getElementById("clock").firstChild.nodeValue = ctime;
        }
        
 window.onload = function()
@@ -327,8 +303,8 @@ setInterval('digitalClock()', 1000);
 <!-- Configure a few settings and attach camera -->
 <script>
     Webcam.set({
-        width: 90,
-        height: 90,
+        width: 490,
+        height: 390,
         image_format: 'jpeg',
         jpeg_quality: 90
     });
@@ -374,7 +350,6 @@ function myFunction() {
 
 
 <script>
-//can't log at this time
 function myFunction2() {
     var x = document.getElementById("snackbar2");
     x.className = "show2";
@@ -439,11 +414,11 @@ function myFunction6() {
 </html>
 
 
+ 
+ 
+ 
 
 
-
-
-
-
-
+ 
+ 
 

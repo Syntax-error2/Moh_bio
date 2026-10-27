@@ -7,8 +7,26 @@ if(isset($_POST['edit_log']) && isset($_POST['log_id'])) {
     $personnel_id = $_GET['personnel_id'];
     $dept = isset($_GET['dept']) ? $_GET['dept'] : '';
     
-    $period_from = trim($_POST['period_from']);
-    $period_to = trim($_POST['period_to']);
+    $period_from = trim($_POST['period_from'] ?? '');
+    $period_to = trim($_POST['period_to'] ?? '');
+    
+    if (empty($period_to) && !empty($period_from)) {
+        $clean_from = str_replace('-', '/', $period_from);
+        $ts_from = strtotime($clean_from);
+        if ($ts_from) {
+            $sep = (strpos($period_from, '/') !== false) ? '/' : '-';
+            $p_parts = explode($sep, $period_from);
+            if (isset($p_parts[0]) && strlen(trim($p_parts[0])) == 4) {
+                $period_to = date("Y{$sep}m{$sep}t", $ts_from);
+            } else {
+                $m_len = isset($p_parts[0]) ? strlen(trim($p_parts[0])) : 2;
+                $y_len = isset($p_parts[2]) ? strlen(trim($p_parts[2])) : (isset($p_parts[1]) ? strlen(trim($p_parts[1])) : 2);
+                $m_fmt = ($m_len == 1) ? 'n' : 'm';
+                $y_fmt = ($y_len == 4) ? 'Y' : 'y';
+                $period_to = date("{$m_fmt}{$sep}t{$sep}{$y_fmt}", $ts_from);
+            }
+        }
+    }
     
     $period = $period_from;
     if(!empty($period_to)) {
@@ -28,8 +46,8 @@ if(isset($_POST['edit_log']) && isset($_POST['log_id'])) {
     $sl_w_pay = (isset($_POST['sl_w_pay']) && $_POST['sl_w_pay'] !== '') ? -1 * abs(floatval(str_replace(',', '', $_POST['sl_w_pay']))) : null;
     $sl_wout_pay = (isset($_POST['sl_wout_pay']) && $_POST['sl_wout_pay'] !== '') ? floatval(str_replace(',', '', $_POST['sl_wout_pay'])) : null;
     
-    // Fetch existing log to check current log_type
-    $stmt_curr = $conn->prepare("SELECT log_type, particulars FROM leave_credit_logs WHERE log_id = ?");
+    // Fetch existing log to check current log_type and remarks
+    $stmt_curr = $conn->prepare("SELECT log_type, particulars, remarks FROM leave_credit_logs WHERE log_id = ?");
     $stmt_curr->execute([$log_id]);
     $curr_row = $stmt_curr->fetch(PDO::FETCH_ASSOC);
     $curr_log_type = $curr_row ? $curr_row['log_type'] : 'Manual Adjustment';
@@ -126,7 +144,14 @@ if(isset($_POST['edit_log']) && isset($_POST['log_id'])) {
         $log_type = 'Monthly Earn';
     }
     
-    $remarks = trim($_POST['remarks']);
+    $remarks = trim($_POST['remarks'] ?? '');
+    // If the original log had a [Code: ...], make sure it is retained in the remarks to prevent duplicate syncs
+    if (!empty($curr_row['remarks']) && preg_match('/\[Code:\s*([A-Za-z0-9]+)\]/i', $curr_row['remarks'], $m)) {
+        $code_str = $m[0];
+        if (stripos($remarks, $code_str) === false) {
+            $remarks = trim($remarks . ' ' . $code_str);
+        }
+    }
     
     try {
         $stmt = $conn->prepare("UPDATE leave_credit_logs SET 

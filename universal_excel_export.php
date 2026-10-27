@@ -1,5 +1,6 @@
 <?php
 // universal_excel_export.php
+$hide_floating_excel_btn = $hide_floating_excel_btn ?? false;
 ?>
 <style>
 @media print {
@@ -26,11 +27,13 @@
     background-color: #144c2c;
 }
 </style>
+<?php if (empty($hide_floating_excel_btn)) { ?>
 <div class="export-btn-container no-print">
     <button type="button" id="universalExportBtn" class="btn-export" onclick="exportUniversalExcel(event)">
         Export to Excel
     </button>
 </div>
+<?php } ?>
 <script>
 function exportUniversalExcel(e) {
     e.preventDefault();
@@ -86,7 +89,7 @@ function exportUniversalExcel(e) {
     if (reportDate) finalParts.push(reportDate);
     
     var reportName = finalParts.join("_").replace(/[^a-zA-Z0-9 \-]/g, "").trim().replace(/\s+/g, "_");
-    if (!reportName || reportName === "MOH_-_DTR_v_10") {
+    if (!reportName || reportName === "MOB_-_DTR_v_10") {
         reportName = "Exported_Report";
     }
     

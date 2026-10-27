@@ -287,56 +287,57 @@
             $vl_wout_pay = 0;
             $sl_wout_pay = 0;
             $vl_w_pay = $numDays;
-        } else if ($remarks == 'TERMINAL LEAVE' || $remarks == 'Terminal Leave') {
-            // Terminal Leave default auto cascade: VL first, then SL
+        } else if ($remarks == 'TERMINAL LEAVE' || $remarks == 'Terminal Leave' || stripos($remarks, 'terminal') !== false || stripos($remarks, 'monetization') !== false || $remarks == 'MONETIZATION' || $remarks == 'Monetization') {
+            // Terminal Leave / Monetization default auto cascade: VL first, then SL (100% with pay)
             if ($curr_vl >= $numDays) {
                 $vl_deduct = $numDays;
                 $curr_vl -= $numDays;
+                $vl_w_pay = $numDays;
+                $sl_deduct = 0;
+                $sl_w_pay = 0;
             } else {
                 $vl_deduct = $curr_vl;
                 $rem = $numDays - $curr_vl;
                 $curr_vl = 0;
-                if ($curr_sl >= $rem) {
-                    $sl_deduct = $rem;
-                    $curr_sl -= $rem;
-                } else {
-                    $sl_deduct = $curr_sl;
-                    $vl_wout_pay = $rem - $curr_sl;
-                    $curr_vl = 0;
-                }
+                $sl_deduct = $rem;
+                $curr_sl -= $rem;
+                $vl_w_pay = $vl_deduct;
+                $sl_w_pay = $rem;
             }
+            $vl_wout_pay = 0;
+            $sl_wout_pay = 0;
         } else if ($remarks == 'VACATION LEAVE' || $remarks == 'Mandatory/Forced Leave' || $remarks == 'Forced Leave' || $remarks == 'Force Leave') {
-            if ($curr_vl >= $numDays) {
-                $vl_deduct = $numDays;
-                $curr_vl -= $numDays;
-            } else {
-                $vl_deduct = $curr_vl;
-                $vl_wout_pay = $numDays - $curr_vl;
-                $curr_vl = 0;
-            }
+            // Tanan sa Absence with pay (VL w/ pay), deducted 1:1 against VL
+            $vl_deduct = $numDays;
+            $curr_vl -= $numDays;
+            $vl_w_pay = $numDays;
+            $vl_wout_pay = 0;
+            $sl_deduct = 0;
+            $sl_w_pay = 0;
+            $sl_wout_pay = 0;
         } else if ($remarks == 'SICK LEAVE') {
-            if ($curr_sl >= $numDays) {
-                $sl_deduct = $numDays;
-                $curr_sl -= $numDays;
-            } else {
-                $sl_deduct = $curr_sl;
-                $rem = $numDays - $curr_sl;
-                $curr_sl = 0;
-                if ($curr_vl >= $rem) {
-                    $vl_deduct = $rem;
-                    $curr_vl -= $rem;
-                } else {
-                    $vl_deduct = $curr_vl;
-                    $sl_wout_pay = $rem - $curr_vl;
-                    $curr_vl = 0;
-                }
-            }
+            // Tanan sa Absence with pay (SL w/ pay), deducted 1:1 against SL
+            $sl_deduct = $numDays;
+            $curr_sl -= $numDays;
+            $sl_w_pay = $numDays;
+            $sl_wout_pay = 0;
+            $vl_deduct = 0;
+            $vl_w_pay = 0;
+            $vl_wout_pay = 0;
+        } else {
+            // Default / other approved leaves: Tanan sa Absence with pay
+            $vl_deduct = $numDays;
+            $curr_vl -= $numDays;
+            $vl_w_pay = $numDays;
+            $vl_wout_pay = 0;
+            $sl_deduct = 0;
+            $sl_w_pay = 0;
+            $sl_wout_pay = 0;
         }
         
-        if (!$is_special_leave) {
-            if ($vl_deduct > 0) $vl_w_pay = $vl_deduct;
-            if ($sl_deduct > 0) $sl_w_pay = $sl_deduct;
-        }
+        // Approved leaves are with pay: zero absence without pay
+        $vl_wout_pay = 0;
+        $sl_wout_pay = 0;
         
         $update = $conn->prepare("UPDATE personnels SET vl_balance = ?, sl_balance = ? WHERE personnel_id = ?");
         $update->execute([$curr_vl, $curr_sl, $personnel_id]);
@@ -350,10 +351,14 @@
             $particulars = $remarks;
         }
         
-        $logRemarks = "Encoded $remarks" . ($leave_code ? " [Code: $leave_code]" : "");
-        if ($vl_wout_pay > 0 || $sl_wout_pay > 0) {
-            $lwop_tot = $vl_wout_pay + $sl_wout_pay;
-            $logRemarks .= " (Plus $lwop_tot LWOP)";
+        if (stripos($remarks, 'terminal') !== false || stripos($particulars, 'terminal') !== false) {
+            $logRemarks = "Certified Correct" . ($leave_code ? " [Code: $leave_code]" : "");
+        } else {
+            $logRemarks = "Encoded $remarks" . ($leave_code ? " [Code: $leave_code]" : "");
+            if ($vl_wout_pay > 0 || $sl_wout_pay > 0) {
+                $lwop_tot = $vl_wout_pay + $sl_wout_pay;
+                $logRemarks .= " (Plus $lwop_tot LWOP)";
+            }
         }
         
         $log = $conn->prepare("INSERT INTO leave_credit_logs (personnel_id, log_type, period, particulars, vl_amount, sl_amount, vl_w_pay, sl_w_pay, vl_wout_pay, sl_wout_pay, remarks) VALUES (?, 'Leave Application', ?, ?, ?, ?, ?, ?, ?, ?, ?)");

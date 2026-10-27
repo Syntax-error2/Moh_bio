@@ -26,10 +26,37 @@ if(isset($_POST['adjust_leave'])){
     $vl_wout_pay = isset($_POST['vl_wout_pay']) ? (float)$_POST['vl_wout_pay'] : 0.000;
     $sl_wout_pay = isset($_POST['sl_wout_pay']) ? (float)$_POST['sl_wout_pay'] : 0.000;
 
-    $period_from = trim($_POST['period_from']);
-    $period_to = trim($_POST['period_to']);
-    $period = $period_from . ' - ' . $period_to;
+    $period_from = trim($_POST['period_from'] ?? '');
+    $period_to = trim($_POST['period_to'] ?? '');
+
+    if (empty($period_to) && !empty($period_from)) {
+        $clean_from = str_replace('-', '/', $period_from);
+        $ts_from = strtotime($clean_from);
+        if ($ts_from) {
+            $sep = (strpos($period_from, '/') !== false) ? '/' : '-';
+            $p_parts = explode($sep, $period_from);
+            if (isset($p_parts[0]) && strlen(trim($p_parts[0])) == 4) {
+                $period_to = date("Y{$sep}m{$sep}t", $ts_from);
+            } else {
+                $m_len = isset($p_parts[0]) ? strlen(trim($p_parts[0])) : 2;
+                $y_len = isset($p_parts[2]) ? strlen(trim($p_parts[2])) : (isset($p_parts[1]) ? strlen(trim($p_parts[1])) : 2);
+                $m_fmt = ($m_len == 1) ? 'n' : 'm';
+                $y_fmt = ($y_len == 4) ? 'Y' : 'y';
+                $period_to = date("{$m_fmt}{$sep}t{$sep}{$y_fmt}", $ts_from);
+            }
+        }
+    }
+
+    $period = !empty($period_to) ? ($period_from . ' - ' . $period_to) : $period_from;
     $particulars = $_POST['particulars'];
+
+    if(empty($remarks) || $remarks === "Manual adjustment by HR") {
+        if(stripos($particulars, 'terminal') !== false) {
+            $remarks = "Certified Correct";
+        } else {
+            $remarks = "Manual adjustment by HR";
+        }
+    }
 
     $is_special = isNonDeductibleSpecialLeave($particulars, $remarks);
     if ($is_special) {
@@ -62,7 +89,7 @@ if(isset($_POST['adjust_leave'])){
         'particulars' => $particulars
     ]);
 
-    // Recalculate secure final balance chronologically
+        // Recalculate secure final balance chronologically
     $stmt2 = $conn->prepare("SELECT vl_amount, sl_amount, period, log_id FROM leave_credit_logs WHERE personnel_id = ?");
     $stmt2->execute([$personnel_id]);
     $logs = $stmt2->fetchAll(PDO::FETCH_ASSOC);
@@ -92,3 +119,4 @@ if(isset($_POST['adjust_leave'])){
     <?php
 }
 ?>
+// Final fix applied by AI

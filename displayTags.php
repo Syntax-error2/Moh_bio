@@ -4,110 +4,116 @@ include('dbcon.php');
 
 $dpCtr=0;
 
-$currentDateDisplay=date('m/d/Y');
-$bdChecker=date('m/d');
+$currentDateDisplay=date('Y-m-d');
+$bdChecker=date('m-d');
 
 function get_client_ip() {
+    static $cached_ip = null;
+    if ($cached_ip !== null) return $cached_ip;
     $ipaddress = '';
-    if (getenv('HTTP_CLIENT_IP'))
-        $ipaddress = getenv('HTTP_CLIENT_IP');
-    else if(getenv('HTTP_X_FORWARDED_FOR'))
-        $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
-    else if(getenv('HTTP_X_FORWARDED'))
-        $ipaddress = getenv('HTTP_X_FORWARDED');
-    else if(getenv('HTTP_FORWARDED_FOR'))
-        $ipaddress = getenv('HTTP_FORWARDED_FOR');
-    else if(getenv('HTTP_FORWARDED'))
-       $ipaddress = getenv('HTTP_FORWARDED');
+    if (!empty($_SERVER['HTTP_CLIENT_IP']))
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    else if(!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    else if(!empty($_SERVER['HTTP_X_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    else if(!empty($_SERVER['HTTP_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    else if(!empty($_SERVER['HTTP_FORWARDED']))
+       $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    else if(!empty($_SERVER['REMOTE_ADDR']))
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
     else if(getenv('REMOTE_ADDR'))
         $ipaddress = getenv('REMOTE_ADDR');
     else
         $ipaddress = 'UNKNOWN';
+    $cached_ip = $ipaddress;
     return $ipaddress;
 }
 
-
-if(get_client_ip()=="::1")
+if(get_client_ip()=="::1" || get_client_ip()=="127.0.0.1")
 {
-    $machine_ip=gethostbyname(trim(`hostname`));  
+    $machine_ip=gethostbyname(gethostname());  
 }else{
     $machine_ip=get_client_ip();
 }
 
-$cc_stmt = $conn->prepare("SELECT * FROM client_computer WHERE ipAddress = :ipAddress");
-$cc_stmt->execute([':ipAddress' => $machine_ip]);
-$cc_query = $cc_stmt;
+$cc_query = $conn->query("SELECT * FROM client_computer WHERE ipAddress='$machine_ip'");
 $cc_row = $cc_query->fetch();
 
  
 
-if($cc_row['display_time']==15){
-$slides_stmt = $conn->prepare("SELECT sequence, img FROM slides ORDER BY sequence ASC");
-$slides_stmt->execute();
-$slides = $slides_stmt->fetchAll(PDO::FETCH_ASSOC);
+if($cc_row['display_time']==15){ 
+    
+if($cc_row['announcement_img']<=15){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=1");
 
-$slide_count = count($slides);
-$active_slide_idx = 0;
-$si_row = ['img' => ''];
+}elseif($cc_row['announcement_img']<=30){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=2");
 
-if ($slide_count > 0) {
-    $announcement_img = max(0, (int)($cc_row['announcement_img'] ?? 0));
-    $active_slide_idx = intdiv($announcement_img, 15);
-    if ($active_slide_idx >= $slide_count) {
-        $active_slide_idx = $slide_count - 1;
-    }
+}elseif($cc_row['announcement_img']<=45){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=3");
 
-    $si_row = $slides[$active_slide_idx];
+}elseif($cc_row['announcement_img']<=60){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=4");
+
+}elseif($cc_row['announcement_img']<=75){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=5");
+
+}elseif($cc_row['announcement_img']<=90){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=6");
+
+}elseif($cc_row['announcement_img']<=105){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=7");
+   
+}elseif($cc_row['announcement_img']<=120){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=8");
+
+}elseif($cc_row['announcement_img']<=135){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=9");
+   
+}elseif($cc_row['announcement_img']<=150){
+$slide_img_query = $conn->query("SELECT * FROM slides WHERE sequence=10");
+   
+}elseif($cc_row['announcement_img']==150){
+$conn->query("UPDATE client_computer SET announcement_img=0 WHERE ipAddress='$machine_ip'");
+
 }
-?>
 
-<div class="kiosk-stage">
-    <div class="kiosk-idle-slider">
-        <div class="kiosk-idle-frame">
-            <img src="announcement_img/<?php echo $si_row['img']; ?>" alt="announcement image..." />
-            <button type="button" class="kiosk-idle-arrow left" onclick="changeAnnouncementSlide('prev')">&#8249;</button>
-            <button type="button" class="kiosk-idle-arrow right" onclick="changeAnnouncementSlide('next')">&#8250;</button>
-        </div>
-        <div class="kiosk-idle-dots">
-            <?php for ($i = 0; $i < $slide_count; $i++) { ?>
-                <button type="button" class="kiosk-idle-dot<?php echo ($i === $active_slide_idx) ? ' active' : ''; ?>" onclick="setAnnouncementSlide(<?php echo $i; ?>)"></button>
-            <?php } ?>
-        </div>
-    </div>
-</div>
+$si_row = $slide_img_query->fetch();
+?> 
+
+<div style="float: left; width: 85%; height: 61%; margin-top: 0px;" class="polaroid">
+  <img src="announcement_img/<?php echo $si_row['img']; ?>" alt="announcement image..." style="width:100%; height:100%; padding: 5px 5px 5px 5px;">
+</div> 
 
 <?php
 
+
 $cc_query=null;
-$slides_stmt=null;
+$slide_img_query=null;
 
 }else{
  
 $tr1_img="";
 $tr1_lname="";
 $tr1_fmname="";
-$tr1_personnel_id_code="";
 $tr1_gl="";
 $logTime="";
  
 
-$log_id_stmt = $conn->prepare("SELECT log_id FROM personnel_logs WHERE logDate = :logDate AND captured_img = '' AND remarks = '' AND client_ip = :client_ip ORDER BY log_id DESC");
-$log_id_stmt->execute([':logDate' => $currentDateDisplay, ':client_ip' => $machine_ip]);
-$log_id_query = $log_id_stmt;
+$currentDateDisplayMdy = date('m/d/Y');
+$log_id_query = $conn->query("SELECT log_id FROM personnel_logs WHERE (logDate='$currentDateDisplay' OR logDate='$currentDateDisplayMdy') AND captured_img='' AND remarks='' AND client_ip='$machine_ip' ORDER BY log_id DESC");
 
 if($log_id_query->rowCount()>0){
 
 $liq_row=$log_id_query->fetch();
 
-$displayLog_stmt = $conn->prepare("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE log_id = :log_id AND logDate = :logDate AND client_ip = :client_ip AND remarks = '' ORDER BY log_id DESC");
-$displayLog_stmt->execute([':log_id' => $liq_row['log_id'], ':logDate' => $currentDateDisplay, ':client_ip' => $machine_ip]);
-$displayLog_query = $displayLog_stmt;
+$displayLog_query = $conn->query("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE log_id='$liq_row[log_id]' AND (logDate='$currentDateDisplay' OR logDate='$currentDateDisplayMdy') AND client_ip='$machine_ip' AND remarks='' ORDER BY log_id DESC");
 
 }else{
 
-$displayLog_stmt = $conn->prepare("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE logDate = :logDate AND client_ip = :client_ip AND remarks = '' ORDER BY log_id DESC");
-$displayLog_stmt->execute([':logDate' => $currentDateDisplay, ':client_ip' => $machine_ip]);
-$displayLog_query = $displayLog_stmt;
+$displayLog_query = $conn->query("SELECT logTime, logFlow, log_id, RFTag_id, img, lname, fname, mname, suffix FROM personnel_logs WHERE (logDate='$currentDateDisplay' OR logDate='$currentDateDisplayMdy') AND client_ip='$machine_ip' AND remarks='' ORDER BY log_id DESC");
 
 }
 
@@ -148,16 +154,12 @@ while($dpLog_row=$displayLog_query->fetch())
         $logTime=$dpLog_row['logTime'];
         $logFlow=$dpLog_row['logFlow'];
         
-        $studData_stmt = $conn->prepare("SELECT * FROM personnels WHERE RFTag_id = :RFTag_id");
-        $studData_stmt->execute([':RFTag_id' => $RFTag_id]);
-        $studData_query = $studData_stmt;
+        $studData_query = $conn->query("SELECT * FROM personnels WHERE RFTag_id='$RFTag_id'");
         $sd_row=$studData_query->fetch();
-
-        $tr1_personnel_id_code = !empty($sd_row['personnel_id_code']) ? $sd_row['personnel_id_code'] : $RFTag_id;
         
-        $do_idxx=$sd_row['do_id'] ?? '';
+        $do_idxx=$sd_row['do_id'];
         
-        $bday=($sd_row['bdMM'] ?? '').'/'.($sd_row['bdDD'] ?? '');
+        $bday=$sd_row['bdMM'].'/'.$sd_row['bdDD'];
         if($bdChecker==$bday)
         {
             $bdayGreeting='Display';
@@ -173,68 +175,86 @@ while($dpLog_row=$displayLog_query->fetch())
 
 
 
-<div class="kiosk-stage">
+<?php
+if($tr1_img==""){ ?>
+<div style="float: left;">
+</div>
+<?php }else{ ?>
+<div style="float: left;" class="polaroid">
+  <img src="<?php echo $tr1_img; ?>" alt="the last tapped" style="width:100%; height:100%; padding: 5px 5px 5px 5px;">
+</div> 
+<?php } ?>
 
-<?php if($tr1_img==""){ ?>
-    <div class="kiosk-idle-slider">
-        <div class="kiosk-idle-frame"></div>
-        <div class="kiosk-idle-dots">
-            <span class="kiosk-idle-dot active"></span>
-            <span class="kiosk-idle-dot"></span>
-            <span class="kiosk-idle-dot"></span>
-            <span class="kiosk-idle-dot"></span>
-            <span class="kiosk-idle-dot"></span>
-        </div>
-    </div>
+
+<div style="width: 52%; height: 45%; background-color: transparent; float: right; margin: 4% 1% 0% 2%; ">
+
+<?php
+if($tr1_img==""){ ?>
+ 
+ 
 <?php }else{ ?>
 
-    <div class="kiosk-active-main">
-        <div class="kiosk-active-photo">
-            <img src="<?php echo $tr1_img; ?>" alt="the last tapped" />
-        </div>
+<p style="margin-bottom: 0px;"><strong style="font-size: 42px; margin-bottom: 0px;"><?php echo $tr1_lname; ?></strong>
 
-        <div class="kiosk-active-details">
-            <?php if($tr1_personnel_id_code!=""){ ?>
-                <span class="kiosk-active-id-badge"><?php echo htmlspecialchars($tr1_personnel_id_code, ENT_QUOTES, 'UTF-8'); ?></span>
-            <?php } ?>
-            <h1 class="kiosk-active-lname"><?php echo $tr1_lname; ?></h1>
-            <p class="kiosk-active-fname"><?php echo $tr1_fmname; ?></p>
-            <?php if($tr1_gl!=""){ ?>
-                <p class="kiosk-active-gl"><?php echo $tr1_gl; ?></p>
-            <?php } ?>
+<br />
+<span style="font-size: 22px;"><?php echo $tr1_fmname; ?></span>
+<br />
+<br />
+<br />
+<span style="font-size: 22px;"><?php echo $tr1_gl; ?></span>
+</p>
 
-            <?php if($bdayGreeting=='Display'){ ?>
-                <p style="margin: 18px 0 0;"><img style="max-width: 70%; height: auto;" src="img/hbd.gif" alt="Happy birthday" /></p>
-            <?php } ?>
-        </div>
-    </div>
-
-    <?php
-    $activeBarColor = ($logFlow==='AM IN' OR $logFlow==='PM IN') ? '#008eb7' : '#fe6284';
-    $activeBarText = ($log_id_query->rowCount()>0) ? 'One moment please...' : $logFlow.' SUCCESS...';
-    ?>
-    <div class="kiosk-active-status" style="background-color: <?php echo $activeBarColor; ?>;">
-        <span class="kiosk-active-status-time"><?php echo $logTime; ?></span>
-        <span class="kiosk-active-status-flow"><?php echo $activeBarText; ?></span>
-    </div>
-
-    <?php if($log_id_query->rowCount()>0){ ?>
-        <input type="hidden" name="log_id" value="<?php echo $log_id; ?>" />
-        <input name="saveBase64File" type="submit" class="btn btn-success" style="display: none;" value="AM OUT" />
-
-        <script>
-        $(document).ready(function(){
-            $("input[name=submitSnapshot]").click();
-            $("input[name=saveBase64File]").click();
-        });
-        </script>
-    <?php } ?>
+<?php if($bdayGreeting=='Display'){ ?>
+<center><p style="margin-top: 12px;"><img style="width: 70%; height: 40%;" src="img/hbd.gif" /></p></center>
+<?php }?>
 
 <?php } ?>
 
 </div>
 
+
+
 <?php
+
+if($log_id_query->rowCount()>0){
+
+if($tr1_img==""){
+    
+}else{ ?>
+
+        <div style="width: 52%; height: 8%; background-color: #008aff; color: white; float: right; margin: 0% 2.5% 0% 0%;">
+        <p style="padding: 10px 16px 12px 12px; font-size: x-large; float: left;"> <strong><?php echo $logTime; ?></strong> </p>
+        <p style="padding: 14px 16px 12px 12px; font-size: large; float: right;"> <strong>One moment please...</strong> </p>
+        
+        <input type="hidden" name="log_id" value="<?php echo $log_id; ?>" />
+        <input name="saveBase64File" type="submit" class="btn btn-success" style="display: none;" value="AM OUT" />
+        
+        </div> 
+       
+                <script>
+                $(document).ready(function(){
+                    
+                        $("input[name=submitSnapshot]").click();
+                        $("input[name=saveBase64File]").click();
+                        
+                });
+                </script>
+<?php }
+        
+}else{
+    
+if($tr1_img==""){ 
+    
+}else{ ?> 
+
+    <div style="width: 52%; height: 8%; background-color: #008aff; color: white; float: right; margin: 0% 2.5% 0% 0%;">
+      <p style="padding: 10px 16px 12px 12px; font-size: x-large; float: left;"> <strong><?php echo $logTime; ?></strong> </p>
+      <p style="padding: 10px 16px 12px 12px; font-size: x-large; float: right;"> <strong><?php echo $logFlow; ?> SUCCESS...</strong> </p>
+    </div>
+ 
+ 
+<?php } }
+
 $log_id_query=null;
 $log_id_query=null;
 

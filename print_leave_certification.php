@@ -1,6 +1,7 @@
 <?php
 include('dbcon.php');
 require_once('session.php');
+require_once('official_duty.php');
 
 $personnel_id = isset($_GET['personnel_id']) ? intval($_GET['personnel_id']) : 0;
 
@@ -17,8 +18,7 @@ if (!$staff) {
     die("Personnel not found.");
 }
 
-$emp_stat_str = strtolower($staff['empStat_name'] ?? '');
-$has_leave_credits = (strpos($emp_stat_str, 'casual') !== false || strpos($emp_stat_str, 'permanent') !== false || strpos($emp_stat_str, 'elective') !== false || strpos($emp_stat_str, 'co-terminous') !== false) || (floatval($staff['vl_balance']) > 0 || floatval($staff['sl_balance']) > 0);
+$has_leave_credits = personnelHasLeaveCredits($conn, $staff);
 
 if (!$has_leave_credits) {
     echo "<script>alert('Leave credit certification is only available for employees with leave credits (Permanent, Casual, or Elective).'); window.close();</script>";
@@ -97,27 +97,19 @@ if (isset($_GET['pronoun']) && in_array(strtolower($_GET['pronoun']), ['his', 'h
     $pronoun = (strtolower($staff['sex'] ?? '') == 'female') ? 'her' : 'his';
 }
 
-// Fetch signatories settings from DB if available
-$sig_query = $conn->query("SELECT * FROM signatories_settings LIMIT 1");
-$sig_row = $sig_query ? $sig_query->fetch(PDO::FETCH_ASSOC) : [];
-$default_sig_name = !empty($sig_row['hrmo_name']) ? $sig_row['hrmo_name'] : 'GINALYN O. HERRADURA';
-$default_sig_pos = !empty($sig_row['hrmo_position']) ? $sig_row['hrmo_position'] : 'Human Resource Management Officer';
-$default_inst_name = !empty($sf_row['institution_name']) ? strtoupper($sf_row['institution_name']) : 'MUNICIPALITY OF HINOBA-AN';
-$seal_img = file_exists('img/moh seal.jpg') ? 'img/moh seal.jpg' : (!empty($sf_row['logo']) ? 'img/' . $sf_row['logo'] : 'img/97763-moh-seal.jpg');
-
 // Signatory
-$signatory_name = isset($_GET['signatory_name']) && trim($_GET['signatory_name']) !== '' ? strtoupper(trim($_GET['signatory_name'])) : $default_sig_name;
-$signatory_pos = isset($_GET['signatory_pos']) && trim($_GET['signatory_pos']) !== '' ? strtoupper(trim($_GET['signatory_pos'])) : $default_sig_pos;
+$signatory_name = isset($_GET['signatory_name']) && trim($_GET['signatory_name']) !== '' ? strtoupper(trim($_GET['signatory_name'])) : 'ROSELLE J. MENDOZA';
+$signatory_pos = isset($_GET['signatory_pos']) && trim($_GET['signatory_pos']) !== '' ? strtoupper(trim($_GET['signatory_pos'])) : 'MGADH-I';
 
 // Loan Guarantee
 $include_guarantee = isset($_GET['include_guarantee']) ? ($_GET['include_guarantee'] == '1' || $_GET['include_guarantee'] == 'on') : true;
-$guarantee_to = isset($_GET['guarantee_to']) && trim($_GET['guarantee_to']) !== '' ? trim($_GET['guarantee_to']) : 'Hinoba-an Multi-Purpose Cooperative';
+$guarantee_to = isset($_GET['guarantee_to']) && trim($_GET['guarantee_to']) !== '' ? trim($_GET['guarantee_to']) : 'Binalbagan Multi-Purpose Cooperative (BIMEC)';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="<?php echo $seal_img; ?>">
+    <link rel="shortcut icon" href="img/72123-mob_seal.png">
     <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
     <title>Certification of Leave Credits - <?php echo htmlspecialchars($emp_name); ?></title>
     <style>
@@ -309,13 +301,13 @@ $guarantee_to = isset($_GET['guarantee_to']) && trim($_GET['guarantee_to']) !== 
         <table class="letterhead-table">
             <tr>
                 <td style="width: 80px; vertical-align: middle;">
-                    <img src="<?php echo $seal_img; ?>" style="width: 65px; height: 65px;">
+                    <img src="img/72123-mob_seal.png" style="width: 65px; height: 65px;">
                 </td>
                 <td style="vertical-align: middle; padding-left: 12px;">
                     <div class="republic-text">
                         <div>Republic of the Philippines</div>
                         <div>Province of Negros Occidental</div>
-                        <div style="font-weight: bold; font-size: 14px;"><?php echo $default_inst_name; ?></div>
+                        <div style="font-weight: bold; font-size: 14px;">MUNICIPALITY OF BINALBAGAN</div>
                         <div style="font-weight: bold; font-size: 12px; color: #222;">HUMAN RESOURCE MANAGEMENT OFFICE</div>
                     </div>
                 </td>
@@ -360,7 +352,7 @@ $guarantee_to = isset($_GET['guarantee_to']) && trim($_GET['guarantee_to']) !== 
 
         <!-- Body Paragraph 3 (Given Date) -->
         <p class="cert-body-p">
-            Given this <?php echo htmlspecialchars($given_date); ?> at Hinoba-an, Negros Occidental.
+            Given this <?php echo htmlspecialchars($given_date); ?> at Binalbagan, Negros Occidental.
         </p>
 
         <!-- Signatory Block -->

@@ -23,6 +23,18 @@ if(isset($_POST['add_travel']) || isset($_POST['add_leave'])){
     if ($remarks == '1') {
         $remarks = isset($_POST['leave_spec']) && trim($_POST['leave_spec']) !== '' ? trim($_POST['leave_spec']) : 'Others';
     }
+    
+    $ps_time_out = !empty($_POST['pass_slip_time_out']) ? date('h:i A', strtotime($_POST['pass_slip_time_out'])) : '';
+    $ps_time_in = !empty($_POST['pass_slip_time_in']) ? date('h:i A', strtotime($_POST['pass_slip_time_in'])) : '';
+    $ps_time_range = '';
+    if (!empty($ps_time_out) && !empty($ps_time_in)) {
+        $ps_time_range = $ps_time_out . ' - ' . $ps_time_in;
+    } elseif (!empty($ps_time_out)) {
+        $ps_time_range = 'Out: ' . $ps_time_out;
+    } elseif (!empty($ps_time_in)) {
+        $ps_time_range = 'In: ' . $ps_time_in;
+    }
+
     $is_forced_leave = ($remarks === 'Mandatory/Forced Leave' || $remarks === 'Forced Leave' || $remarks === 'Force Leave' || stripos($remarks, 'forced leave') !== false || stripos($remarks, 'force leave') !== false);
     if ($is_forced_leave) {
         $remarks = 'Mandatory/Forced Leave';
@@ -361,8 +373,13 @@ $img='personnelImg/'.$pd1_row['img'];
                 $dates_array[] = $logDate;
                 
                 if (!$is_monetization_or_terminal) {
+                    $log_remarks = $remarks;
+                    if ($remarks === 'PASS SLIP' && !empty($ps_time_range)) {
+                        $log_remarks = 'PASS SLIP (' . $ps_time_range . ')';
+                    }
+                    $log_remarks = substr($log_remarks, 0, 55);
                     $conn->query("INSERT INTO personnel_logs(RFTag_id, img, lname, fname, mname, suffix, do_id, shift_id, logDate, remarks, travel_leave_code)
-                    VALUES ('$logRFTagId', '$img', '$pd1_row[lname]', '$pd1_row[fname]', '$pd1_row[mname]', '$pd1_row[suffix]', '$pd1_row[do_id]', '$pd1_row[shift_id]', '$logDate', '$remarks', '$leave_code')");
+                    VALUES ('$logRFTagId', '$img', '$pd1_row[lname]', '$pd1_row[fname]', '$pd1_row[mname]', '$pd1_row[suffix]', '$pd1_row[do_id]', '$pd1_row[shift_id]', '$logDate', '$log_remarks', '$leave_code')");
                 }
             }
         }
@@ -409,80 +426,49 @@ $img='personnelImg/'.$pd1_row['img'];
         } else if(stripos($remarks, 'monetization') !== false || stripos($remarks, 'terminal') !== false) {
             $monetizeSource = $_POST['monetization_source'] ?? 'auto';
             if ($monetizeSource === 'sl' || $remarks == 'Monetization (Sick Leave)' || $remarks == 'Terminal Leave (Sick Leave)') {
-                // Deduct from Sick Leave only (cascade to VL if SL is empty)
-                if ($curr_sl >= $numDays) {
-                    $sl_deduct = $numDays;
-                    $curr_sl -= $numDays;
-                } else {
-                    $sl_deduct = $curr_sl;
-                    $rem = $numDays - $curr_sl;
-                    $curr_sl = 0;
-                    if ($curr_vl >= $rem) {
-                        $vl_deduct = $rem;
-                        $curr_vl -= $rem;
-                    } else {
-                        $vl_deduct = $curr_vl;
-                        $sl_wout_pay = $rem - $curr_vl;
-                        $curr_vl = 0;
-                    }
-                }
+                $sl_deduct = $numDays;
+                $curr_sl -= $numDays;
+                $sl_w_pay = $numDays;
             } else if ($monetizeSource === 'vl' || $remarks == 'Monetization (Vacation Leave)' || $remarks == 'Terminal Leave (Vacation Leave)') {
-                // Deduct from Vacation Leave only
-                if ($curr_vl >= $numDays) {
-                    $vl_deduct = $numDays;
-                    $curr_vl -= $numDays;
-                } else {
-                    $vl_deduct = $curr_vl;
-                    $vl_wout_pay = $numDays - $curr_vl;
-                    $curr_vl = 0;
-                }
+                $vl_deduct = $numDays;
+                $curr_vl -= $numDays;
+                $vl_w_pay = $numDays;
             } else {
-                // Default / Auto: Deduct from Vacation Leave first, then cascade to Sick Leave
+                // Auto: Deduct from VL first, then SL
                 if ($curr_vl >= $numDays) {
                     $vl_deduct = $numDays;
                     $curr_vl -= $numDays;
+                    $vl_w_pay = $numDays;
                 } else {
                     $vl_deduct = $curr_vl;
                     $rem = $numDays - $curr_vl;
                     $curr_vl = 0;
-                    if ($curr_sl >= $rem) {
-                        $sl_deduct = $rem;
-                        $curr_sl -= $rem;
-                    } else {
-                        $sl_deduct = $curr_sl;
-                        $vl_wout_pay = $rem - $curr_sl;
-                        $curr_vl = 0;
-                    }
+                    $sl_deduct = $rem;
+                    $curr_sl -= $rem;
+                    $vl_w_pay = $vl_deduct;
+                    $sl_w_pay = $rem;
                 }
             }
+            $vl_wout_pay = 0;
+            $sl_wout_pay = 0;
         } else if($remarks == 'Vacation Leave' || $remarks == 'Mandatory/Forced Leave' || $remarks == 'Forced Leave' || $remarks == 'Force Leave') {
-            if ($curr_vl >= $numDays) {
-                $vl_deduct = $numDays;
-                $curr_vl -= $numDays;
-            } else {
-                $vl_deduct = $curr_vl;
-                $vl_wout_pay = $numDays - $curr_vl;
-                $curr_vl = 0;
-            }
+            // Tanan sa Absence with pay (VL w/ pay), deducted 1:1 against VL
+            $vl_deduct = $numDays;
+            $curr_vl -= $numDays;
+            $vl_w_pay = $numDays;
+            $vl_wout_pay = 0;
+            $sl_deduct = 0;
+            $sl_w_pay = 0;
+            $sl_wout_pay = 0;
         } else if($remarks == 'Sick Leave') {
-            if ($curr_sl >= $numDays) {
-                $sl_deduct = $numDays;
-                $curr_sl -= $numDays;
-            } else {
-                $sl_deduct = $curr_sl;
-                // Cascade to VL if SL is empty
-                $rem = $numDays - $curr_sl;
-                $curr_sl = 0;
-                
-                if ($curr_vl >= $rem) {
-                    $vl_deduct = $rem;
-                    $curr_vl -= $rem;
-                } else {
-                    $vl_deduct = $curr_vl;
-                    $sl_wout_pay = $rem - $curr_vl;
-                    $curr_vl = 0;
-                }
-            }
+            // Tanan sa Absence with pay (SL w/ pay), deducted 1:1 against SL
+            $sl_deduct = $numDays;
+            $curr_sl -= $numDays;
+            $sl_w_pay = $numDays;
+            $sl_wout_pay = 0;
+            $vl_deduct = 0;
+            $vl_w_pay = 0;
+            $vl_wout_pay = 0;
         }
         
         if (!$is_non_deductible) {
@@ -520,14 +506,42 @@ $img='personnelImg/'.$pd1_row['img'];
             }
         }
         
-        $logRemarks = "Applied for $remarks [Code: $_POST[leave_code]]";
-        if ($vl_wout_pay > 0 || $sl_wout_pay > 0) {
-            $lwop_tot = $vl_wout_pay + $sl_wout_pay;
-            $logRemarks .= " (Plus $lwop_tot LWOP)";
+        if (stripos($remarks, 'terminal') !== false || stripos($particulars, 'terminal') !== false) {
+            $logRemarks = "Certified Correct" . (!empty($_POST['leave_code']) ? " [Code: $_POST[leave_code]]" : "");
+        } else {
+            $logRemarks = "Applied for $remarks [Code: $_POST[leave_code]]";
+            $start_yr = !empty($first_date) ? (int)date('Y', strtotime($first_date)) : 0;
+            if ($start_yr > 0 && $start_yr < 2026) {
+                $logRemarks .= " [HR Encoded]";
+            }
+            if ($vl_wout_pay > 0 || $sl_wout_pay > 0) {
+                $lwop_tot = $vl_wout_pay + $sl_wout_pay;
+                $logRemarks .= " (Plus $lwop_tot LWOP)";
+            }
         }
         
-        $log = $conn->prepare("INSERT INTO leave_credit_logs (personnel_id, log_type, period, particulars, vl_amount, sl_amount, vl_w_pay, sl_w_pay, vl_wout_pay, sl_wout_pay, remarks) VALUES (?, 'Leave Application', ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $log->execute([$pd1_row['personnel_id'], $period_str, $particulars, -$vl_deduct, -$sl_deduct, $vl_w_pay, $sl_w_pay, $vl_wout_pay, $sl_wout_pay, $logRemarks]);
+        try {
+            $log = $conn->prepare("INSERT INTO leave_credit_logs (personnel_id, log_type, period, particulars, vl_amount, sl_amount, vl_w_pay, sl_w_pay, vl_wout_pay, sl_wout_pay, remarks) VALUES (?, 'Leave Application', ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $log->execute([$pd1_row['personnel_id'], $period_str, $particulars, -$vl_deduct, -$sl_deduct, $vl_w_pay, $sl_w_pay, $vl_wout_pay, $sl_wout_pay, $logRemarks]);
+        } catch (PDOException $e) {
+            if ($e->getCode() == '42S22' || strpos($e->getMessage(), '1054') !== false) {
+                $repair_cols = [
+                    "period VARCHAR(100) DEFAULT NULL",
+                    "particulars VARCHAR(100) DEFAULT NULL",
+                    "vl_w_pay DECIMAL(10,3) DEFAULT 0.000",
+                    "sl_w_pay DECIMAL(10,3) DEFAULT 0.000",
+                    "vl_wout_pay DECIMAL(10,3) DEFAULT 0.000",
+                    "sl_wout_pay DECIMAL(10,3) DEFAULT 0.000"
+                ];
+                foreach ($repair_cols as $c) {
+                    try { $conn->query("ALTER TABLE leave_credit_logs ADD COLUMN $c"); } catch (PDOException $ex) {}
+                }
+                $log = $conn->prepare("INSERT INTO leave_credit_logs (personnel_id, log_type, period, particulars, vl_amount, sl_amount, vl_w_pay, sl_w_pay, vl_wout_pay, sl_wout_pay, remarks) VALUES (?, 'Leave Application', ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $log->execute([$pd1_row['personnel_id'], $period_str, $particulars, -$vl_deduct, -$sl_deduct, $vl_w_pay, $sl_w_pay, $vl_wout_pay, $sl_wout_pay, $logRemarks]);
+            } else {
+                throw $e;
+            }
+        }
         // ----------------------------------
         } // End of if(isset($_POST['add_leave']))
 
@@ -538,8 +552,27 @@ $img='personnelImg/'.$pd1_row['img'];
                 $description = $_POST['description'];
                 $location = $_POST['location_venue'];
                 
-                $conn->query("INSERT INTO personnel_official_travel_logs(personnel_id, travel_code, purpose, description, location, travel_date, travel_type, numDays)
-                VALUES ('$pd1_row[personnel_id]', '$leave_code', '$purpose', '$description', '$location', '$final_logDate', '$remarks', '$_POST[no_of_days]')");
+                if ($remarks === 'PASS SLIP') {
+                    if (empty(trim($description))) {
+                        $description = !empty($ps_time_range) ? "PASS SLIP ($ps_time_range)" : "PASS SLIP";
+                    } elseif (!empty($ps_time_range) && stripos($description, $ps_time_range) === false) {
+                        $description .= " ($ps_time_range)";
+                    }
+                }
+                
+                try {
+                    $stmt_to = $conn->prepare("INSERT INTO personnel_official_travel_logs(personnel_id, travel_code, purpose, description, location, travel_date, travel_type, numDays, time_out, time_in) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt_to->execute([$pd1_row['personnel_id'], $leave_code, $purpose, $description, $location, $final_logDate, $remarks, $_POST['no_of_days'], $ps_time_out, $ps_time_in]);
+                } catch (PDOException $e) {
+                    try {
+                        $conn->query("ALTER TABLE personnel_official_travel_logs ADD COLUMN time_out VARCHAR(20) DEFAULT NULL, ADD COLUMN time_in VARCHAR(20) DEFAULT NULL");
+                        $stmt_to = $conn->prepare("INSERT INTO personnel_official_travel_logs(personnel_id, travel_code, purpose, description, location, travel_date, travel_type, numDays, time_out, time_in) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        $stmt_to->execute([$pd1_row['personnel_id'], $leave_code, $purpose, $description, $location, $final_logDate, $remarks, $_POST['no_of_days'], $ps_time_out, $ps_time_in]);
+                    } catch (PDOException $e2) {
+                        $conn->query("INSERT INTO personnel_official_travel_logs(personnel_id, travel_code, purpose, description, location, travel_date, travel_type, numDays)
+                        VALUES ('$pd1_row[personnel_id]', '$leave_code', '$purpose', '$description', '$location', '$final_logDate', '$remarks', '$_POST[no_of_days]')");
+                    }
+                }
             }
             
             if(isset($_POST['add_201_sr'])) {
@@ -668,5 +701,86 @@ if(isset($_POST['deleteTravel'])){
 <script>
 window.alert('Travel Order successfully deleted...');
 window.location='list_travel_order.php?cw=list_travel'; 
+</script>
+<?php } ?>
+
+<?php
+// UPDATE TRAVEL
+if(isset($_POST['updateTravel'])){
+    $travel_code = $_GET['travel_code'];
+    $remarks = $_POST['remarks'] ?? 'OFFICIAL BUSINESS TRIP';
+    $purpose = $_POST['purpose_title'] ?? '';
+    $description = $_POST['description'] ?? '';
+    $location = $_POST['location_venue'] ?? '';
+    
+    $raw_time_out = $_POST['pass_slip_time_out'] ?? '';
+    $raw_time_in = $_POST['pass_slip_time_in'] ?? '';
+    $ps_time_out = '';
+    if (!empty($raw_time_out)) {
+        $ps_time_out = (strlen($raw_time_out) <= 8 && strpos($raw_time_out, ':') !== false) ? date('h:i A', strtotime($raw_time_out)) : $raw_time_out;
+    }
+    $ps_time_in = '';
+    if (!empty($raw_time_in)) {
+        $ps_time_in = (strlen($raw_time_in) <= 8 && strpos($raw_time_in, ':') !== false) ? date('h:i A', strtotime($raw_time_in)) : $raw_time_in;
+    }
+    
+    $ps_time_range = '';
+    if (!empty($ps_time_out) && !empty($ps_time_in)) {
+        $ps_time_range = $ps_time_out . ' - ' . $ps_time_in;
+    } elseif (!empty($ps_time_out)) {
+        $ps_time_range = 'Out: ' . $ps_time_out;
+    } elseif (!empty($ps_time_in)) {
+        $ps_time_range = 'In: ' . $ps_time_in;
+    }
+    
+    if ($remarks === 'PASS SLIP') {
+        if (empty(trim($description))) {
+            $description = !empty($ps_time_range) ? "PASS SLIP ($ps_time_range)" : "PASS SLIP";
+        } elseif (!empty($ps_time_range) && stripos($description, $ps_time_range) === false) {
+            $description .= " ($ps_time_range)";
+        }
+    }
+
+    try {
+        $conn->query("ALTER TABLE personnel_official_travel_logs ADD COLUMN time_out VARCHAR(20) DEFAULT NULL, ADD COLUMN time_in VARCHAR(20) DEFAULT NULL");
+    } catch (Exception $e) {}
+
+    try {
+        $stmt_up = $conn->prepare("UPDATE personnel_official_travel_logs SET travel_type=?, purpose=?, description=?, location=?, time_out=?, time_in=? WHERE travel_code=?");
+        $stmt_up->execute([$remarks, $purpose, $description, $location, $ps_time_out, $ps_time_in, $travel_code]);
+    } catch (PDOException $e) {
+        $stmt_up = $conn->prepare("UPDATE personnel_official_travel_logs SET travel_type=?, purpose=?, description=?, location=? WHERE travel_code=?");
+        $stmt_up->execute([$remarks, $purpose, $description, $location, $travel_code]);
+    }
+
+    $log_remarks = $remarks;
+    if ($remarks === 'PASS SLIP' && !empty($ps_time_range)) {
+        $log_remarks = 'PASS SLIP (' . $ps_time_range . ')';
+    }
+    $log_remarks = substr($log_remarks, 0, 55);
+    $stmt_pl = $conn->prepare("UPDATE personnel_logs SET remarks=? WHERE travel_leave_code=?");
+    $stmt_pl->execute([$log_remarks, $travel_code]);
+
+    if(isset($_POST['add_201_sr'])) {
+        $chk_sem = $conn->prepare("SELECT seminar_id FROM personnel_seminars WHERE entry_type=?");
+        $chk_sem->execute([$travel_code]);
+        if(!$chk_sem->fetch()) {
+            $pot = $conn->prepare("SELECT personnel_id, travel_date FROM personnel_official_travel_logs WHERE travel_code=?");
+            $pot->execute([$travel_code]);
+            while($p_row = $pot->fetch()) {
+                $dParts = explode(' - ', $p_row['travel_date']);
+                $dFrom = date('m/d/Y', strtotime(trim($dParts[0])));
+                $dTo = isset($dParts[1]) ? date('m/d/Y', strtotime(trim($dParts[1]))) : $dFrom;
+                $conn->query("INSERT INTO personnel_seminars(personnel_id, seminar_title, seminar_desc, seminar_venue, event_date, event_date_to, entry_type)
+                VALUES ('$p_row[personnel_id]', '$purpose', '$description', '$location', '$dFrom', '$dTo', '$travel_code')");
+            }
+        }
+    }
+
+    $conn = null;
+?>
+<script>
+window.alert('Travel Order successfully updated!');
+window.location='list_travel_order_detailed.php?travel_code=<?php echo urlencode($travel_code); ?>';
 </script>
 <?php } ?>

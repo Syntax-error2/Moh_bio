@@ -58,7 +58,7 @@
                                         
                                     echo $staff_row['fname']." ".substr($staff_row['mname'], 0,1).". ".$staff_row['lname']." ".$staff_row['suffix'];
                                     
-                                    } ?> - Leave Credits</li>
+                                    } ?> - Service Record</li>
           </ul>
         </div>
       </div>
@@ -75,6 +75,7 @@
             
             <?php include('encode_daily_log_modal.php'); ?>
             <?php include('restDay_modal.php'); ?>
+            <?php include('update_shift_single_modal.php'); ?>
             <?php include('updateMonthlyLog_modal.php'); ?>
             <?php include('print_monthly_attendance_modal_csf48.php'); ?>
             <?php include('print_monthly_attendance_modal.php'); ?>
@@ -99,7 +100,7 @@
                                         
                                     echo $staff_row['fname']." ".substr($staff_row['mname'], 0,1).". ".$staff_row['lname']." ".$staff_row['suffix'];
                                     
-                                    } ?> <small style="<?php if($es_row5['type'] == 'Regular Shift'){ ?> color: green; <?php }elseif($es_row5['type'] == 'Night Shift'){ ?> color: blue; <?php }elseif($es_row5['type'] == '24 Hours Shift'){ ?> color: brown; <?php }elseif($es_row5['type'] == 'Open Time'){ ?> color: purple; <?php }else{ ?> color: red; <?php } ?>">( <?php echo $es_row5 ? $es_row5['shift_name'] : 'N/A'; ?> - <?php echo $es_row5 ? $es_row5['type'] : 'N/A'; ?> )</small>
+                                    } ?> <a href="javascript:void(0);" data-toggle="modal" data-target="#updateShiftSingleModal" onclick="event.stopPropagation();" title="Click to change shift / schedule..." style="cursor: pointer; text-decoration: underline; <?php if($es_row5['type'] == 'Regular Shift'){ ?> color: green; <?php }elseif($es_row5['type'] == 'Night Shift'){ ?> color: blue; <?php }elseif($es_row5['type'] == '24 Hours Shift'){ ?> color: brown; <?php }elseif($es_row5['type'] == 'Open Time'){ ?> color: purple; <?php }else{ ?> color: red; <?php } ?>"><small><i class="fa fa-pencil-square-o"></i> ( <?php echo $es_row5 ? htmlspecialchars($es_row5['shift_name']) : 'N/A'; ?> - <?php echo $es_row5 ? htmlspecialchars($es_row5['type']) : 'N/A'; ?> )</small></a>
                                     
                   </h4>
                   </a>
@@ -138,17 +139,7 @@
                 <a class="btn btn-outline-primary" href="list_personnel_individual_details_EB.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> EDUCATIONAL BACKGROUND</a>
                 <a class="btn btn-outline-primary" href="list_personnel_individual_details_SA.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> SEMINARS ATTENDED</a>                  <a class="btn btn-outline-primary" href="list_personnel_individual_details_SR.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> SERVICE RECORD</a>
                   <?php
-                  $lc_emp_stat_query = $conn->query("SELECT emp_stat_name FROM emp_status WHERE empStat_id='".$staff_row['empStat_id']."'");
-                  $has_leave_credits = false;
-                  if($lc_emp_stat_query){
-                    $lc_es = $lc_emp_stat_query->fetch();
-                    if($lc_es && (strpos(strtolower($lc_es['emp_stat_name']), 'casual') !== false || strpos(strtolower($lc_es['emp_stat_name']), 'permanent') !== false || strpos(strtolower($lc_es['emp_stat_name']), 'elective') !== false)) {
-                      $has_leave_credits = true;
-                    }
-                  }
-                  if(!$has_leave_credits && (floatval($staff_row['vl_balance']) > 0 || floatval($staff_row['sl_balance']) > 0)){
-                    $has_leave_credits = true;
-                  }
+                  $has_leave_credits = personnelHasLeaveCredits($conn, $staff_row);
                   if($has_leave_credits) { ?>
                     <a class="btn btn-primary" style="color: white; font-weight: bold;" href="list_personnel_individual_details_LC.php?dept=<?php echo $_GET['dept']; ?>&personnel_id=<?php echo $_GET['personnel_id']; ?>"> LEAVE CREDITS</a>
                     <a href="javascript:void(0);" id="btnOpenCertModal" class="btn btn-info" style="color: white; margin-left: 2px;" title="Leave Credit Certification" data-toggle="modal" data-target="#certModal" onclick="$('#certModal').modal('show'); return false;"><i class="fa fa-certificate"></i></a>
@@ -221,6 +212,7 @@
             <?php } ?>
             <a href="#" data-toggle="modal" data-target="#absenceModal" class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i> Manual Absence/Undertime</a>
             <a href="#" data-toggle="modal" data-target="#adjustLeave<?php echo $_GET['personnel_id']; ?>" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i> Adjust Balance</a>
+            <a href="list_personnel_individual_details_LC.php?personnel_id=<?php echo $_GET['personnel_id']; ?>&dept=<?php echo urlencode($_GET['dept'] ?? ''); ?>&sync_leaves=1" class="btn btn-outline-info btn-sm" title="Check and sync approved leave applications into Leave Card"><i class="fa fa-refresh"></i> Sync Leaves</a>
         </div>
     </div>
     
@@ -279,11 +271,26 @@
             </thead>
             <tbody>
                 <?php
+                if (function_exists('syncPersonnelUnloggedLeaves')) {
+                    syncPersonnelUnloggedLeaves($conn, $_GET['personnel_id']);
+                }
                 $log_query = $conn->prepare("SELECT * FROM leave_credit_logs WHERE personnel_id=? ORDER BY log_id ASC");
                 $log_query->execute([$_GET['personnel_id']]);
                 $logs = $log_query->fetchAll(PDO::FETCH_ASSOC);
                 $logs = array_values(array_filter($logs, function ($log) {
-                    return !isZeroValueOfficialDutyLeaveLog($log);
+                    if (isZeroValueOfficialDutyLeaveLog($log)) {
+                        return false;
+                    }
+                    // Exclude legacy pre-2026 RFID leave applications (keep records encoded in the new system)
+                    if ($log['log_type'] === 'Leave Application' && stripos($log['remarks'], 'Applied for') !== false && stripos($log['remarks'], '[HR Encoded]') === false) {
+                        $p = trim(explode(' - ', $log['period'])[0]);
+                        $ts = strtotime(str_replace('-', '/', $p));
+                        $y = $ts ? (int)date('Y', $ts) : 0;
+                        if ($y > 0 && $y < 2026) {
+                            return false;
+                        }
+                    }
+                    return true;
                 }));
 
 usort($logs, function($a, $b) {
@@ -321,6 +328,30 @@ usort($logs, function($a, $b) {
                     $logs[$key]['sl_run_calc'] = $sl_run;
                 }
 
+                $has_terminal_leave = false;
+                foreach ($logs as $l) {
+                    if (stripos($l['particulars'] ?? '', 'terminal') !== false ||
+                        stripos($l['log_type'] ?? '', 'terminal') !== false ||
+                        stripos($l['remarks'] ?? '', 'terminal') !== false) {
+                        $has_terminal_leave = true;
+                        break;
+                    }
+                }
+                if (!$has_terminal_leave) {
+                    $chk_tl_log = $conn->prepare("SELECT log_id FROM leave_credit_logs WHERE personnel_id = ? AND (particulars LIKE '%terminal%' OR log_type LIKE '%terminal%' OR remarks LIKE '%terminal%') LIMIT 1");
+                    $chk_tl_log->execute([$_GET['personnel_id']]);
+                    if ($chk_tl_log->fetch()) {
+                        $has_terminal_leave = true;
+                    }
+                }
+                if (!$has_terminal_leave) {
+                    $chk_tl_app = $conn->prepare("SELECT lap_id FROM leave_applicants WHERE applicant_id = ? AND (leave_type LIKE '%terminal%' OR leave_type_desc LIKE '%terminal%') LIMIT 1");
+                    $chk_tl_app->execute([$_GET['personnel_id']]);
+                    if ($chk_tl_app->fetch()) {
+                        $has_terminal_leave = true;
+                    }
+                }
+
                 // Order: Reverse to show descending only if requested, otherwise show ascending
                 if ($lc_order === 'desc') {
                     $logs = array_reverse($logs);
@@ -341,12 +372,24 @@ usort($logs, function($a, $b) {
                     $is_special_leave = isNonDeductibleSpecialLeave($particulars, $log['remarks']);
 
                     $vl_earned = ($is_monthly_earn && $log['vl_amount'] > 0) ? $log['vl_amount'] : '';
-                    $vl_w_pay = ($log['vl_amount'] < 0) ? abs($log['vl_amount']) : '';
-                    $vl_wout_pay = (!empty($log["vl_wout_pay"]) && $log["vl_wout_pay"] > 0) ? $log["vl_wout_pay"] : "";
+                    $vl_w_pay = (!empty($log['vl_w_pay']) && (float)$log['vl_w_pay'] > 0) ? (float)$log['vl_w_pay'] : (($log['vl_amount'] < 0) ? abs($log['vl_amount']) : '');
+                    $vl_wout_pay = (!empty($log["vl_wout_pay"]) && (float)$log["vl_wout_pay"] > 0) ? $log["vl_wout_pay"] : "";
 
                     $sl_earned = ($is_monthly_earn && $log['sl_amount'] > 0) ? $log['sl_amount'] : '';
-                    $sl_w_pay = ($log['sl_amount'] < 0) ? abs($log['sl_amount']) : '';
-                    $sl_wout_pay = (!empty($log["sl_wout_pay"]) && $log["sl_wout_pay"] > 0) ? $log["sl_wout_pay"] : "";
+                    $sl_w_pay = (!empty($log['sl_w_pay']) && (float)$log['sl_w_pay'] > 0) ? (float)$log['sl_w_pay'] : (($log['sl_amount'] < 0) ? abs($log['sl_amount']) : '');
+                    $sl_wout_pay = (!empty($log["sl_wout_pay"]) && (float)$log["sl_wout_pay"] > 0) ? $log["sl_wout_pay"] : "";
+
+                    // Approved leave applications are paid leaves: tanan sa absence with pay, zero sa without pay
+                    if ($log_type_clean === 'leave application' || stripos($particulars_clean, 'leave') !== false) {
+                        if (!empty($vl_wout_pay) && (float)$vl_wout_pay > 0) {
+                            $vl_w_pay = ((float)$vl_w_pay > 0 ? (float)$vl_w_pay : 0) + (float)$vl_wout_pay;
+                            $vl_wout_pay = '';
+                        }
+                        if (!empty($sl_wout_pay) && (float)$sl_wout_pay > 0) {
+                            $sl_w_pay = ((float)$sl_w_pay > 0 ? (float)$sl_w_pay : 0) + (float)$sl_wout_pay;
+                            $sl_wout_pay = '';
+                        }
+                    }
 
                     // Non-deductible special leaves (Wellness, Maternity, Paternity, Solo Parent, Rehab, Emergency)
                     // reflect their days with pay without deducting from running balances
@@ -373,15 +416,43 @@ usort($logs, function($a, $b) {
         $p_parts = explode(' - ', $period);
         $period_from = trim($p_parts[0]);
         $period_to = trim($p_parts[1]);
-    } else {
+    }
+    
+    // If period_to is empty, automatically compute appropriate end date
+    if ($period_to === '' && $period_from !== '') {
         if(strtolower($log['log_type']) == 'leave application' || stripos($log['particulars'], 'leave') !== false) {
             $period_to = $period_from;
+        } else {
+            $clean_from = str_replace('-', '/', $period_from);
+            $ts_from = strtotime($clean_from);
+            if ($ts_from) {
+                $sep = (strpos($period_from, '/') !== false) ? '/' : '-';
+                $p_parts = explode($sep, $period_from);
+                if (isset($p_parts[0]) && strlen(trim($p_parts[0])) == 4) {
+                    $period_to = date("Y{$sep}m{$sep}t", $ts_from);
+                } else {
+                    $m_len = isset($p_parts[0]) ? strlen(trim($p_parts[0])) : 2;
+                    $y_len = isset($p_parts[2]) ? strlen(trim($p_parts[2])) : (isset($p_parts[1]) ? strlen(trim($p_parts[1])) : 2);
+                    $m_fmt = ($m_len == 1) ? 'n' : 'm';
+                    $y_fmt = ($y_len == 4) ? 'Y' : 'y';
+                    $period_to = date("{$m_fmt}{$sep}t{$sep}{$y_fmt}", $ts_from);
+                }
+            }
         }
     }
     
     $remarks_display = htmlspecialchars($log['remarks']);
     // Remove "Manual adjustment by HR" from remarks case-insensitively
     $remarks_display = trim(str_ireplace('Manual adjustment by HR', '', $remarks_display));
+    // Remove LWOP text from remarks for leave applications
+    $remarks_display = trim(preg_replace('/\s*\(Plus\s+[\d\.]+\s+LWOP\)/i', '', $remarks_display));
+    
+    // Automatically display Certified Correct for Terminal Leave if empty or generic
+    if (stripos($particulars, 'terminal') !== false || stripos($log['log_type'], 'terminal') !== false || stripos($remarks_display, 'terminal') !== false) {
+        if ($remarks_display === '' || stripos($remarks_display, 'applied for') !== false || stripos($remarks_display, 'encoded') !== false || stripos($remarks_display, 'certified correct') !== false) {
+            $remarks_display = 'Certified Correct';
+        }
+    }
     
     // Remove "Balance Forwarded" from particulars if it's a manual entry
     $particulars_display = htmlspecialchars($particulars);
@@ -430,6 +501,22 @@ usort($logs, function($a, $b) {
             </tbody>
         </table>
     </div>
+    <?php if ($has_terminal_leave) { ?>
+    <div style="display: flex; justify-content: flex-end; margin-top: 15px; margin-bottom: 25px; padding-right: 15px;">
+        <div style="width: 290px; border: 3.5px solid #0f2b48; border-radius: 10px; padding: 10px 14px 12px 14px; color: #0f2b48; font-family: Arial, Helvetica, sans-serif; box-sizing: border-box; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <div style="text-align: center; font-size: 13px; font-weight: 900; letter-spacing: 0.5px; line-height: 1.25;">CERTIFIED TRUE COPY OF</div>
+            <div style="text-align: center; font-size: 13px; font-weight: 900; letter-spacing: 0.5px; line-height: 1.25;">AN ORIGINAL DOCUMENT</div>
+            <div style="display: flex; align-items: flex-end; margin-top: 12px; font-size: 12px; font-weight: 800; line-height: 1;">
+                <span style="white-space: nowrap; padding-right: 4px; letter-spacing: 0.5px;">SIGNED</span>
+                <span style="flex-grow: 1; border-bottom: 2px dotted #0f2b48; height: 12px; margin-bottom: 1px;"></span>
+            </div>
+            <div style="display: flex; align-items: flex-end; margin-top: 8px; font-size: 12px; font-weight: 800; line-height: 1;">
+                <span style="white-space: nowrap; padding-right: 4px; letter-spacing: 0.5px;">DATE</span>
+                <span style="flex-grow: 1; border-bottom: 2px dotted #0f2b48; height: 12px; margin-bottom: 1px;"></span>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
 </div>
                           
                           <?php $personnel_id = $_GET['personnel_id']; include('adjust_leave_modal.php'); ?>
@@ -506,7 +593,10 @@ usort($logs, function($a, $b) {
                     </div>
                     
                     <div class="form-group">
-                        <label>Remarks</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="mb-0">Remarks</label>
+                            <a href="javascript:void(0);" onclick="$('#edit_remarks').val('Certified Correct');" class="small text-primary font-weight-bold" style="text-decoration: none;"><i class="fa fa-certificate"></i> Set 'Certified Correct'</a>
+                        </div>
                         <textarea name="remarks" id="edit_remarks" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
@@ -520,13 +610,64 @@ usort($logs, function($a, $b) {
 </div>
 
 <script>
+if (typeof autoCalculatePeriodTo !== 'function') {
+    function autoCalculatePeriodTo(dateStr) {
+        if (!dateStr) return '';
+        dateStr = dateStr.trim();
+        var sep = dateStr.indexOf('/') !== -1 ? '/' : (dateStr.indexOf('-') !== -1 ? '-' : '');
+        if (!sep) return '';
+        var parts = dateStr.split(sep);
+        if (parts.length < 3) return '';
+
+        var m, d, y, mStr, yStr;
+        if (parts[0].length === 4) {
+            y = parseInt(parts[0], 10);
+            m = parseInt(parts[1], 10);
+            d = parseInt(parts[2], 10);
+            yStr = parts[0];
+            mStr = parts[1];
+            if (isNaN(y) || isNaN(m)) return '';
+            var lastDay = new Date(y, m, 0).getDate();
+            var ldStr = (lastDay < 10 ? '0' : '') + lastDay;
+            return yStr + sep + mStr + sep + ldStr;
+        } else {
+            m = parseInt(parts[0], 10);
+            d = parseInt(parts[1], 10);
+            y = parseInt(parts[2], 10);
+            mStr = parts[0];
+            yStr = parts[2];
+            if (isNaN(y) || isNaN(m)) return '';
+            var fullYear = (y < 100) ? (2000 + y) : y;
+            var lastDay = new Date(fullYear, m, 0).getDate();
+            var ldStr = (mStr.length === 2 && lastDay < 10) ? ('0' + lastDay) : lastDay;
+            return mStr + sep + ldStr + sep + yStr;
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    let editPeriodFrom = document.getElementById('edit_period_from');
+    if (editPeriodFrom) {
+        ['input', 'change', 'blur', 'keyup'].forEach(evt => {
+            editPeriodFrom.addEventListener(evt, function() {
+                let calc = autoCalculatePeriodTo(this.value);
+                if (calc) {
+                    document.getElementById('edit_period_to').value = calc;
+                }
+            });
+        });
+    }
+
     let editBtns = document.querySelectorAll('.edit-log-btn');
     editBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             document.getElementById('edit_log_id').value = this.dataset.id;
             document.getElementById('edit_period_from').value = this.dataset.period_from;
-            document.getElementById('edit_period_to').value = this.dataset.period_to;
+            let pTo = this.dataset.period_to || '';
+            if (!pTo && this.dataset.period_from) {
+                pTo = autoCalculatePeriodTo(this.dataset.period_from) || '';
+            }
+            document.getElementById('edit_period_to').value = pTo;
             document.getElementById('edit_particulars').value = this.dataset.particulars;
             document.getElementById('edit_vl_earned').value = this.dataset.vl_earned;
             document.getElementById('edit_vl_balance').value = this.dataset.vl_balance;

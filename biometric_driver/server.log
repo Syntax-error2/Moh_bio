@@ -1,0 +1,813 @@
+[2026-10-26 11:32:46.896] Program.Main started
+[2026-10-26 11:32:47.121] Form1_Load started
+[2026-10-26 11:32:47.170] WebServer started on port 15270
+[2026-10-26 11:32:47.172] AutoInit starting...
+[2026-10-26 11:32:47.220] zkfp2.Init returned: 0
+[2026-10-26 11:32:47.220] zkfp2.GetDeviceCount: 1
+[2026-10-26 11:32:48.483] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 11:32:48.502] Capture thread started. Dimensions: 300x400
+[2026-10-26 11:32:48.502] AutoInit open succeeded. Model: Live20R, Serial: 1972261800062
+[2026-10-26 11:32:48.502] Form1_Load finished. Initialized: True
+[2026-10-26 12:32:57.107] Program.Main started.
+[2026-10-26 12:32:57.507] Form1_Load started.
+[2026-10-26 12:32:57.533] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 12:32:57.543] AutoInit starting...
+[2026-10-26 12:32:57.563] zkfp2.Init returned: 0
+[2026-10-26 12:32:57.563] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:32:58.808] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 12:32:58.851] Capture thread started. Dimensions: 300x400
+[2026-10-26 12:32:58.857] Form1_Load finished. Initialized: True
+[2026-10-26 12:33:47.464] Program.Main started.
+[2026-10-26 12:34:39.352] Program.Main started.
+[2026-10-26 12:34:39.669] Form1_Load started.
+[2026-10-26 12:34:39.687] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 12:34:39.693] AutoInit starting...
+[2026-10-26 12:34:39.717] zkfp2.Init returned: 0
+[2026-10-26 12:34:39.717] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:34:40.964] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 12:34:40.965] Capture thread started. Dimensions: 300x400
+[2026-10-26 12:34:40.970] Form1_Load finished. Initialized: True
+[2026-10-26 12:36:04.764] Program.Main started.
+[2026-10-26 12:36:05.061] Form1_Load started.
+[2026-10-26 12:36:05.081] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 12:36:05.098] AutoInit starting...
+[2026-10-26 12:36:05.157] zkfp2.Init returned: 0
+[2026-10-26 12:36:05.157] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:36:06.392] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 12:36:06.397] Capture thread started. Dimensions: 300x400
+[2026-10-26 12:36:06.406] Form1_Load finished. Initialized: True
+[2026-10-26 12:36:43.845] SyncTemplates: Added 0/1886 templates into native DB cache in 19 ms.
+[2026-10-26 12:41:04.080] Program.Main started.
+[2026-10-26 12:41:04.337] Form1_Load started.
+[2026-10-26 12:41:04.339] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 12:41:04.349] AutoInit starting...
+[2026-10-26 12:41:04.365] zkfp2.Init returned: 0
+[2026-10-26 12:41:04.365] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:41:05.656] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 12:41:05.656] Capture thread started. Dimensions: 300x400
+[2026-10-26 12:41:05.659] Form1_Load finished. Initialized: True
+[2026-10-26 12:41:14.494] SyncTemplates: Added 0/1886 templates into native DB cache in 18 ms.
+[2026-10-26 12:42:55.156] SyncTemplates: Added 0/1886 templates into native DB cache in 18 ms.
+[2026-10-26 12:43:56.490] Program.Main started.
+[2026-10-26 12:43:56.740] Form1_Load started.
+[2026-10-26 12:43:56.740] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 12:43:56.757] AutoInit starting...
+[2026-10-26 12:43:56.774] zkfp2.Init returned: 0
+[2026-10-26 12:43:56.774] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:43:58.004] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 12:43:58.008] Capture thread started. Dimensions: 300x400
+[2026-10-26 12:43:58.011] Form1_Load finished. Initialized: True
+[2026-10-26 12:44:11.006] SyncTemplates: Added 0/1886 templates into native DB cache in 24 ms. (First item: blobLen=-1, ret=-999, err='GetCachedOrDecodeBlob returned null or 0 (base64 len=1026)')
+[2026-10-26 12:45:17.487] Program.Main started.
+[2026-10-26 12:45:17.733] Form1_Load started.
+[2026-10-26 12:45:17.740] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 12:45:17.746] AutoInit starting...
+[2026-10-26 12:45:17.774] zkfp2.Init returned: 0
+[2026-10-26 12:45:17.774] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:45:18.822] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 12:45:18.844] Capture thread started. Dimensions: 300x400
+[2026-10-26 12:45:18.846] Form1_Load finished. Initialized: True
+[2026-10-26 12:45:34.182] SyncTemplates: Added 1886/1886 templates into native DB cache in 132 ms. (First item: blobLen=1288, ret=0, err='')
+[2026-10-26 12:53:40.140] Program.Main started.
+[2026-10-26 12:53:40.285] Form1_Load started.
+[2026-10-26 12:53:40.331] WebServer Start Error: Failed to listen on prefix 'http://127.0.0.1:15270/ZK_Finger/' because it conflicts with an existing registration on the machine.
+[2026-10-26 12:53:40.339] AutoInit starting...
+[2026-10-26 12:53:40.358] zkfp2.Init returned: 0
+[2026-10-26 12:53:40.358] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:40.358] OpenDevice failed for index 0
+[2026-10-26 12:53:40.358] Form1_Load finished. Initialized: False
+[2026-10-26 12:53:43.367] AutoInit starting...
+[2026-10-26 12:53:43.367] zkfp2.Init returned: 1
+[2026-10-26 12:53:43.367] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:43.367] OpenDevice failed for index 0
+[2026-10-26 12:53:44.998] OpenDevice failed for index 0
+[2026-10-26 12:53:46.380] AutoInit starting...
+[2026-10-26 12:53:46.380] zkfp2.Init returned: 1
+[2026-10-26 12:53:46.381] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:46.381] OpenDevice failed for index 0
+[2026-10-26 12:53:47.399] OpenDevice failed for index 0
+[2026-10-26 12:53:49.392] AutoInit starting...
+[2026-10-26 12:53:49.392] zkfp2.Init returned: 1
+[2026-10-26 12:53:49.392] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:49.392] OpenDevice failed for index 0
+[2026-10-26 12:53:52.396] AutoInit starting...
+[2026-10-26 12:53:52.396] zkfp2.Init returned: 1
+[2026-10-26 12:53:52.397] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:52.397] OpenDevice failed for index 0
+[2026-10-26 12:53:55.399] AutoInit starting...
+[2026-10-26 12:53:55.399] zkfp2.Init returned: 1
+[2026-10-26 12:53:55.401] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:55.401] OpenDevice failed for index 0
+[2026-10-26 12:53:58.403] AutoInit starting...
+[2026-10-26 12:53:58.403] zkfp2.Init returned: 1
+[2026-10-26 12:53:58.409] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:53:58.412] OpenDevice failed for index 0
+[2026-10-26 12:54:01.414] AutoInit starting...
+[2026-10-26 12:54:01.414] zkfp2.Init returned: 1
+[2026-10-26 12:54:01.414] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:01.414] OpenDevice failed for index 0
+[2026-10-26 12:54:04.426] AutoInit starting...
+[2026-10-26 12:54:04.427] zkfp2.Init returned: 1
+[2026-10-26 12:54:04.427] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:04.427] OpenDevice failed for index 0
+[2026-10-26 12:54:07.437] AutoInit starting...
+[2026-10-26 12:54:07.439] zkfp2.Init returned: 1
+[2026-10-26 12:54:07.439] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:07.442] OpenDevice failed for index 0
+[2026-10-26 12:54:10.448] AutoInit starting...
+[2026-10-26 12:54:10.448] zkfp2.Init returned: 1
+[2026-10-26 12:54:10.448] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:10.448] OpenDevice failed for index 0
+[2026-10-26 12:54:13.469] AutoInit starting...
+[2026-10-26 12:54:13.469] zkfp2.Init returned: 1
+[2026-10-26 12:54:13.472] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:13.472] OpenDevice failed for index 0
+[2026-10-26 12:54:16.483] AutoInit starting...
+[2026-10-26 12:54:16.483] zkfp2.Init returned: 1
+[2026-10-26 12:54:16.483] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:16.483] OpenDevice failed for index 0
+[2026-10-26 12:54:19.488] AutoInit starting...
+[2026-10-26 12:54:19.488] zkfp2.Init returned: 1
+[2026-10-26 12:54:19.488] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:19.491] OpenDevice failed for index 0
+[2026-10-26 12:54:22.499] AutoInit starting...
+[2026-10-26 12:54:22.501] zkfp2.Init returned: 1
+[2026-10-26 12:54:22.502] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:22.515] OpenDevice failed for index 0
+[2026-10-26 12:54:25.518] AutoInit starting...
+[2026-10-26 12:54:25.518] zkfp2.Init returned: 1
+[2026-10-26 12:54:25.518] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:25.518] OpenDevice failed for index 0
+[2026-10-26 12:54:28.530] AutoInit starting...
+[2026-10-26 12:54:28.531] zkfp2.Init returned: 1
+[2026-10-26 12:54:28.531] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:28.531] OpenDevice failed for index 0
+[2026-10-26 12:54:31.539] AutoInit starting...
+[2026-10-26 12:54:31.541] zkfp2.Init returned: 1
+[2026-10-26 12:54:31.543] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:31.543] OpenDevice failed for index 0
+[2026-10-26 12:54:34.551] AutoInit starting...
+[2026-10-26 12:54:34.551] zkfp2.Init returned: 1
+[2026-10-26 12:54:34.551] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:34.553] OpenDevice failed for index 0
+[2026-10-26 12:54:35.096] SyncTemplates: Added 1886/1886 templates into native DB cache in 204 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 12:54:37.563] AutoInit starting...
+[2026-10-26 12:54:37.563] zkfp2.Init returned: 1
+[2026-10-26 12:54:37.563] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:37.563] OpenDevice failed for index 0
+[2026-10-26 12:54:40.574] AutoInit starting...
+[2026-10-26 12:54:40.574] zkfp2.Init returned: 1
+[2026-10-26 12:54:40.574] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:40.574] OpenDevice failed for index 0
+[2026-10-26 12:54:43.587] AutoInit starting...
+[2026-10-26 12:54:43.587] zkfp2.Init returned: 1
+[2026-10-26 12:54:43.587] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:43.587] OpenDevice failed for index 0
+[2026-10-26 12:54:45.527] OpenDevice failed for index 0
+[2026-10-26 12:54:46.600] AutoInit starting...
+[2026-10-26 12:54:46.600] zkfp2.Init returned: 1
+[2026-10-26 12:54:46.600] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:46.600] OpenDevice failed for index 0
+[2026-10-26 12:54:49.615] AutoInit starting...
+[2026-10-26 12:54:49.616] zkfp2.Init returned: 1
+[2026-10-26 12:54:49.616] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:54:49.616] OpenDevice failed for index 0
+[2026-10-26 12:54:50.862] Program.Main finished.
+[2026-10-26 12:54:59.752] Program.Main started.
+[2026-10-26 12:54:59.896] Form1_Load started.
+[2026-10-26 12:54:59.911] WebServer Start Error: Failed to listen on prefix 'http://127.0.0.1:15270/ZK_Finger/' because it conflicts with an existing registration on the machine.
+[2026-10-26 12:54:59.916] AutoInit starting...
+[2026-10-26 12:54:59.923] zkfp2.Init returned: -1
+[2026-10-26 12:54:59.923] Form1_Load finished. Initialized: False
+[2026-10-26 12:55:02.947] AutoInit starting...
+[2026-10-26 12:55:02.954] zkfp2.Init returned: -1
+[2026-10-26 12:55:05.469] SyncTemplates: Added 1886/1886 templates into native DB cache in 111 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 12:55:05.964] AutoInit starting...
+[2026-10-26 12:55:05.980] zkfp2.Init returned: 0
+[2026-10-26 12:55:05.980] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:05.988] OpenDevice failed for index 0
+[2026-10-26 12:55:08.998] AutoInit starting...
+[2026-10-26 12:55:08.998] zkfp2.Init returned: 1
+[2026-10-26 12:55:09.000] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:09.000] OpenDevice failed for index 0
+[2026-10-26 12:55:09.627] OpenDevice failed for index 0
+[2026-10-26 12:55:10.689] OpenDevice failed for index 0
+[2026-10-26 12:55:12.006] AutoInit starting...
+[2026-10-26 12:55:12.007] zkfp2.Init returned: 1
+[2026-10-26 12:55:12.007] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:12.008] OpenDevice failed for index 0
+[2026-10-26 12:55:15.013] AutoInit starting...
+[2026-10-26 12:55:15.014] zkfp2.Init returned: 1
+[2026-10-26 12:55:15.014] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:15.014] OpenDevice failed for index 0
+[2026-10-26 12:55:18.018] AutoInit starting...
+[2026-10-26 12:55:18.018] zkfp2.Init returned: 1
+[2026-10-26 12:55:18.018] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:18.018] OpenDevice failed for index 0
+[2026-10-26 12:55:21.031] AutoInit starting...
+[2026-10-26 12:55:21.031] zkfp2.Init returned: 1
+[2026-10-26 12:55:21.031] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:21.032] OpenDevice failed for index 0
+[2026-10-26 12:55:24.042] AutoInit starting...
+[2026-10-26 12:55:24.042] zkfp2.Init returned: 1
+[2026-10-26 12:55:24.042] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:24.042] OpenDevice failed for index 0
+[2026-10-26 12:55:27.050] AutoInit starting...
+[2026-10-26 12:55:27.050] zkfp2.Init returned: 1
+[2026-10-26 12:55:27.051] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:27.051] OpenDevice failed for index 0
+[2026-10-26 12:55:30.062] AutoInit starting...
+[2026-10-26 12:55:30.062] zkfp2.Init returned: 1
+[2026-10-26 12:55:30.062] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:30.062] OpenDevice failed for index 0
+[2026-10-26 12:55:33.080] AutoInit starting...
+[2026-10-26 12:55:33.080] zkfp2.Init returned: 1
+[2026-10-26 12:55:33.080] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:33.080] OpenDevice failed for index 0
+[2026-10-26 12:55:36.086] AutoInit starting...
+[2026-10-26 12:55:36.086] zkfp2.Init returned: 1
+[2026-10-26 12:55:36.086] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:36.087] OpenDevice failed for index 0
+[2026-10-26 12:55:39.095] AutoInit starting...
+[2026-10-26 12:55:39.095] zkfp2.Init returned: 1
+[2026-10-26 12:55:39.095] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:39.095] OpenDevice failed for index 0
+[2026-10-26 12:55:42.100] AutoInit starting...
+[2026-10-26 12:55:42.100] zkfp2.Init returned: 1
+[2026-10-26 12:55:42.100] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:42.104] OpenDevice failed for index 0
+[2026-10-26 12:55:45.108] AutoInit starting...
+[2026-10-26 12:55:45.110] zkfp2.Init returned: 1
+[2026-10-26 12:55:45.110] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:45.113] OpenDevice failed for index 0
+[2026-10-26 12:55:48.119] AutoInit starting...
+[2026-10-26 12:55:48.119] zkfp2.Init returned: 1
+[2026-10-26 12:55:48.119] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:48.119] OpenDevice failed for index 0
+[2026-10-26 12:55:51.125] AutoInit starting...
+[2026-10-26 12:55:51.125] zkfp2.Init returned: 1
+[2026-10-26 12:55:51.125] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:51.128] OpenDevice failed for index 0
+[2026-10-26 12:55:54.130] AutoInit starting...
+[2026-10-26 12:55:54.130] zkfp2.Init returned: 1
+[2026-10-26 12:55:54.132] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:54.132] OpenDevice failed for index 0
+[2026-10-26 12:55:57.137] AutoInit starting...
+[2026-10-26 12:55:57.137] zkfp2.Init returned: 1
+[2026-10-26 12:55:57.137] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:55:57.137] OpenDevice failed for index 0
+[2026-10-26 12:56:00.151] AutoInit starting...
+[2026-10-26 12:56:00.151] zkfp2.Init returned: 1
+[2026-10-26 12:56:00.154] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:00.155] OpenDevice failed for index 0
+[2026-10-26 12:56:03.170] AutoInit starting...
+[2026-10-26 12:56:03.170] zkfp2.Init returned: 1
+[2026-10-26 12:56:03.170] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:03.170] OpenDevice failed for index 0
+[2026-10-26 12:56:06.190] AutoInit starting...
+[2026-10-26 12:56:06.190] zkfp2.Init returned: 1
+[2026-10-26 12:56:06.192] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:06.193] OpenDevice failed for index 0
+[2026-10-26 12:56:09.196] AutoInit starting...
+[2026-10-26 12:56:09.196] zkfp2.Init returned: 1
+[2026-10-26 12:56:09.196] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:09.199] OpenDevice failed for index 0
+[2026-10-26 12:56:12.216] AutoInit starting...
+[2026-10-26 12:56:12.216] zkfp2.Init returned: 1
+[2026-10-26 12:56:12.216] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:12.216] OpenDevice failed for index 0
+[2026-10-26 12:56:15.232] AutoInit starting...
+[2026-10-26 12:56:15.234] zkfp2.Init returned: 1
+[2026-10-26 12:56:15.236] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:15.237] OpenDevice failed for index 0
+[2026-10-26 12:56:18.244] AutoInit starting...
+[2026-10-26 12:56:18.244] zkfp2.Init returned: 1
+[2026-10-26 12:56:18.244] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:18.244] OpenDevice failed for index 0
+[2026-10-26 12:56:21.248] AutoInit starting...
+[2026-10-26 12:56:21.248] zkfp2.Init returned: 1
+[2026-10-26 12:56:21.248] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:21.252] OpenDevice failed for index 0
+[2026-10-26 12:56:24.259] AutoInit starting...
+[2026-10-26 12:56:24.261] zkfp2.Init returned: 1
+[2026-10-26 12:56:24.262] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:24.262] OpenDevice failed for index 0
+[2026-10-26 12:56:27.274] AutoInit starting...
+[2026-10-26 12:56:27.274] zkfp2.Init returned: 1
+[2026-10-26 12:56:27.277] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:27.277] OpenDevice failed for index 0
+[2026-10-26 12:56:30.286] AutoInit starting...
+[2026-10-26 12:56:30.286] zkfp2.Init returned: 1
+[2026-10-26 12:56:30.289] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:30.290] OpenDevice failed for index 0
+[2026-10-26 12:56:33.301] AutoInit starting...
+[2026-10-26 12:56:33.303] zkfp2.Init returned: 1
+[2026-10-26 12:56:33.305] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:33.306] OpenDevice failed for index 0
+[2026-10-26 12:56:36.321] AutoInit starting...
+[2026-10-26 12:56:36.321] zkfp2.Init returned: 1
+[2026-10-26 12:56:36.323] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:36.323] OpenDevice failed for index 0
+[2026-10-26 12:56:39.332] AutoInit starting...
+[2026-10-26 12:56:39.335] zkfp2.Init returned: 1
+[2026-10-26 12:56:39.335] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:39.335] OpenDevice failed for index 0
+[2026-10-26 12:56:42.343] AutoInit starting...
+[2026-10-26 12:56:42.345] zkfp2.Init returned: 1
+[2026-10-26 12:56:42.345] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:42.348] OpenDevice failed for index 0
+[2026-10-26 12:56:45.360] AutoInit starting...
+[2026-10-26 12:56:45.360] zkfp2.Init returned: 1
+[2026-10-26 12:56:45.360] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:45.360] OpenDevice failed for index 0
+[2026-10-26 12:56:48.384] AutoInit starting...
+[2026-10-26 12:56:48.384] zkfp2.Init returned: 1
+[2026-10-26 12:56:48.384] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:48.384] OpenDevice failed for index 0
+[2026-10-26 12:56:51.406] AutoInit starting...
+[2026-10-26 12:56:51.406] zkfp2.Init returned: 1
+[2026-10-26 12:56:51.406] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:51.409] OpenDevice failed for index 0
+[2026-10-26 12:56:54.415] AutoInit starting...
+[2026-10-26 12:56:54.415] zkfp2.Init returned: 1
+[2026-10-26 12:56:54.415] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:54.415] OpenDevice failed for index 0
+[2026-10-26 12:56:57.432] AutoInit starting...
+[2026-10-26 12:56:57.432] zkfp2.Init returned: 1
+[2026-10-26 12:56:57.433] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:56:57.433] OpenDevice failed for index 0
+[2026-10-26 12:57:00.436] AutoInit starting...
+[2026-10-26 12:57:00.436] zkfp2.Init returned: 1
+[2026-10-26 12:57:00.437] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:00.437] OpenDevice failed for index 0
+[2026-10-26 12:57:03.440] AutoInit starting...
+[2026-10-26 12:57:03.440] zkfp2.Init returned: 1
+[2026-10-26 12:57:03.440] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:03.440] OpenDevice failed for index 0
+[2026-10-26 12:57:06.451] AutoInit starting...
+[2026-10-26 12:57:06.451] zkfp2.Init returned: 1
+[2026-10-26 12:57:06.451] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:06.451] OpenDevice failed for index 0
+[2026-10-26 12:57:09.466] AutoInit starting...
+[2026-10-26 12:57:09.467] zkfp2.Init returned: 1
+[2026-10-26 12:57:09.468] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:09.468] OpenDevice failed for index 0
+[2026-10-26 12:57:12.473] AutoInit starting...
+[2026-10-26 12:57:12.474] zkfp2.Init returned: 1
+[2026-10-26 12:57:12.474] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:12.476] OpenDevice failed for index 0
+[2026-10-26 12:57:15.484] AutoInit starting...
+[2026-10-26 12:57:15.484] zkfp2.Init returned: 1
+[2026-10-26 12:57:15.487] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:15.487] OpenDevice failed for index 0
+[2026-10-26 12:57:18.494] AutoInit starting...
+[2026-10-26 12:57:18.494] zkfp2.Init returned: 1
+[2026-10-26 12:57:18.494] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:18.497] OpenDevice failed for index 0
+[2026-10-26 12:57:21.516] AutoInit starting...
+[2026-10-26 12:57:21.516] zkfp2.Init returned: 1
+[2026-10-26 12:57:21.518] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:21.518] OpenDevice failed for index 0
+[2026-10-26 12:57:24.531] AutoInit starting...
+[2026-10-26 12:57:24.531] zkfp2.Init returned: 1
+[2026-10-26 12:57:24.531] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:24.535] OpenDevice failed for index 0
+[2026-10-26 12:57:27.549] AutoInit starting...
+[2026-10-26 12:57:27.549] zkfp2.Init returned: 1
+[2026-10-26 12:57:27.549] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:27.549] OpenDevice failed for index 0
+[2026-10-26 12:57:30.557] AutoInit starting...
+[2026-10-26 12:57:30.557] zkfp2.Init returned: 1
+[2026-10-26 12:57:30.558] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:30.559] OpenDevice failed for index 0
+[2026-10-26 12:57:33.575] AutoInit starting...
+[2026-10-26 12:57:33.576] zkfp2.Init returned: 1
+[2026-10-26 12:57:33.576] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:33.576] OpenDevice failed for index 0
+[2026-10-26 12:57:36.594] AutoInit starting...
+[2026-10-26 12:57:36.594] zkfp2.Init returned: 1
+[2026-10-26 12:57:36.594] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:36.594] OpenDevice failed for index 0
+[2026-10-26 12:57:39.606] AutoInit starting...
+[2026-10-26 12:57:39.607] zkfp2.Init returned: 1
+[2026-10-26 12:57:39.607] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:39.607] OpenDevice failed for index 0
+[2026-10-26 12:57:42.624] AutoInit starting...
+[2026-10-26 12:57:42.624] zkfp2.Init returned: 1
+[2026-10-26 12:57:42.624] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:42.624] OpenDevice failed for index 0
+[2026-10-26 12:57:45.632] AutoInit starting...
+[2026-10-26 12:57:45.632] zkfp2.Init returned: 1
+[2026-10-26 12:57:45.634] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:45.634] OpenDevice failed for index 0
+[2026-10-26 12:57:48.637] AutoInit starting...
+[2026-10-26 12:57:48.638] zkfp2.Init returned: 1
+[2026-10-26 12:57:48.639] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:48.639] OpenDevice failed for index 0
+[2026-10-26 12:57:51.647] AutoInit starting...
+[2026-10-26 12:57:51.650] zkfp2.Init returned: 1
+[2026-10-26 12:57:51.650] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:51.652] OpenDevice failed for index 0
+[2026-10-26 12:57:54.661] AutoInit starting...
+[2026-10-26 12:57:54.661] zkfp2.Init returned: 1
+[2026-10-26 12:57:54.663] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:54.663] OpenDevice failed for index 0
+[2026-10-26 12:57:57.667] AutoInit starting...
+[2026-10-26 12:57:57.667] zkfp2.Init returned: 1
+[2026-10-26 12:57:57.667] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:57:57.667] OpenDevice failed for index 0
+[2026-10-26 12:58:00.672] AutoInit starting...
+[2026-10-26 12:58:00.672] zkfp2.Init returned: 1
+[2026-10-26 12:58:00.672] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:00.672] OpenDevice failed for index 0
+[2026-10-26 12:58:03.689] AutoInit starting...
+[2026-10-26 12:58:03.689] zkfp2.Init returned: 1
+[2026-10-26 12:58:03.692] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:03.692] OpenDevice failed for index 0
+[2026-10-26 12:58:06.705] AutoInit starting...
+[2026-10-26 12:58:06.705] zkfp2.Init returned: 1
+[2026-10-26 12:58:06.707] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:06.707] OpenDevice failed for index 0
+[2026-10-26 12:58:09.721] AutoInit starting...
+[2026-10-26 12:58:09.723] zkfp2.Init returned: 1
+[2026-10-26 12:58:09.723] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:09.725] OpenDevice failed for index 0
+[2026-10-26 12:58:12.737] AutoInit starting...
+[2026-10-26 12:58:12.737] zkfp2.Init returned: 1
+[2026-10-26 12:58:12.737] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:12.737] OpenDevice failed for index 0
+[2026-10-26 12:58:15.742] AutoInit starting...
+[2026-10-26 12:58:15.744] zkfp2.Init returned: 1
+[2026-10-26 12:58:15.744] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:15.746] OpenDevice failed for index 0
+[2026-10-26 12:58:18.763] AutoInit starting...
+[2026-10-26 12:58:18.765] zkfp2.Init returned: 1
+[2026-10-26 12:58:18.765] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:18.768] OpenDevice failed for index 0
+[2026-10-26 12:58:21.769] AutoInit starting...
+[2026-10-26 12:58:21.769] zkfp2.Init returned: 1
+[2026-10-26 12:58:21.771] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:21.771] OpenDevice failed for index 0
+[2026-10-26 12:58:24.778] AutoInit starting...
+[2026-10-26 12:58:24.781] zkfp2.Init returned: 1
+[2026-10-26 12:58:24.785] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:24.785] OpenDevice failed for index 0
+[2026-10-26 12:58:27.795] AutoInit starting...
+[2026-10-26 12:58:27.796] zkfp2.Init returned: 1
+[2026-10-26 12:58:27.796] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:27.797] OpenDevice failed for index 0
+[2026-10-26 12:58:30.807] AutoInit starting...
+[2026-10-26 12:58:30.808] zkfp2.Init returned: 1
+[2026-10-26 12:58:30.808] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:30.811] OpenDevice failed for index 0
+[2026-10-26 12:58:33.814] AutoInit starting...
+[2026-10-26 12:58:33.814] zkfp2.Init returned: 1
+[2026-10-26 12:58:33.814] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:33.814] OpenDevice failed for index 0
+[2026-10-26 12:58:36.827] AutoInit starting...
+[2026-10-26 12:58:36.827] zkfp2.Init returned: 1
+[2026-10-26 12:58:36.829] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:36.829] OpenDevice failed for index 0
+[2026-10-26 12:58:39.847] AutoInit starting...
+[2026-10-26 12:58:39.847] zkfp2.Init returned: 1
+[2026-10-26 12:58:39.847] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:39.847] OpenDevice failed for index 0
+[2026-10-26 12:58:42.854] AutoInit starting...
+[2026-10-26 12:58:42.854] zkfp2.Init returned: 1
+[2026-10-26 12:58:42.854] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:42.854] OpenDevice failed for index 0
+[2026-10-26 12:58:45.867] AutoInit starting...
+[2026-10-26 12:58:45.867] zkfp2.Init returned: 1
+[2026-10-26 12:58:45.869] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:45.869] OpenDevice failed for index 0
+[2026-10-26 12:58:48.881] AutoInit starting...
+[2026-10-26 12:58:48.882] zkfp2.Init returned: 1
+[2026-10-26 12:58:48.883] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:48.883] OpenDevice failed for index 0
+[2026-10-26 12:58:51.887] AutoInit starting...
+[2026-10-26 12:58:51.887] zkfp2.Init returned: 1
+[2026-10-26 12:58:51.887] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:51.891] OpenDevice failed for index 0
+[2026-10-26 12:58:54.900] AutoInit starting...
+[2026-10-26 12:58:54.901] zkfp2.Init returned: 1
+[2026-10-26 12:58:54.902] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:54.902] OpenDevice failed for index 0
+[2026-10-26 12:58:57.906] AutoInit starting...
+[2026-10-26 12:58:57.906] zkfp2.Init returned: 1
+[2026-10-26 12:58:57.906] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:58:57.906] OpenDevice failed for index 0
+[2026-10-26 12:59:00.915] AutoInit starting...
+[2026-10-26 12:59:00.915] zkfp2.Init returned: 1
+[2026-10-26 12:59:00.915] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:00.918] OpenDevice failed for index 0
+[2026-10-26 12:59:03.926] AutoInit starting...
+[2026-10-26 12:59:03.927] zkfp2.Init returned: 1
+[2026-10-26 12:59:03.930] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:03.930] OpenDevice failed for index 0
+[2026-10-26 12:59:06.935] AutoInit starting...
+[2026-10-26 12:59:06.935] zkfp2.Init returned: 1
+[2026-10-26 12:59:06.935] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:06.935] OpenDevice failed for index 0
+[2026-10-26 12:59:09.943] AutoInit starting...
+[2026-10-26 12:59:09.943] zkfp2.Init returned: 1
+[2026-10-26 12:59:09.943] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:09.947] OpenDevice failed for index 0
+[2026-10-26 12:59:12.954] AutoInit starting...
+[2026-10-26 12:59:12.956] zkfp2.Init returned: 1
+[2026-10-26 12:59:12.958] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:12.959] OpenDevice failed for index 0
+[2026-10-26 12:59:15.972] AutoInit starting...
+[2026-10-26 12:59:15.974] zkfp2.Init returned: 1
+[2026-10-26 12:59:15.974] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:15.974] OpenDevice failed for index 0
+[2026-10-26 12:59:18.989] AutoInit starting...
+[2026-10-26 12:59:18.989] zkfp2.Init returned: 1
+[2026-10-26 12:59:18.989] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:18.989] OpenDevice failed for index 0
+[2026-10-26 12:59:22.004] AutoInit starting...
+[2026-10-26 12:59:22.004] zkfp2.Init returned: 1
+[2026-10-26 12:59:22.004] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:22.004] OpenDevice failed for index 0
+[2026-10-26 12:59:25.019] AutoInit starting...
+[2026-10-26 12:59:25.019] zkfp2.Init returned: 1
+[2026-10-26 12:59:25.019] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:25.019] OpenDevice failed for index 0
+[2026-10-26 12:59:28.041] AutoInit starting...
+[2026-10-26 12:59:28.042] zkfp2.Init returned: 1
+[2026-10-26 12:59:28.044] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:28.044] OpenDevice failed for index 0
+[2026-10-26 12:59:31.056] AutoInit starting...
+[2026-10-26 12:59:31.057] zkfp2.Init returned: 1
+[2026-10-26 12:59:31.057] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:31.059] OpenDevice failed for index 0
+[2026-10-26 12:59:34.075] AutoInit starting...
+[2026-10-26 12:59:34.075] zkfp2.Init returned: 1
+[2026-10-26 12:59:34.075] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:34.075] OpenDevice failed for index 0
+[2026-10-26 12:59:37.087] AutoInit starting...
+[2026-10-26 12:59:37.087] zkfp2.Init returned: 1
+[2026-10-26 12:59:37.087] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:37.087] OpenDevice failed for index 0
+[2026-10-26 12:59:40.093] AutoInit starting...
+[2026-10-26 12:59:40.094] zkfp2.Init returned: 1
+[2026-10-26 12:59:40.097] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:40.097] OpenDevice failed for index 0
+[2026-10-26 12:59:43.103] AutoInit starting...
+[2026-10-26 12:59:43.103] zkfp2.Init returned: 1
+[2026-10-26 12:59:43.105] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:43.106] OpenDevice failed for index 0
+[2026-10-26 12:59:46.109] AutoInit starting...
+[2026-10-26 12:59:46.111] zkfp2.Init returned: 1
+[2026-10-26 12:59:46.113] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:46.115] OpenDevice failed for index 0
+[2026-10-26 12:59:49.117] AutoInit starting...
+[2026-10-26 12:59:49.118] zkfp2.Init returned: 1
+[2026-10-26 12:59:49.118] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:49.120] OpenDevice failed for index 0
+[2026-10-26 12:59:52.128] AutoInit starting...
+[2026-10-26 12:59:52.128] zkfp2.Init returned: 1
+[2026-10-26 12:59:52.128] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:52.132] OpenDevice failed for index 0
+[2026-10-26 12:59:55.136] AutoInit starting...
+[2026-10-26 12:59:55.136] zkfp2.Init returned: 1
+[2026-10-26 12:59:55.139] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:55.141] OpenDevice failed for index 0
+[2026-10-26 12:59:58.148] AutoInit starting...
+[2026-10-26 12:59:58.149] zkfp2.Init returned: 1
+[2026-10-26 12:59:58.149] zkfp2.GetDeviceCount: 1
+[2026-10-26 12:59:58.150] OpenDevice failed for index 0
+[2026-10-26 13:00:01.162] AutoInit starting...
+[2026-10-26 13:00:01.162] zkfp2.Init returned: 1
+[2026-10-26 13:00:01.162] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:01.167] OpenDevice failed for index 0
+[2026-10-26 13:00:04.171] AutoInit starting...
+[2026-10-26 13:00:04.173] zkfp2.Init returned: 1
+[2026-10-26 13:00:04.176] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:04.177] OpenDevice failed for index 0
+[2026-10-26 13:00:07.189] AutoInit starting...
+[2026-10-26 13:00:07.191] zkfp2.Init returned: 1
+[2026-10-26 13:00:07.191] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:07.193] OpenDevice failed for index 0
+[2026-10-26 13:00:10.196] AutoInit starting...
+[2026-10-26 13:00:10.199] zkfp2.Init returned: 1
+[2026-10-26 13:00:10.220] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:10.220] OpenDevice failed for index 0
+[2026-10-26 13:00:13.224] AutoInit starting...
+[2026-10-26 13:00:13.224] zkfp2.Init returned: 1
+[2026-10-26 13:00:13.224] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:13.227] OpenDevice failed for index 0
+[2026-10-26 13:00:16.238] AutoInit starting...
+[2026-10-26 13:00:16.238] zkfp2.Init returned: 1
+[2026-10-26 13:00:16.241] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:16.241] OpenDevice failed for index 0
+[2026-10-26 13:00:19.253] AutoInit starting...
+[2026-10-26 13:00:19.253] zkfp2.Init returned: 1
+[2026-10-26 13:00:19.255] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:19.258] OpenDevice failed for index 0
+[2026-10-26 13:00:22.266] AutoInit starting...
+[2026-10-26 13:00:22.266] zkfp2.Init returned: 1
+[2026-10-26 13:00:22.266] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:22.266] OpenDevice failed for index 0
+[2026-10-26 13:00:25.271] AutoInit starting...
+[2026-10-26 13:00:25.271] zkfp2.Init returned: 1
+[2026-10-26 13:00:25.271] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:25.274] OpenDevice failed for index 0
+[2026-10-26 13:00:28.287] AutoInit starting...
+[2026-10-26 13:00:28.287] zkfp2.Init returned: 1
+[2026-10-26 13:00:28.290] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:28.291] OpenDevice failed for index 0
+[2026-10-26 13:00:31.306] AutoInit starting...
+[2026-10-26 13:00:31.306] zkfp2.Init returned: 1
+[2026-10-26 13:00:31.306] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:31.310] OpenDevice failed for index 0
+[2026-10-26 13:00:34.326] AutoInit starting...
+[2026-10-26 13:00:34.326] zkfp2.Init returned: 1
+[2026-10-26 13:00:34.329] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:34.329] OpenDevice failed for index 0
+[2026-10-26 13:00:37.339] AutoInit starting...
+[2026-10-26 13:00:37.339] zkfp2.Init returned: 1
+[2026-10-26 13:00:37.339] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:37.341] OpenDevice failed for index 0
+[2026-10-26 13:00:40.346] AutoInit starting...
+[2026-10-26 13:00:40.348] zkfp2.Init returned: 1
+[2026-10-26 13:00:40.348] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:40.348] OpenDevice failed for index 0
+[2026-10-26 13:00:43.355] AutoInit starting...
+[2026-10-26 13:00:43.355] zkfp2.Init returned: 1
+[2026-10-26 13:00:43.355] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:43.355] OpenDevice failed for index 0
+[2026-10-26 13:00:46.363] AutoInit starting...
+[2026-10-26 13:00:46.363] zkfp2.Init returned: 1
+[2026-10-26 13:00:46.363] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:00:46.366] OpenDevice failed for index 0
+[2026-10-26 13:06:45.446] Program.Main started.
+[2026-10-26 13:06:45.696] Form1_Load started.
+[2026-10-26 13:06:45.702] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 13:06:45.712] AutoInit starting...
+[2026-10-26 13:06:45.738] zkfp2.Init returned: 0
+[2026-10-26 13:06:45.738] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:06:46.894] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 13:06:46.896] Capture thread started. Dimensions: 300x400
+[2026-10-26 13:06:46.976] AutoInit: device already initialized (Live20R, 1972261800062)
+[2026-10-26 13:06:46.976] Form1_Load finished. Initialized: True
+[2026-10-26 13:06:47.373] SyncTemplates: Added 1886/1886 templates into native DB cache in 147 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 13:07:19.790] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 27ms
+[2026-10-26 13:07:52.250] Program.Main started.
+[2026-10-26 13:07:52.489] Form1_Load started.
+[2026-10-26 13:07:52.500] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 13:07:52.507] AutoInit starting...
+[2026-10-26 13:07:52.523] zkfp2.Init returned: 0
+[2026-10-26 13:07:52.523] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:07:53.656] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 13:07:53.656] Capture thread started. Dimensions: 300x400
+[2026-10-26 13:07:53.702] Form1_Load finished. Initialized: True
+[2026-10-26 13:26:05.822] Program.Main started.
+[2026-10-26 13:26:06.253] Form1_Load started.
+[2026-10-26 13:26:06.295] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 13:26:06.305] AutoInit starting...
+[2026-10-26 13:26:06.334] zkfp2.Init returned: 0
+[2026-10-26 13:26:06.334] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:26:07.413] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 13:26:07.415] Capture thread started. Dimensions: 300x400
+[2026-10-26 13:26:07.462] Form1_Load finished. Initialized: True
+[2026-10-26 13:27:12.380] Program.Main started.
+[2026-10-26 13:27:12.810] Form1_Load started.
+[2026-10-26 13:27:12.858] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 13:27:12.868] AutoInit starting...
+[2026-10-26 13:27:12.943] zkfp2.Init returned: 0
+[2026-10-26 13:27:12.943] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:27:13.938] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 13:27:13.938] Capture thread started. Dimensions: 300x400
+[2026-10-26 13:27:13.963] Form1_Load finished. Initialized: True
+[2026-10-26 13:27:17.491] SyncTemplates: Added 1886/1886 templates into native DB cache in 141 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 13:56:46.809] Program.Main started.
+[2026-10-26 13:56:46.965] Form1_Load started.
+[2026-10-26 13:56:46.975] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 13:56:46.975] AutoInit starting...
+[2026-10-26 13:56:46.999] zkfp2.Init returned: 0
+[2026-10-26 13:56:46.999] zkfp2.GetDeviceCount: 1
+[2026-10-26 13:56:48.257] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 13:56:48.257] Capture thread started. Dimensions: 300x400
+[2026-10-26 13:56:48.257] Form1_Load finished. Initialized: True
+[2026-10-26 13:56:53.323] SyncTemplates: Added 1886/1886 templates into native DB cache in 143 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 13:57:28.278] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 14ms
+[2026-10-26 13:57:28.278] Native 1:N Match: Unrecognized (Score=0) in 14 ms
+[2026-10-26 13:57:34.353] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 6ms
+[2026-10-26 13:57:34.355] Native 1:N Match: Unrecognized (Score=0) in 6 ms
+[2026-10-26 13:57:47.327] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 8ms
+[2026-10-26 13:57:47.327] Native 1:N Match: Unrecognized (Score=0) in 8 ms
+[2026-10-26 13:57:52.484] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 7ms
+[2026-10-26 13:57:52.484] Native 1:N Match: Unrecognized (Score=0) in 7 ms
+[2026-10-26 13:57:58.243] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 6ms
+[2026-10-26 13:57:58.243] Native 1:N Match: Unrecognized (Score=0) in 6 ms
+[2026-10-26 13:57:58.464] SyncTemplates: Added 1889/1889 templates into native DB cache in 163 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 13:58:01.552] SyncTemplates: Added 1890/1890 templates into native DB cache in 154 ms. (First item: blobLen=1300, ret=0, err='')
+[2026-10-26 13:58:04.181] Fingerprint touch: DBIdentify ret=0, fid=1737, score=424 in 9ms
+[2026-10-26 13:58:04.181] Native 1:N Match SUCCESS: ArrayIndex=1736, Score=424, Personnel=1291 in 9 ms
+[2026-10-26 13:58:09.060] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 8ms
+[2026-10-26 13:58:09.062] Native 1:N Match: Unrecognized (Score=0) in 8 ms
+[2026-10-26 13:58:12.679] Fingerprint touch: DBIdentify ret=0, fid=1737, score=235 in 5ms
+[2026-10-26 13:58:12.681] Native 1:N Match SUCCESS: ArrayIndex=1736, Score=235, Personnel=1291 in 5 ms
+[2026-10-26 13:58:15.934] Fingerprint touch: DBIdentify ret=0, fid=1737, score=507 in 8ms
+[2026-10-26 13:58:15.935] Native 1:N Match SUCCESS: ArrayIndex=1736, Score=507, Personnel=1291 in 8 ms
+[2026-10-26 13:58:19.204] Fingerprint touch: DBIdentify ret=0, fid=1737, score=557 in 5ms
+[2026-10-26 13:58:19.205] Native 1:N Match SUCCESS: ArrayIndex=1736, Score=557, Personnel=1291 in 5 ms
+[2026-10-26 13:58:24.799] Fingerprint touch: DBIdentify ret=0, fid=1737, score=351 in 10ms
+[2026-10-26 13:58:24.800] Native 1:N Match SUCCESS: ArrayIndex=1736, Score=351, Personnel=1291 in 10 ms
+[2026-10-26 13:58:31.789] SyncTemplates: Added 1890/1890 templates into native DB cache in 150 ms. (First item: blobLen=1084, ret=0, err='')
+[2026-10-26 13:59:04.129] Fingerprint touch: DBIdentify ret=0, fid=10, score=244 in 8ms
+[2026-10-26 13:59:04.130] Native 1:N Match SUCCESS: ArrayIndex=9, Score=244, Personnel=1291 in 8 ms
+[2026-10-26 13:59:09.551] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 7ms
+[2026-10-26 13:59:09.553] Native 1:N Match: Unrecognized (Score=0) in 7 ms
+[2026-10-26 13:59:12.153] Fingerprint touch: DBIdentify ret=-17, fid=0, score=0 in 10ms
+[2026-10-26 13:59:12.154] Native 1:N Match: Unrecognized (Score=0) in 10 ms
+[2026-10-26 13:59:14.950] Fingerprint touch: DBIdentify ret=0, fid=10, score=223 in 8ms
+[2026-10-26 13:59:14.951] Native 1:N Match SUCCESS: ArrayIndex=9, Score=223, Personnel=1291 in 8 ms
+[2026-10-26 13:59:18.255] Fingerprint touch: DBIdentify ret=0, fid=5, score=435 in 9ms
+[2026-10-26 13:59:18.255] Native 1:N Match SUCCESS: ArrayIndex=4, Score=435, Personnel=1291 in 9 ms
+[2026-10-26 14:04:56.964] SyncTemplates: Added 1890/1890 templates into native DB cache in 165 ms. (First item: blobLen=1084, ret=0, err='')
+[2026-10-26 14:05:00.007] Fingerprint touch: DBIdentify ret=0, fid=954, score=632 in 7ms
+[2026-10-26 14:05:00.008] Native 1:N Match SUCCESS: ArrayIndex=953, Score=632, Personnel=1291 in 7 ms
+[2026-10-26 14:05:27.083] SyncTemplates: Added 1890/1890 templates into native DB cache in 95 ms. (First item: blobLen=1176, ret=0, err='')
+[2026-10-26 14:08:41.737] Program.Main started.
+[2026-10-26 14:08:41.888] Form1_Load started.
+[2026-10-26 14:08:41.904] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 14:08:41.904] AutoInit starting...
+[2026-10-26 14:08:41.922] zkfp2.Init returned: 0
+[2026-10-26 14:08:41.922] zkfp2.GetDeviceCount: 1
+[2026-10-26 14:08:43.287] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 14:08:43.287] Capture thread started. Dimensions: 300x400
+[2026-10-26 14:08:43.296] Form1_Load finished. Initialized: True
+[2026-10-26 14:12:16.109] Program.Main started.
+[2026-10-26 14:12:16.257] Form1_Load started.
+[2026-10-26 14:12:16.269] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 14:12:16.276] AutoInit starting...
+[2026-10-26 14:12:16.292] zkfp2.Init returned: 0
+[2026-10-26 14:12:16.293] zkfp2.GetDeviceCount: 1
+[2026-10-26 14:12:17.659] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 14:12:17.659] Capture thread started. Dimensions: 300x400
+[2026-10-26 14:12:17.666] Form1_Load finished. Initialized: True
+[2026-10-26 15:13:25.443] Program.Main started.
+[2026-10-26 15:13:25.623] Form1_Load started.
+[2026-10-26 15:13:25.643] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 15:13:25.648] AutoInit starting...
+[2026-10-26 15:13:25.675] zkfp2.Init returned: 0
+[2026-10-26 15:13:25.675] zkfp2.GetDeviceCount: 1
+[2026-10-26 15:13:27.007] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 15:13:27.007] Capture thread started. Dimensions: 300x400
+[2026-10-26 15:13:27.022] Form1_Load finished. Initialized: True
+[2026-10-26 15:14:29.003] Program.Main started.
+[2026-10-26 15:14:29.137] Form1_Load started.
+[2026-10-26 15:14:29.155] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 15:14:29.169] AutoInit starting...
+[2026-10-26 15:14:29.176] zkfp2.Init returned: 0
+[2026-10-26 15:14:29.176] zkfp2.GetDeviceCount: 1
+[2026-10-26 15:14:30.523] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 15:14:30.523] Capture thread started. Dimensions: 300x400
+[2026-10-26 15:14:30.534] Form1_Load finished. Initialized: True
+[2026-10-26 15:17:20.728] Program.Main started.
+[2026-10-26 15:17:20.892] Form1_Load started.
+[2026-10-26 15:17:20.902] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 15:17:20.911] AutoInit starting...
+[2026-10-26 15:17:20.923] zkfp2.Init returned: 0
+[2026-10-26 15:17:20.923] zkfp2.GetDeviceCount: 1
+[2026-10-26 15:17:22.211] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 15:17:22.211] Capture thread started. Dimensions: 300x400
+[2026-10-26 15:17:22.218] Form1_Load finished. Initialized: True
+[2026-10-26 15:24:13.935] Program.Main started.
+[2026-10-26 15:24:14.101] Form1_Load started.
+[2026-10-26 15:24:14.116] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 15:24:14.120] AutoInit starting...
+[2026-10-26 15:24:14.136] zkfp2.Init returned: 0
+[2026-10-26 15:24:14.136] zkfp2.GetDeviceCount: 1
+[2026-10-26 15:24:15.474] Detected device: Model=Live20R, Serial=1972261800062, Manufacturer=ZKTeco Inc.
+[2026-10-26 15:24:15.475] Capture thread started. Dimensions: 300x400
+[2026-10-26 15:24:15.482] Form1_Load finished. Initialized: True
+[2026-10-26 15:26:00.371] SyncTemplates: Added 1894/1894 templates into native DB cache in 104 ms. (First item: blobLen=1288, ret=0, err='')
+[2026-10-26 15:26:50.821] SyncTemplates: Added 1890/1890 templates into native DB cache in 107 ms. (First item: blobLen=1176, ret=0, err='')
+[2026-10-26 15:27:20.943] SyncTemplates: Added 1890/1890 templates into native DB cache in 76 ms. (First item: blobLen=1054, ret=0, err='')
+[2026-10-26 19:23:29.313] Program.Main started.
+[2026-10-26 19:23:29.606] Form1_Load started.
+[2026-10-26 19:23:29.666] WebServer successfully started on http://127.0.0.1:15270/ZK_Finger/
+[2026-10-26 19:23:29.672] AutoInit starting...
+[2026-10-26 19:23:30.242] zkfp2.Init returned: -1
+[2026-10-26 19:23:30.242] Form1_Load finished. Initialized: False
+[2026-10-26 19:23:33.250] AutoInit starting...
+[2026-10-26 19:23:33.256] zkfp2.Init returned: -1
+[2026-10-26 19:23:36.269] AutoInit starting...
+[2026-10-26 19:23:36.271] zkfp2.Init returned: -1
+[2026-10-26 19:23:39.276] AutoInit starting...
+[2026-10-26 19:23:39.284] zkfp2.Init returned: -1
+[2026-10-26 19:23:42.298] AutoInit starting...
+[2026-10-26 19:23:42.302] zkfp2.Init returned: -1
+[2026-10-26 19:23:45.316] AutoInit starting...
+[2026-10-26 19:23:45.321] zkfp2.Init returned: -1
+[2026-10-26 19:23:48.334] AutoInit starting...
+[2026-10-26 19:23:48.334] zkfp2.Init returned: -1
+[2026-10-26 19:23:51.346] AutoInit starting...
+[2026-10-26 19:23:51.351] zkfp2.Init returned: -1
+[2026-10-26 19:23:54.368] AutoInit starting...
+[2026-10-26 19:23:54.374] zkfp2.Init returned: -1
+[2026-10-26 19:23:57.384] AutoInit starting...
+[2026-10-26 19:23:57.389] zkfp2.Init returned: -1
+[2026-10-26 19:23:59.592] Program.Main finished.

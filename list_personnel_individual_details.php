@@ -421,7 +421,8 @@
       </section>
       
       
-      <?php include('footer.php'); ?>
+      <?php include('update_shift_single_modal.php'); ?>
+<?php include('footer.php'); ?>
       
     </div>
 
