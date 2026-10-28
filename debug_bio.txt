@@ -1,0 +1,190 @@
+2026-10-06 16:13:23 - POST received: Array
+(
+    [RFTag_id] => BIO-000677
+    [log_source] => BIO
+)
+
+2026-10-06 16:13:23 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-06 16:47:46 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-06 16:47:46 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-06 16:48:02 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-06 16:48:06 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-06 16:48:09 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 10:59:56 - POST received: Array
+(
+    [RFTag_id] => BIO-000677
+    [log_source] => BIO
+)
+
+2026-10-07 10:59:56 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 11:00:11 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 11:00:11 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 11:20:24 - POST received: Array
+(
+    [RFTag_id] => BIO-000677
+    [log_source] => BIO
+)
+
+2026-10-07 11:20:24 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 11:20:29 - POST received: Array
+(
+    [RFTag_id] => BIO-000677
+    [log_source] => BIO
+)
+
+2026-10-07 11:20:34 - POST received: Array
+(
+    [RFTag_id] => BIO-000677
+    [log_source] => BIO
+)
+
+2026-10-07 11:50:56 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 11:50:56 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 11:58:43 - POST received: Array
+(
+    [RFTag_id] => BIO-000014
+    [log_source] => BIO
+)
+
+2026-10-07 11:58:43 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 12:07:56 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 12:07:56 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 12:15:14 - POST received: Array
+(
+    [RFTag_id] => BIO-000678
+    [log_source] => BIO
+)
+
+2026-10-07 12:15:14 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 12:18:47 - POST received: Array
+(
+    [RFTag_id] => BIO-000679
+    [log_source] => BIO
+)
+
+2026-10-07 12:18:47 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 12:19:21 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 12:19:21 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 12:20:45 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 12:20:45 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 14:25:42 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 14:25:42 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 14:27:04 - POST received: Array
+(
+    [RFTag_id] => BIO-000142
+    [log_source] => BIO
+)
+
+2026-10-07 14:27:04 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 16:35:19 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 16:35:19 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 16:40:23 - POST received: Array
+(
+    [RFTag_id] => BIO-000142
+    [log_source] => BIO
+)
+
+2026-10-07 16:40:23 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 16:41:12 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 16:41:12 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 17:02:45 - POST received: Array
+(
+    [RFTag_id] => BIO-000140
+    [log_source] => BIO
+)
+
+2026-10-07 17:02:45 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 17:03:14 - POST received: Array
+(
+    [RFTag_id] => BIO-000142
+    [log_source] => BIO
+)
+
+2026-10-07 17:03:14 - Output: {"status":"success","flow":"IN","sound":"valid"}
+2026-10-07 17:13:12 - POST received: Array
+(
+    [RFTag_id] => BIO-000679
+    [log_source] => BIO
+)
+
+2026-10-07 17:13:12 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 19:04:53 - POST received: Array
+(
+    [RFTag_id] => BIO-000678
+    [log_source] => BIO
+)
+
+2026-10-07 19:04:53 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 19:05:00 - POST received: Array
+(
+    [RFTag_id] => BIO-000142
+    [log_source] => BIO
+)
+
+2026-10-07 19:05:00 - Output: {"status":"success","flow":"OUT","sound":"valid"}
+2026-10-07 19:05:10 - POST received: Array
+(
+    [RFTag_id] => BIO-000142
+    [log_source] => BIO
+)
+

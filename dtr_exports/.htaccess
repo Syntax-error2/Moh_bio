@@ -1,0 +1,7 @@
+# Secure DTR Exports Folder
+# Prevent directory listing
+Options -Indexes
+
+<FilesMatch "\.dtr$">
+    # Allow local PHP scripts to access
+</FilesMatch>
