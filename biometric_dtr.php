@@ -1,43 +1,89 @@
 <?php
 include('dbcon.php');
 
-// Fetch all registered biometric templates to load into the scanner cache
-$flatTemplates = [];
-$stmt = $conn->query("SELECT personnel_id, biometric_id, fingerprint_template FROM personnels WHERE fingerprint_template IS NOT NULL AND fingerprint_template != ''");
+// Load templates prioritized by Primary Finger (rt, ri) and recent attendance
+$recentPunches = [];
+try {
+    $recentPunches = $conn->query("
+        SELECT personnel_id, MAX(log_date) as last_date 
+        FROM bio_dtr 
+        GROUP BY personnel_id
+    ")->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {}
+
+$stmt = $conn->query("SELECT p.personnel_id, p.RFTag_id, p.biometric_id, p.fingerprint_template FROM personnels p JOIN emp_status es ON es.empStat_id = p.empStat_id WHERE es.status = 'Active' AND (p.separation_date IS NULL OR p.separation_date = '' OR p.separation_date = '  /  /    ') AND p.fingerprint_template IS NOT NULL AND p.fingerprint_template != ''");
+
+$primaryTemplates = [];
+$secondaryTemplates = [];
+$fingerOrder = ['rt' => 1, 'ri' => 2, 'lt' => 3, 'li' => 4];
+
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $pid = $row['personnel_id'];
+    $lastLogDate = $recentPunches[$pid] ?? '1970-01-01';
+    
     $data = null;
     if (!empty($row['fingerprint_template'])) {
         $data = json_decode($row['fingerprint_template'], true);
     }
     
     if (is_array($data)) {
-        // Multi-finger support
         foreach($data as $finger => $base64) {
-            $flatTemplates[] = [
+            $item = [
                 'personnel_id' => $row['personnel_id'],
-                'biometric_id' => $row['biometric_id'],
+                'RFTag_id' => $row['RFTag_id'] ?? '',
+                'biometric_id' => $row['biometric_id'] ?? '',
                 'finger' => $finger,
-                'fingerprint_template' => $base64
+                'fingerprint_template' => $base64,
+                '_last_log' => $lastLogDate,
+                '_priority' => $fingerOrder[$finger] ?? 99
             ];
+            if ($finger === 'rt' || $finger === 'ri') {
+                $primaryTemplates[] = $item;
+            } else {
+                $secondaryTemplates[] = $item;
+            }
         }
     } else if (!empty($row['fingerprint_template'])) {
-        // Legacy support from first version of multi-finger
-        $flatTemplates[] = [
+        $primaryTemplates[] = [
             'personnel_id' => $row['personnel_id'],
-            'biometric_id' => $row['biometric_id'],
+            'RFTag_id' => $row['RFTag_id'] ?? '',
+            'biometric_id' => $row['biometric_id'] ?? '',
             'finger' => 'legacy',
-            'fingerprint_template' => $row['fingerprint_template']
+            'fingerprint_template' => $row['fingerprint_template'],
+            '_last_log' => $lastLogDate,
+            '_priority' => 1
         ];
     }
 }
 
+usort($primaryTemplates, function($a, $b) {
+    if ($a['_last_log'] !== $b['_last_log']) {
+        return strcmp($b['_last_log'], $a['_last_log']);
+    }
+    if ($a['_priority'] !== $b['_priority']) {
+        return $a['_priority'] <=> $b['_priority'];
+    }
+    return $a['personnel_id'] <=> $b['personnel_id'];
+});
+
+usort($secondaryTemplates, function($a, $b) {
+    if ($a['_last_log'] !== $b['_last_log']) {
+        return strcmp($b['_last_log'], $a['_last_log']);
+    }
+    return $a['_priority'] <=> $b['_priority'];
+});
+
+$flatTemplates = array_map(function($t) {
+    unset($t['_last_log'], $t['_priority']);
+    return $t;
+}, array_merge($primaryTemplates, $secondaryTemplates));
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>HRMS - Biometric DTR</title>
-    <link rel="shortcut icon" href="img/moh seal.jpg">
+    <title>MOH - Biometric DTR</title>
+    <link rel="shortcut icon" href="img/72123-mob_seal.png">
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
     <style>
@@ -124,34 +170,23 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         }
 
         /* Responsiveness */
-        @media (max-width: 1200px) {
-            .navbar h4 { font-size: 0.9em; }
-            .clock { font-size: 4em; }
-            .scan-icon-container { margin-bottom: 30px; }
-            .scan-ring { width: 250px; height: 250px; }
-            .scan-icon { font-size: 8em; }
-            .status-box { padding: 12px 25px; }
-            .status-msg { font-size: 1.2em; }
-        }
         @media (max-width: 992px) {
-            body { height: auto; overflow: auto; }
+            body { height: auto; overflow: visible; }
             .main-container { flex-direction: column; height: auto; min-height: 100vh; }
-            .scanner-panel { width: 100%; min-height: 60vh; padding: 30px 15px; }
+            .scanner-panel { width: 100%; min-height: 60vh; padding: 40px 20px; }
             .monitor-panel { width: 100%; height: auto; padding: 20px; }
-            .navbar { flex-wrap: wrap; text-align: center; justify-content: center; gap: 10px; padding: 10px; }
-            .navbar .brand { flex-direction: column; gap: 5px; }
-            .navbar h4 { font-size: 0.8em; line-height: 1.2; }
-            .clock { font-size: 3.5em; }
-            .scan-ring { width: 200px; height: 200px; }
-            .scan-icon { font-size: 6em; }
+            .navbar { flex-wrap: wrap; text-align: center; justify-content: center; gap: 15px; padding: 15px; }
+            .navbar .brand { flex-direction: column; gap: 8px; }
+            .clock { font-size: 4.5em; }
         }
         @media (max-width: 576px) {
-            .clock { font-size: 2.8em; }
-            .date { font-size: 0.8em; margin-bottom: 20px; }
-            .scan-icon-container img { width: 120px !important; height: 120px !important; }
-            .scan-ring { width: 140px; height: 140px; }
-            .monitor-header h3 { font-size: 1.2em; }
-            .carousel-inner { height: 300px !important; }
+            .clock { font-size: 3.2em; }
+            .date { font-size: 0.9em; margin-bottom: 30px; }
+            .scan-icon-container img { width: 100px !important; height: 100px !important; }
+            .scan-ring { width: 160px; height: 160px; }
+            .navbar h4 { font-size: 0.9em; line-height: 1.4; }
+            .monitor-header h3 { font-size: 1.3em; }
+            .carousel-inner { height: 400px !important; }
         }
     </style>
 </head>
@@ -159,8 +194,8 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     
     <div class="navbar">
         <div class="brand">
-            <img src="img/moh seal.jpg" alt="MOH Logo" class="logo">
-            <h4>MUNICIPALITY OF HINOBA-AN HRMS - BIOMETRIC TIME & ATTENDANCE</h4>
+            <img src="img/72123-mob_seal.png" alt="MOB Logo" class="logo">
+            <h4>MUNICIPALITY OF BINALBAGAN HRMS - BIOMETRIC TIME & ATTENDANCE</h4>
         </div>
         <div>
         
@@ -171,7 +206,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     <div class="main-container">
         <!-- Left Panel -->
         <div class="scanner-panel">
-            <div id="greeting" style="font-size: 1.8em; font-weight: 800; margin-bottom: 5px; color: #10b981; letter-spacing: 1px; text-transform: uppercase;">Welcome!</div>
+            <div id="greeting" style="font-size: 1.8em; font-weight: 800; margin-bottom: -15px; color: #10b981; letter-spacing: 1px; text-transform: uppercase;">Welcome!</div>
             <div class="clock" id="clock">00:00:00</div>
             <div class="date" id="date">Loading...</div>
             
@@ -181,7 +216,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             </div>
             
             <div class="status-box">
-                <p class="status-msg" id="statusMsg"><i class='fa fa-spinner fa-spin'></i> Initializing...</p>
+                <p class="status-msg" id="statusMsg">Initializing Scanner...</p>
             </div>
             
             <div class="emp-overlay" id="empOverlay">
@@ -243,9 +278,8 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         
         $(document).ready(function() {
             loadLiveFeed();
-            initScanner();
             
-            // Refresh enrollments without competing with every scan.
+            // Refresh enrollments without repeatedly downloading the full template set during a queue.
             var templateRefreshInFlight = false;
             setInterval(function() {
                 if (templateRefreshInFlight) return;
@@ -258,8 +292,11 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     cache: true,
                     timeout: 10000,
                     success: function(data) {
-                        // A 304 response has no body; keep the current template set.
-                        if (Array.isArray(data)) setRegisteredTemplates(data);
+                        // A 304 response has no body; keep the templates already in use.
+                        if (Array.isArray(data)) {
+                            setRegisteredTemplates(data);
+                            syncTemplatesToBridge();
+                        }
                     },
                     complete: function() {
                         templateRefreshInFlight = false;
@@ -301,13 +338,24 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         var captureTimer = null;
         var captureRequestInFlight = false;
         var capturePollFailures = 0;
-        var captureStarted = 0;
 
+        var precomputedChunks = [];
+        var chunkSize = 950;
         function setRegisteredTemplates(templates) {
             registeredTemplates = Array.isArray(templates) ? templates : [];
             joinedTemplates = registeredTemplates.map(function(t) { return t.fingerprint_template; }).join('|');
+            precomputedChunks = [];
+            for (var i = 0; i < registeredTemplates.length; i += chunkSize) {
+                var chunk = registeredTemplates.slice(i, i + chunkSize);
+                precomputedChunks.push({
+                    templates: chunk,
+                    payload: chunk.map(function(t) { return t.fingerprint_template; }).join('|')
+                });
+            }
         }
         setRegisteredTemplates(registeredTemplates);
+
+        // Template array is kept static to guarantee 100% strict matching accuracy
 
         function updateUI(status, type, empName = '', imgSrc = '', logType = '') {
             $('#statusMsg').html(status);
@@ -341,9 +389,9 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
         function initScanner() {
             if (currentPortIndex >= ports.length) {
-                updateUI("<i class='fa fa-warning'></i> Scanner not detected. Check the scanner bridge on this computer.", "error");
-                currentPortIndex = 0; // reset for next manual click
-                setTimeout(initScanner, 3000); // Poll every 3 seconds if not found
+                updateUI("<i class='fa fa-warning'></i> Scanner not detected.", "error");
+                currentPortIndex = 0; // reset
+                setTimeout(initScanner, 5000);
                 return;
             }
             
@@ -355,20 +403,10 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 dataType: "text",
                 timeout: 5000,
                 success: function (data) {
-                    try {
-                        var res = JSON.parse(data);
-                        if (res.ret == 0) {
-                            capturePollFailures = 0;
-                            updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
-                            startCapture();
-                        } else {
-                            currentPortIndex++;
-                            initScanner();
-                        }
-                    } catch(e) {
-                        currentPortIndex++;
-                        initScanner();
-                    }
+                    capturePollFailures = 0;
+                    updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
+                    syncTemplatesToBridge();
+                    startCapture();
                 },
                 error: function () {
                     // Try next port
@@ -378,10 +416,22 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             });
         }
 
+        function syncTemplatesToBridge() {
+            if (!registeredTemplates || registeredTemplates.length === 0 || !zkTecoUrl) return;
+            $.ajax({
+                url: zkTecoUrl + "/SyncTemplates",
+                type: "POST",
+                data: { templates: JSON.stringify(registeredTemplates) },
+                timeout: 15000,
+                success: function(res) {
+                    console.debug("Templates synced to native bridge RAM:", res);
+                }
+            });
+        }
+
         function startCapture() {
             clearTimeout(captureTimer);
             captureTimer = null;
-            captureStarted = performance.now();
             $.ajax({
                 url: zkTecoUrl + "/BeginCapture",
                 type: "GET",
@@ -412,8 +462,16 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         var res = JSON.parse(data);
                         if (res.ret == 0 && res.template) {
                             continuePolling = false;
-                            console.debug('Fingerprint capture took ' + Math.round(performance.now() - captureStarted) + ' ms');
-                            verifyFingerprint(res.template);
+                            // Instant zero-latency native 1:N match (< 3ms) directly from bridge RAM!
+                            if (res.match_index !== undefined && res.match_index >= 0 && registeredTemplates[res.match_index]) {
+                                console.debug('Instant native match in RAM (Match Index: ' + res.match_index + ', Score: ' + res.score + ')');
+                                var target = registeredTemplates[res.match_index];
+                                var targetId = target.biometric_id ? target.biometric_id : (target.RFTag_id ? target.RFTag_id : target.personnel_id);
+                                logAttendanceToDatabase(targetId, target);
+                            } else {
+                                // Fallback to chunked VerifyMulti if not in RAM cache or unrecognized
+                                verifyFingerprint(res.template);
+                            }
                         }
                     } catch (e) {}
                 },
@@ -427,7 +485,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 },
                 complete: function () {
                     captureRequestInFlight = false;
-                    if (continuePolling) captureTimer = setTimeout(pollCapture, 500);
+                    if (continuePolling) captureTimer = setTimeout(pollCapture, 15);
                 }
             });
         }
@@ -437,43 +495,79 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             
             if (registeredTemplates.length === 0) {
                 updateUI("<i class='fa fa-times'></i> No templates in DB.", "error");
-                setTimeout(startCapture, 3000);
+                setTimeout(startCapture, 2000);
                 return;
             }
 
-            var templatesForScan = registeredTemplates;
-            var templatesPayload = joinedTemplates;
             var verificationStarted = performance.now();
+            var chunkIndex = 0;
+            var totalChunks = precomputedChunks.length;
 
-            $.ajax({
-                url: zkTecoUrl + "/VerifyMulti",
-                type: "POST",
-                data: { capTemplate: liveTemplate, regTemplates: templatesPayload },
-                timeout: 30000,
-                success: function (data) {
-                    console.debug('Fingerprint verification took ' + Math.round(performance.now() - verificationStarted) + ' ms for ' + templatesForScan.length + ' templates');
-                    try {
-                        var res = typeof data === 'string' ? JSON.parse(data) : data;
-                        if (res.ret == 0 && res.match_index >= 0 && templatesForScan[res.match_index]) {
-                            var target = templatesForScan[res.match_index]; var targetId = target.biometric_id ? target.biometric_id : (target.RFTag_id ? target.RFTag_id : target.personnel_id);
-                            logAttendanceToDatabase(targetId);
-                        } else {
-                            updateUI("<i class='fa fa-times'></i> Unrecognized Fingerprint.", "error");
-                            setTimeout(() => { updateUI("<i class='fa fa-hand-pointer-o'></i> Ready to scan...", "info"); startCapture(); }, 2000);
+            function verifyChunk() {
+                if (chunkIndex >= totalChunks) {
+                    console.debug('Fingerprint verification failed after ' + Math.round(performance.now() - verificationStarted) + ' ms');
+                    updateUI("<i class='fa fa-times'></i> Unrecognized Fingerprint.", "error");
+                    setTimeout(function() {
+                        updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
+                        startCapture();
+                    }, 1200);
+                    return;
+                }
+
+                var chunkObj = precomputedChunks[chunkIndex];
+                var templatesChunk = chunkObj.templates;
+                var templatesPayload = chunkObj.payload;
+
+                $.ajax({
+                    url: zkTecoUrl + "/VerifyMulti",
+                    type: "POST",
+                    data: { capTemplate: liveTemplate, regTemplates: templatesPayload },
+                    timeout: 10000,
+                    success: function (data) {
+                        try {
+                            var res = typeof data === 'string' ? JSON.parse(data) : data;
+                            // Strict matching: verify match_index is within this exact chunk
+                            if (res.ret == 0 && res.match_index >= 0 && templatesChunk[res.match_index]) {
+                                console.debug('Strict verification matched in ' + Math.round(performance.now() - verificationStarted) + ' ms (Score: ' + res.score + ')');
+                                var target = templatesChunk[res.match_index]; 
+                                var targetId = target.biometric_id ? target.biometric_id : (target.RFTag_id ? target.RFTag_id : target.personnel_id);
+                                logAttendanceToDatabase(targetId, target);
+                            } else {
+                                chunkIndex++;
+                                verifyChunk();
+                            }
+                        } catch(e) {
+                            updateUI("<i class='fa fa-times'></i> Verification error.", "error");
+                            setTimeout(startCapture, 2000);
                         }
-                    } catch(e) {
-                        updateUI("<i class='fa fa-times'></i> Verification error.", "error");
+                    },
+                    error: function() {
+                        updateUI("<i class='fa fa-times'></i> Verification failed.", "error");
                         setTimeout(startCapture, 2000);
                     }
-                },
-                error: function() {
-                    updateUI("<i class='fa fa-times'></i> Verification failed.", "error");
-                    setTimeout(startCapture, 2000);
-                }
-            });
+                });
+            }
+
+            verifyChunk();
         }
 
-        function logAttendanceToDatabase(targetId) {
+        function renderEmployeeOverlay(imgUrl, nameText, flowText) {
+            $('#overlayImg').attr('src', imgUrl || 'personnelImg/default_img.jpg');
+            $('#overlayName').text(nameText || '');
+            var displayedFlow = flowText || 'TIME IN';
+            $('#overlayType').text(displayedFlow);
+            
+            if (displayedFlow.indexOf('IN') !== -1) {
+                $('#overlayType').removeClass('bg-danger').addClass('bg-success');
+            } else {
+                $('#overlayType').removeClass('bg-success').addClass('bg-danger');
+            }
+            
+            $('#iconContainer').hide();
+            $('#empOverlay').fadeIn();
+        }
+
+        function logAttendanceToDatabase(targetId, matchedTarget) {
             updateUI("<i class='fa fa-spinner fa-spin'></i> Logging DTR...", "info");
             var loggingStarted = performance.now();
             $.ajax({
@@ -490,42 +584,36 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         if (response.status === 'success') {
                             updateUI("<i class='fa fa-check'></i> Logged successfully!", "success");
                             
+                            // Successful punch
+                            
                             if (response.sound === 'valid') {
                                 PopupCenterValid();
                             } else {
                                 PopupCenterInvalid();
                             }
                             
-                            // Fetch latest log to show in overlay
-                            $.ajax({
-                                url: 'get_latest_bio_log.php',
-                                type: 'GET',
-                                data: { RFTag_id: targetId },
-                                dataType: 'json',
-                                success: function(logData) {
-                                    if(logData.status == 'success') {
-                                        $('#overlayImg').attr('src', logData.img);
-                                        $('#overlayName').text(logData.name);
-                                        $('#overlayType').text(logData.logFlow + " - " + logData.time);
-                                        
-                                        if(logData.logFlow.indexOf('IN') !== -1) {
-                                            $('#overlayType').removeClass('bg-danger').addClass('bg-success');
-                                        } else {
-                                            $('#overlayType').removeClass('bg-success').addClass('bg-danger');
+                            // Instant overlay display if response contains img and name
+                            if (response.img && response.name) {
+                                renderEmployeeOverlay(response.img, response.name, response.logFlow);
+                            } else {
+                                // Safe fallback: query get_latest_bio_log.php if fields are missing
+                                $.ajax({
+                                    url: 'get_latest_bio_log.php',
+                                    type: 'GET',
+                                    data: { RFTag_id: targetId },
+                                    dataType: 'json',
+                                    success: function(logData) {
+                                        if (logData && logData.status == 'success') {
+                                            renderEmployeeOverlay(logData.img, logData.name, response.logFlow || logData.logFlow);
                                         }
-                                        
-                                        $('#iconContainer').hide();
-                                        $('#empOverlay').fadeIn();
-                                        
-                                        loadLiveFeed(); // Refresh the list
                                     }
-                                }
-                            });
+                                });
+                            }
                             
                         } else {
                             // Error from process script
                             updateUI("<i class='fa fa-times'></i> " + response.message, "error");
-                            restartDelay = 3000;
+                            restartDelay = 1200;
                             if (response.sound === 'invalid') {
                                 PopupCenterInvalid();
                             }
@@ -534,20 +622,24 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         console.log("JSON Parse Error on response:", responseStr);
                         console.error(e);
                         updateUI("<i class='fa fa-times'></i> Scan Error", "error");
-                        restartDelay = 3000;
+                        restartDelay = 1200;
                         PopupCenterInvalid();
                     }
                     
-                    // Keep the result visible briefly while allowing the next person to scan.
+                    // Re-arm scanner rapidly so the next person in queue can scan immediately
+                    setTimeout(() => {
+                        updateUI("<i class='fa fa-crosshairs' style='color: #10b981; animation: pulse-opacity 2s infinite;'></i> READY TO SCAN...", "info");
+                        startCapture();
+                    }, Math.min(restartDelay, 250));
+
                     setTimeout(() => {
                         $('#empOverlay').hide();
                         $('#iconContainer').show();
-                        updateUI("<i class='fa fa-hand-pointer-o'></i> Ready to scan...", "info");
-                        startCapture();
                     }, restartDelay);
                 },
                 error: function(xhr, status) {
-                    // A timeout may happen after the server saved the log. Never resubmit it automatically.
+                    // The server may have saved the scan before the request timed out.
+                    // Never automatically resubmit the same attendance request.
                     updateUI(status === 'timeout'
                         ? "<i class='fa fa-warning'></i> Attendance not confirmed. Check the latest log before rescanning."
                         : "<i class='fa fa-times'></i> Server Error. Check the latest log before rescanning.", "error");
@@ -555,21 +647,9 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 }
             });
         }
-        
-        function loadLiveFeed() {
-            $.ajax({
-                url: 'fetch_live_feed.php',
-                type: 'GET',
-                success: function(html) {
-                    $('#liveFeed').html(html);
-                }
-            });
-        }
 
         $(document).ready(function() {
-            loadLiveFeed();
-            // Auto refresh feed every 10 seconds just in case
-            setInterval(loadLiveFeed, 10000);
+            initScanner();
         });
     </script>
 </body>

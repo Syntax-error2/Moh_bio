@@ -4,6 +4,7 @@
 <?php
 
 include('session.php');  
+require_once __DIR__ . '/dtr_day_status.php';
 //error_reporting(0);
 
   $get_RFTag_id=$_GET['RFTag_id'];
@@ -246,12 +247,16 @@ $studData_row=$studData_query->fetch();
     // Fetch all logs for the month
     $startDate = sprintf("%04d-%02d-01", $selectedYYYY, $selectedMM);
     $endDate = sprintf("%04d-%02d-%02d", $selectedYYYY, $selectedMM, $MMmaxDay - 1);
+    $legacyMonth = sprintf('%02d/%%/%04d', $selectedMM, $selectedYYYY);
+    $legacyMonthShort = (int)$selectedMM . '/%/' . $selectedYYYY;
     
     $allBioLogs = [];
-    $bio_stmt = $conn->prepare("SELECT log_date, time_in, time_out FROM bio_dtr WHERE personnel_id = ? AND log_date BETWEEN ? AND ? ORDER BY time_in ASC");
-    $bio_stmt->execute([$studData_row['personnel_id'], $startDate, $endDate]);
-    while ($r = $bio_stmt->fetch(PDO::FETCH_ASSOC)) {
-        $allBioLogs[$r['log_date']][] = $r;
+    if (!empty($studData_row['biometric_id'])) {
+        $bio_stmt = $conn->prepare("SELECT log_date, time_in, time_out FROM bio_dtr WHERE personnel_id = ? AND log_date BETWEEN ? AND ? ORDER BY time_in ASC");
+        $bio_stmt->execute([$studData_row['personnel_id'], $startDate, $endDate]);
+        while ($r = $bio_stmt->fetch(PDO::FETCH_ASSOC)) {
+            $allBioLogs[$r['log_date']][] = $r;
+        }
     }
     
     // Fetch schedule
@@ -259,59 +264,46 @@ $studData_row=$studData_query->fetch();
     $sched_stmt = $conn->prepare("SELECT * FROM time_schedules WHERE do_id = ? AND shift_id = ?");
     $sched_stmt->execute([$studData_row['do_id'], $studData_row['shift_id']]);
     while ($r = $sched_stmt->fetch(PDO::FETCH_ASSOC)) {
-        $allSchedules[$r['day']] = $r;
+        $allSchedules[ucfirst(strtolower(trim($r['day'])))] = $r;
     }
+    $currentScheduleKey = $studData_row['do_id'] . ':' . $studData_row['shift_id'];
+    $schedulesByAssignment = [$currentScheduleKey => $allSchedules];
     
     // Fetch activity calendar
     $allHolidays = [];
-    $hol_stmt = $conn->prepare("SELECT completeDate, event_title, status FROM activity_calendar WHERE completeDate BETWEEN ? AND ?");
+    $hol_stmt = $conn->prepare("SELECT completeDate, event_title, act_type, status FROM activity_calendar WHERE completeDate BETWEEN ? AND ?");
     $hol_stmt->execute([$startDate, $endDate]);
     while ($r = $hol_stmt->fetch(PDO::FETCH_ASSOC)) {
         $allHolidays[$r['completeDate']][] = $r;
     }
     
-    // Fetch approved leaves
-        // Fetch approved overtime requests
-    $allOvertime = [];
-    $startDateDB = $startDate;
-    $endDateDB = $endDate;
-    $ot_stmt = $conn->prepare("SELECT ot_date FROM personnel_overtime_requests WHERE personnel_id = ? AND ot_date BETWEEN ? AND ?");
-    $ot_stmt->execute([$studData_row['personnel_id'], $startDateDB, $endDateDB]);
-    while ($r = $ot_stmt->fetch(PDO::FETCH_ASSOC)) {
-        $formattedDate = date('m/d/Y', strtotime($r['ot_date']));
-        $allOvertime[$formattedDate] = true;
-    }
+    require_once __DIR__ . '/overtime_dtr.php';
+    $overtimeData = overtimeDtrLoad($conn, $studData_row['personnel_id'], $RFTag_id, $startDate, $endDate);
     
+    // Leave and travel are recorded as dated personnel log remarks.
     $allLeaves = [];
-    $leave_stmt = $conn->prepare("SELECT logDate, remarks FROM personnel_logs WHERE RFTag_id = ? AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ? AND (remarks='Vacation Leave' OR remarks='Sick Leave' OR travel_leave_code != '')");
-    $leave_stmt->execute([$studData_row['RFTag_id'], $startDate, $endDate]);
+    $allLeaveCodes = [];
+    $leave_stmt = $conn->prepare("SELECT logDate, remarks, travel_leave_code FROM personnel_logs WHERE RFTag_id = ? AND (logDate BETWEEN ? AND ? OR logDate LIKE ? OR logDate LIKE ?) AND (COALESCE(travel_leave_code, '') != '' OR (COALESCE(remarks, '') != '' AND remarks NOT IN ('Updated', 'Inserted', '24hrs'))) ORDER BY log_id ASC");
+    $leave_stmt->execute([$RFTag_id, $startDate, $endDate, $legacyMonth, $legacyMonthShort]);
     while ($r = $leave_stmt->fetch(PDO::FETCH_ASSOC)) {
-        $allLeaves[$r['logDate']] = $r['remarks'];
+        $logDateTime = strtotime($r['logDate']);
+        if ($logDateTime === false) continue;
+        $normalizedDate = date('Y-m-d', $logDateTime);
+        if ($normalizedDate < $startDate || $normalizedDate > $endDate) continue;
+        $remarks = trim($r['remarks'] ?? '');
+        $allLeaves[$normalizedDate] = $remarks !== '' ? $remarks : 'Leave/Travel Record';
+        $allLeaveCodes[$normalizedDate] = $r['travel_leave_code'] ?? '';
     }
     // Fetch personnel_logs
     $allPersonnelLogs = [];
-    $p_stmt = $conn->prepare("
-        SELECT logFlow, logTime, late_status, logDate 
-        FROM personnel_logs 
-        WHERE (RFTag_id = ? OR RFTag_id = ?) 
-          AND (
-            (logDate LIKE '%-%' AND logDate BETWEEN ? AND ?) OR 
-            (logDate NOT LIKE '%-%' AND STR_TO_DATE(logDate, '%m/%d/%Y') BETWEEN ? AND ?)
-          )
-          AND (client_ip = '' OR logDate LIKE '%-%')
-    ");
-    $p_stmt->execute([
-        $studData_row['RFTag_id'], 
-        $studData_row['biometric_id'], 
-        $startDate, 
-        $endDate, 
-        $startDate, 
-        $endDate
-    ]);
+    $p_stmt = $conn->prepare("SELECT logFlow, logTime, late_status, logDate, do_id, shift_id FROM personnel_logs WHERE RFTag_id = ? AND (logDate BETWEEN ? AND ? OR logDate LIKE ? OR logDate LIKE ?) ORDER BY log_id ASC");
+    $p_stmt->execute([$RFTag_id, $startDate, $endDate, $legacyMonth, $legacyMonthShort]);
     while ($r = $p_stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Normalize logDate to YYYY-MM-DD for array key
-        $r_date = strpos($r['logDate'], '-') !== false ? $r['logDate'] : date('Y-m-d', strtotime($r['logDate']));
-        $allPersonnelLogs[$r_date][$r['logFlow']] = $r;
+        $logDateTime = strtotime($r['logDate']);
+        if ($logDateTime === false) continue;
+        $normalizedDate = date('Y-m-d', $logDateTime);
+        if ($normalizedDate < $startDate || $normalizedDate > $endDate) continue;
+        $allPersonnelLogs[$normalizedDate][$r['logFlow']] = $r;
     }
     // -------------------------------
     
@@ -320,11 +312,35 @@ $studData_row=$studData_query->fetch();
         $dailyLate=0;
         $dailyUTime=0;
         $dailyOvertime=0;
+        $dailyOvertimeLabel = '';
         $dayPad = str_pad($d, 2, '0', STR_PAD_LEFT);
         $logDateCtr = $selectedYYYY . '-' . $selectedMM . '-' . $dayPad;
         $displayDateCtr = $selectedMM . '/' . $dayPad . '/' . substr($selectedYYYY, 2, 2);
+
+        // Use the office and shift recorded with the punch when an employee's
+        // current assignment differs from the assignment on this report date.
+        $scheduleAssignment = null;
+        foreach (['PM OUT', 'PM IN', 'AM OUT', 'AM IN'] as $flowForSchedule) {
+            $candidate = $allPersonnelLogs[$logDateCtr][$flowForSchedule] ?? null;
+            if ($candidate && !empty($candidate['do_id']) && !empty($candidate['shift_id'])) {
+                $scheduleAssignment = $candidate;
+                break;
+            }
+        }
+        $scheduleOfficeId = $scheduleAssignment['do_id'] ?? $studData_row['do_id'];
+        $scheduleShiftId = $scheduleAssignment['shift_id'] ?? $studData_row['shift_id'];
+        $scheduleKey = $scheduleOfficeId . ':' . $scheduleShiftId;
+        if (!array_key_exists($scheduleKey, $schedulesByAssignment)) {
+            $dayScheduleStmt = $conn->prepare('SELECT * FROM time_schedules WHERE do_id = ? AND shift_id = ?');
+            $dayScheduleStmt->execute([$scheduleOfficeId, $scheduleShiftId]);
+            $schedulesByAssignment[$scheduleKey] = [];
+            while ($scheduleRow = $dayScheduleStmt->fetch(PDO::FETCH_ASSOC)) {
+                $schedulesByAssignment[$scheduleKey][ucfirst(strtolower(trim($scheduleRow['day'])))] = $scheduleRow;
+            }
+        }
+        $allSchedules = $schedulesByAssignment[$scheduleKey];
         
-        $is_biometric = !empty($allBioLogs[$logDateCtr]);
+        $is_biometric = !empty($studData_row['biometric_id']);
         $bio_am_in = false;
         $bio_am_out = false;
         $bio_pm_in = false;
@@ -341,15 +357,54 @@ $studData_row=$studData_query->fetch();
                         $bio_pm_in = ['logTime' => $log['time_in'], 'late_status' => 'on'];
                     }
                 }
+            }
+            foreach($bio_logs as $log) {
                 if (!empty($log['time_out']) && $log['time_out'] != '00:00:00') {
-                    if ($log['time_out'] < '13:00:00' && !$bio_am_out) {
-                        $bio_am_out = ['logTime' => $log['time_out'], 'late_status' => 'on'];
-                    } else if ($log['time_out'] >= '13:00:00' && !$bio_pm_out) {
-                        $bio_pm_out = ['logTime' => $log['time_out'], 'late_status' => 'on'];
+                    $tOut = $log['time_out'];
+                    $tIn = $log['time_in'] ?? '';
+                    if (!empty($tIn) && $tIn != '00:00:00' && $tIn < '12:00:00') {
+                        if ($tOut < '14:00:00' || ($bio_pm_in && $tOut <= $bio_pm_in['logTime'])) {
+                            if (!$bio_am_out) {
+                                $bio_am_out = ['logTime' => $tOut, 'late_status' => 'on'];
+                            }
+                        } else if ($tOut >= '15:00:00') {
+                            if (!$bio_pm_out) {
+                                $bio_pm_out = ['logTime' => $tOut, 'late_status' => 'on'];
+                            }
+                        } else {
+                            if (!$bio_am_out && !$bio_pm_in) {
+                                $bio_am_out = ['logTime' => $tOut, 'late_status' => 'on'];
+                            } else if (!$bio_pm_out) {
+                                $bio_pm_out = ['logTime' => $tOut, 'late_status' => 'on'];
+                            }
+                        }
+                    } else {
+                        if ($tOut < '14:00:00' && (!$bio_pm_in || $tOut <= $bio_pm_in['logTime']) && !$bio_am_out) {
+                            $bio_am_out = ['logTime' => $tOut, 'late_status' => 'on'];
+                        } else if (!$bio_pm_out) {
+                            $bio_pm_out = ['logTime' => $tOut, 'late_status' => 'on'];
+                        }
                     }
                 }
             }
         }
+        $hasAnyLogs = !empty($bio_am_in) || !empty($bio_am_out) || !empty($bio_pm_in) || !empty($bio_pm_out);
+        foreach (['AM IN', 'AM OUT', 'PM IN', 'PM OUT'] as $attendanceFlow) {
+            if (!empty($allPersonnelLogs[$logDateCtr][$attendanceFlow])) {
+                $hasAnyLogs = true;
+                break;
+            }
+        }
+        $holidayEvent = null;
+        foreach ($allHolidays[$logDateCtr] ?? [] as $calendarEvent) {
+            if (stripos($calendarEvent['act_type'] ?? '', 'holiday') !== false || stripos($calendarEvent['event_title'] ?? '', 'holiday') !== false) {
+                $holidayEvent = $calendarEvent;
+                break;
+            }
+        }
+        $isNonWorkingHoliday = $holidayEvent
+            && in_array($holidayEvent['act_type'], ['Legal Holiday', 'Special Non-Working Holiday'], true)
+            && $holidayEvent['status'] !== 'Add as working day';
  
     ?>
     
@@ -367,64 +422,77 @@ $studData_row=$studData_query->fetch();
           }
       }
   }
+
+  $timestamp = strtotime($logDateCtr);
+  $dayName=date('l', $timestamp);
+  $dayName2=substr($dayName, 0,3);
+  $isRestDay = $dayName2 == 'Sat' || $dayName2 == 'Sun' || $dayName2 == 'Fri'; 
+  $hasLeave = isset($allLeaves[$logDateCtr]);
+  $leaveRemarks = $hasLeave ? $allLeaves[$logDateCtr] : '';
+  $leaveCode = $allLeaveCodes[$logDateCtr] ?? null;
+  $isLeaveRemark = $hasLeave && (stripos($leaveRemarks, 'leave') !== false || stripos($leaveRemarks, 'vacation') !== false || stripos($leaveRemarks, 'sick') !== false || stripos($leaveCode ?? '', 'LV') !== false);
+  $isWeekendLeave = $isRestDay && $isLeaveRemark;
+  $ps_info = $hasLeave ? dtrCheckPassSlip($conn, $leaveRemarks, $leaveCode) : ['is_pass_slip' => false, 'time_info' => ''];
+  $isPassSlip = $ps_info['is_pass_slip'];
+  $passSlipTimes = $ps_info['time_info'];
   
   if ($isWorkingDayHoliday) {
       
   ?>
-  <td rowspan="2">
+  <td rowspan="2" <?php if($isWeekendLeave){ ?>style="background-color: #b8ffd9; font-weight: bold;"<?php } ?> <?php if($isWeekendLeave && $leaveRemarks !== ''){ ?>title="<?php echo htmlspecialchars($leaveRemarks, ENT_QUOTES, 'UTF-8'); ?>"<?php } ?>>
     <?php
-    
-    $timestamp = strtotime($logDateCtr);
-    $dayName=date('l', $timestamp);
-    $dayName2=substr($dayName, 0,3);
     echo $displayDateCtr." <sup>".$dayName2."</sup>";
-    
+    if ($holidayEvent) echo '<br><small>HOLIDAY</small>';
+    if ($isWeekendLeave) {
+        echo '<br><small style="color: #0b6623; font-weight: bold; font-size: 8px; display: block; line-height: 1.1;">LEAVE</small>';
+    }
+    if ($isPassSlip) {
+        $ps_tip = $leaveRemarks !== '' ? $leaveRemarks : 'PASS SLIP';
+        if (!empty($passSlipTimes)) {
+            $ps_tip .= ' ('.$passSlipTimes.')';
+        }
+        echo '<br><small style="color: #0056b3; font-weight: bold; font-size: 8px; display: block; line-height: 1.1;" title="'.htmlspecialchars($ps_tip, ENT_QUOTES, 'UTF-8').'">PASS SLIP'.(!empty($passSlipTimes) ? '<br>'.$passSlipTimes : '').'</small>';
+    }
     ?>
     </td>
   <?php }else{?>
-  <td>
+  <td <?php if($isWeekendLeave){ ?>style="background-color: #b8ffd9; font-weight: bold;"<?php } ?> <?php if($isWeekendLeave && $leaveRemarks !== ''){ ?>title="<?php echo htmlspecialchars($leaveRemarks, ENT_QUOTES, 'UTF-8'); ?>"<?php } ?>>
     <?php
-    
-    $timestamp = strtotime($logDateCtr);
-    $dayName=date('l', $timestamp);
-    $dayName2=substr($dayName, 0,3);
     echo $displayDateCtr." <sup>".$dayName2."</sup>";
-    
+    if ($holidayEvent) echo '<br><small>HOLIDAY</small>';
+    if ($isWeekendLeave) {
+        echo '<br><small style="color: #0b6623; font-weight: bold; font-size: 8px; display: block; line-height: 1.1;">LEAVE</small>';
+    }
+    if ($isPassSlip) {
+        $ps_tip = $leaveRemarks !== '' ? $leaveRemarks : 'PASS SLIP';
+        if (!empty($passSlipTimes)) {
+            $ps_tip .= ' ('.$passSlipTimes.')';
+        }
+        echo '<br><small style="color: #0056b3; font-weight: bold; font-size: 8px; display: block; line-height: 1.1;" title="'.htmlspecialchars($ps_tip, ENT_QUOTES, 'UTF-8').'">PASS SLIP'.(!empty($passSlipTimes) ? '<br>'.$passSlipTimes : '').'</small>';
+    }
     ?>
     </td>
   <?php } ?>
+
+  <?php 
+  if(!$hasAnyLogs AND !$isNonWorkingHoliday AND $isRestDay){ ?>
   
-     
-    
-    
-    <?php
-    $hasLeave = isset($allLeaves[$logDateCtr]);
-    if($hasLeave){ 
-    $leaveRemarks = $allLeaves[$logDateCtr];
-    $leaveCtr=$leaveCtr+1;
-    
-    ?> 
-    <td colspan="7" style="background-color: #b8ffd9;"><center><strong><?php echo $leaveRemarks; ?></strong></center></td>
-     
-      <?php }else{
-    $hasAnyLogs = false;
-    if ($is_biometric) {
-        $hasAnyLogs = !empty($allPersonnelLogs[$logDateCtr]) || !empty($bio_am_in) || !empty($bio_am_out) || !empty($bio_pm_in) || !empty($bio_pm_out);
-    } else {
-        $hasAnyLogs = !empty($allPersonnelLogs[$logDateCtr]);
-    }
-    
-    if(!$hasAnyLogs AND ($dayName2=='Sat' OR $dayName2=='Sun')){ ?> 
-    
-    <td colspan="6" style="background-color: #ececec;"><center><strong><?php if($dayName2=='Sat'){ echo "S A T U R D A Y"; } if($dayName2=='Sun'){ echo "S U N D A Y"; } ?></strong></center></td>
-     
-      <?php }else{
+  <td colspan="7" style="background-color: #ececec;"><center><strong><?php echo strtoupper(implode(' ', str_split($dayName))); ?></strong></center></td>
+   
+    <?php }else if($hasLeave && (!$isRestDay || !$isLeaveRemark) && !($isPassSlip && $hasAnyLogs)){ 
+  $leaveCtr=$leaveCtr+1;
+  ?> 
+  <td colspan="7" style="background-color: #b8ffd9;"><center><strong><?php echo htmlspecialchars($leaveRemarks, ENT_QUOTES, 'UTF-8'); ?></strong></center></td>
+   
+    <?php }else{
      
       $isRegularHoliday = false;
       $sc_row = null;
       if (isset($allHolidays[$logDateCtr])) {
           foreach ($allHolidays[$logDateCtr] as $hol) {
-              if ($hol['status'] != 'Add as working day') {
+              if ($hol['status'] != 'Add as working day'
+                  && stripos($hol['act_type'] ?? '', 'holiday') === false
+                  && stripos($hol['event_title'] ?? '', 'holiday') === false) {
                   $isRegularHoliday = true;
                   $sc_row = $hol;
                   break;
@@ -432,11 +500,19 @@ $studData_row=$studData_query->fetch();
           }
       }
       
-      if($isRegularHoliday){
+      if($isNonWorkingHoliday && !$hasAnyLogs){
+      ?>
+      <td colspan="7" style="background-color: #ffbac5;"><center><strong>HOLIDAY — <?php echo htmlspecialchars($holidayEvent['event_title'], ENT_QUOTES, 'UTF-8'); ?></strong></center></td>
+      <?php }else if($isRegularHoliday && !$hasAnyLogs){
       ?>
         
-      <td colspan="6" style="background-color: #ffbac5;"><center><strong><?php echo $sc_row['event_title'].'</strong> [ '.$sc_row['status'].' ]'; ?></strong></center></td>
+      <td colspan="7" style="background-color: #ffbac5;"><center><strong><?php echo htmlspecialchars($sc_row['event_title'], ENT_QUOTES, 'UTF-8'); ?></strong></center></td>
       
+      <?php }else if(!$hasAnyLogs && $logDateCtr < date('Y-m-d') && !$isRestDay){
+          $amAbsentCtr++;
+          $pmAbsentCtr++;
+      ?>
+      <td colspan="7" style="background-color: #ffe6e6;"><center><strong>ABSENT</strong></center></td>
       <?php }else{ ?> 
  
     
@@ -464,37 +540,30 @@ $studData_row=$studData_query->fetch();
     
     
     <?php
-    if($studLogs_AM_IN_row['late_status']==='on'){
+    if(!$isRestDay && $studLogs_AM_IN_row['late_status']==='on' && !empty($allSchedules[$dayName]['am_IN']) && strtotime($allSchedules[$dayName]['am_IN']) !== false){
         
         $sq_row = $allSchedules[$dayName] ?? null;
  
-        if ($sq_row && !empty($sq_row['am_IN'])) {
-            $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
-            $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
-            sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
-            $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
-            
-            $am_in_late_min=($time_seconds_time_am_in-$time_seconds_time_am_in_late)/60;
-            
-            if ($am_in_late_min <= 15) {
-                $dailyLate=$dailyLate+0;
-                $amPresentCtr=$amPresentCtr+1;
-                ?>
-                <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
-                <?php
-            } else {
-                $grandTotalamLateMin=$grandTotalamLateMin+$am_in_late_min;
-                
-                $amLateCtr=$amLateCtr+1;
-                $amPresentCtr=$amPresentCtr+1;
-                
-                $dailyLate=$dailyLate+$am_in_late_min;
-                ?>
-                <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
-            <?php } ?>
-        <?php } else {
+        $str_time_sched_am_in_late= date("H:i:s", strtotime($sq_row['am_IN']));
+        $str_time_sched_am_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_in_late);
+        sscanf($str_time_sched_am_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
+        $time_seconds_time_am_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
+        
+        $am_in_late_min=($time_seconds_time_am_in-$time_seconds_time_am_in_late)/60;
+        
+        if ($am_in_late_min <= 15) {
             $dailyLate=$dailyLate+0;
             $amPresentCtr=$amPresentCtr+1;
+            ?>
+            <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
+            <?php
+        } else {
+            $grandTotalamLateMin=$grandTotalamLateMin+$am_in_late_min;
+            
+            $amLateCtr=$amLateCtr+1;
+            $amPresentCtr=$amPresentCtr+1;
+            
+            $dailyLate=$dailyLate+$am_in_late_min;
             ?>
             <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_AM_IN_row['logTime'])); ?> ]</p>
         <?php } ?>
@@ -518,9 +587,9 @@ $studData_row=$studData_query->fetch();
     
     <?php }else{ $time_seconds_time_am_in=0;  
     
-       $amAbsentCtr=$amAbsentCtr+1; ?>
+       if (!$isRestDay) $amAbsentCtr=$amAbsentCtr+1; ?>
        
-        <p style="margin: 0px;">--:--</p>   
+        <p style="margin: 0px;"><?php echo (!$isNonWorkingHoliday && $logDateCtr < date('Y-m-d') && !$isRestDay && empty($allPersonnelLogs[$logDateCtr]['AM OUT']) && empty($bio_am_out)) ? 'ABSENT' : '--:--'; ?></p>
     <?php } ?>
     
     </td>
@@ -548,31 +617,25 @@ $studData_row=$studData_query->fetch();
     ?>
     
     <?php
-    if($studLogs_AM_OUT_row['late_status']==='on'){
+    if(!$isRestDay && $studLogs_AM_OUT_row['late_status']==='on' && !empty($allSchedules[$dayName]['am_OUT']) && strtotime($allSchedules[$dayName]['am_OUT']) !== false){
         
         $sq_row = $allSchedules[$dayName] ?? null;
         
-        if ($sq_row && !empty($sq_row['am_OUT'])) {
-            $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
-            $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
-            sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
-            $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
+        $str_time_sched_am_out_utime= date("H:i:s", strtotime($sq_row['am_OUT']));
+        $str_time_sched_am_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_am_out_utime);
+        sscanf($str_time_sched_am_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
+        $time_seconds_time_am_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
+        
+        $am_out_utime_min=($time_seconds_time_am_out_utime-$time_seconds_time_am_out)/60;
+        
+        $grandTotalamUTimeMin=$grandTotalamUTimeMin+$am_out_utime_min;
+        
+        $amUTimeCtr=$amUTimeCtr+1;
+        
+        $dailyUTime=$dailyUTime+$am_out_utime_min;
             
-            $am_out_utime_min=($time_seconds_time_am_out_utime-$time_seconds_time_am_out)/60;
-            
-            $grandTotalamUTimeMin=$grandTotalamUTimeMin+$am_out_utime_min;
-            
-            $amUTimeCtr=$amUTimeCtr+1;
-            
-            $dailyUTime=$dailyUTime+$am_out_utime_min;
-                
-        ?>
-            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
-        <?php } else {
-            $dailyUTime=$dailyUTime+0;
-        ?>
-            <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
-        <?php } ?>
+    ?>
+        <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Undertime [ <?php echo date('h:i:s A', strtotime($studLogs_AM_OUT_row['logTime'])); ?> ]</p>
     <?php }else{
         
         $dailyUTime=$dailyUTime+0; ?>
@@ -587,11 +650,7 @@ $studData_row=$studData_query->fetch();
     <?php }else{ $time_seconds_time_am_out=0; 
     
     $chk_has_pm_out = false;
-    if ($is_biometric) {
-        $chk_has_pm_out = !empty($bio_pm_out);
-    } else {
-        $chk_has_pm_out = isset($allPersonnelLogs[$logDateCtr]['PM OUT']);
-    }
+    $chk_has_pm_out = !empty($bio_pm_out) || isset($allPersonnelLogs[$logDateCtr]['PM OUT']);
     
     if($chk_has_pm_out AND $has_am_in){ }else{ ?>
     
@@ -628,37 +687,30 @@ $studData_row=$studData_query->fetch();
     ?>
     
     <?php
-    if($studLogs_PM_IN_row['late_status']==='on'){
+    if(!$isRestDay && $studLogs_PM_IN_row['late_status']==='on' && !empty($allSchedules[$dayName]['pm_IN']) && strtotime($allSchedules[$dayName]['pm_IN']) !== false){
         
         $sq_row = $allSchedules[$dayName] ?? null;
  
-        if ($sq_row && !empty($sq_row['pm_IN'])) {
-            $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
-            $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
-            sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
-            $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
-            
-            $pm_in_late_min=($time_seconds_time_pm_in-$time_seconds_time_pm_in_late)/60;
-            
-            if ($pm_in_late_min <= 15) {
-                $dailyLate=$dailyLate+0;
-                $pmPresentCtr=$pmPresentCtr+1;
-                ?>
-                <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
-                <?php
-            } else {
-                $grandTotalpmLateMin=$grandTotalpmLateMin+$pm_in_late_min;
-                
-                $pmLateCtr=$pmLateCtr+1;
-                $pmPresentCtr=$pmPresentCtr+1;
-                
-                $dailyLate=$dailyLate+$pm_in_late_min;
-                ?>
-                <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
-            <?php } ?>
-        <?php } else {
+        $str_time_sched_pm_in_late= date("H:i:s", strtotime($sq_row['pm_IN']));
+        $str_time_sched_pm_in_late = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_in_late);
+        sscanf($str_time_sched_pm_in_late, "%d:%d:%d", $hours, $minutes, $seconds);
+        $time_seconds_time_pm_in_late = ($hours * 3600) + $minutes * 60 + $seconds;
+        
+        $pm_in_late_min=($time_seconds_time_pm_in-$time_seconds_time_pm_in_late)/60;
+        
+        if ($pm_in_late_min <= 15) {
             $dailyLate=$dailyLate+0;
             $pmPresentCtr=$pmPresentCtr+1;
+            ?>
+            <p style="background-color: white; margin: 0px;"><i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
+            <?php
+        } else {
+            $grandTotalpmLateMin=$grandTotalpmLateMin+$pm_in_late_min;
+            
+            $pmLateCtr=$pmLateCtr+1;
+            $pmPresentCtr=$pmPresentCtr+1;
+            
+            $dailyLate=$dailyLate+$pm_in_late_min;
             ?>
             <p style="background-color: #ffe57e; margin: 0px;">&nbsp;<i class="fa fa-check"></i>&nbsp;&nbsp;Late [ <?php echo date('h:i:s A', strtotime($studLogs_PM_IN_row['logTime'])); ?> ]</p>
         <?php } ?>
@@ -675,19 +727,15 @@ $studData_row=$studData_query->fetch();
     <?php
     
     $chk_has_pm_out = false;
-    if ($is_biometric) {
-        $chk_has_pm_out = !empty($bio_pm_out);
-    } else {
-        $chk_has_pm_out = isset($allPersonnelLogs[$logDateCtr]['PM OUT']);
-    }
+    $chk_has_pm_out = !empty($bio_pm_out) || isset($allPersonnelLogs[$logDateCtr]['PM OUT']);
     
     if($chk_has_pm_out AND $has_am_in){ $pmPresentCtr=$pmPresentCtr+1; }else{ 
         
-        $pmAbsentCtr=$pmAbsentCtr+1;
+        if (!$isRestDay) $pmAbsentCtr=$pmAbsentCtr+1;
         
         ?>
     
-    <p style="margin: 0px;">--:--</p>   
+    <p style="margin: 0px;"><?php echo (!$isNonWorkingHoliday && $logDateCtr < date('Y-m-d') && !$isRestDay && !$chk_has_pm_out) ? 'ABSENT' : '--:--'; ?></p>
     
     <?php } } ?>
     
@@ -713,22 +761,20 @@ $studData_row=$studData_query->fetch();
     sscanf($str_time_pm_out, "%d:%d:%d", $hours, $minutes, $seconds);
     $time_seconds_time_pm_out = ($hours * 3600) + $minutes * 60 + $seconds;
     
-    // Always fetch schedule to calculate Overtime even if not 'on' for undertime
+    // The punch can exist even when the employee has no schedule for this day.
     $sq_row = $allSchedules[$dayName] ?? null;
-    
-    if ($sq_row && !empty($sq_row['pm_OUT'])) {
-        $str_time_sched_pm_out_utime= date("H:i:s", strtotime($sq_row['pm_OUT']));
-        $str_time_sched_pm_out_utime = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time_sched_pm_out_utime);
+    $hasPmOutSchedule = !empty($sq_row['pm_OUT']) && strtotime($sq_row['pm_OUT']) !== false;
+    $time_seconds_time_pm_out_utime = null;
+    if ($hasPmOutSchedule) {
+        $str_time_sched_pm_out_utime = date("H:i:s", strtotime($sq_row['pm_OUT']));
         sscanf($str_time_sched_pm_out_utime, "%d:%d:%d", $hours, $minutes, $seconds);
         $time_seconds_time_pm_out_utime = ($hours * 3600) + $minutes * 60 + $seconds;
-    } else {
-        $time_seconds_time_pm_out_utime = 0;
     }
     
     // Check for Overtime
         $overtime_sec = 0; 
         $checkDate = date('m/d/Y', strtotime($logDateCtr));
-    if (isset($allOvertime[$checkDate])) {
+    if ($hasPmOutSchedule && ($overtimeData['requests'][$logDateCtr] ?? null) === 'approved') {
         if ($is_biometric && !empty($bio_logs)) {
             foreach($bio_logs as $log) {
                 if (!empty($log['time_in']) && !empty($log['time_out'])) {
@@ -748,12 +794,12 @@ $studData_row=$studData_query->fetch();
             $overtime_sec = $time_seconds_time_pm_out - $time_seconds_time_pm_out_utime;
         }
     }
-    if ($overtime_sec > 0) {
-        $dailyOvertime = $overtime_sec / 60;
-        $grandTotalOvertimeMin = (isset($grandTotalOvertimeMin) ? $grandTotalOvertimeMin : 0) + $dailyOvertime;
-    }
+    $overtimeState = overtimeDtrDay($overtimeData, $logDateCtr, max(0, $overtime_sec / 60));
+    $dailyOvertime = $overtimeState['minutes'];
+    $dailyOvertimeLabel = $overtimeState['label'];
+    $grandTotalOvertimeMin += $dailyOvertime;
      
-    if($studLogs_PM_OUT_row['late_status']=="on"){
+    if(!$isRestDay && $studLogs_PM_OUT_row['late_status']=="on" && $hasPmOutSchedule){
         $pm_out_utime_min=($time_seconds_time_pm_out_utime-$time_seconds_time_pm_out)/60;
         $grandTotalpmUTimeMin=$grandTotalpmUTimeMin+$pm_out_utime_min;
         $pmUTimeCtr=$pmUTimeCtr+1;
@@ -815,12 +861,13 @@ $studData_row=$studData_query->fetch();
     <!-- Overtime -->
     <td>
     <?php echo (isset($dailyOvertime) ? $dailyOvertime : 0) .' minute(s)'; ?>
+    <?php if ($dailyOvertimeLabel !== '') echo '<br><strong>' . htmlspecialchars($dailyOvertimeLabel, ENT_QUOTES, 'UTF-8') . '</strong>'; ?>
     </td>
     <!-- end Overtime -->
   <?php } ?>
   
     
-    <?php } } } ?>
+    <?php } } ?>
     
   <?php
   $SC_query4 = $conn->query("select * FROM activity_calendar WHERE completeDate='$logDateCtr' AND status='Add as working day'");

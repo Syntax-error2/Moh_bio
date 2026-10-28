@@ -414,5 +414,18 @@
 
 
     
-  </body>
+  
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: 'auto_accrue_leaves.php',
+        type: 'POST',
+        success: function(response) {
+            console.log('Auto-accrual check complete.');
+        }
+    });
+});
+</script>
+
+</body>
 </html>

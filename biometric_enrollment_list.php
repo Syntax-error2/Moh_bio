@@ -52,8 +52,9 @@ include('header.php');
                         <?php
                         $query = $conn->query("SELECT p.personnel_id, p.personnel_id_code, p.lname, p.fname, p.mname, p.fingerprint_template, d.dept_office_name 
                                                FROM personnels p 
+                                               JOIN emp_status es ON es.empStat_id = p.empStat_id
                                                LEFT JOIN dept_offices d ON p.do_id = d.do_id 
-                                               WHERE p.separation_date IS NULL OR p.separation_date='' OR p.separation_date='  /  /    '
+                                               WHERE es.status = 'Active' AND (p.separation_date IS NULL OR p.separation_date='' OR p.separation_date='  /  /    ')
                                                ORDER BY p.lname ASC");
                         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
                             $fingers = [];

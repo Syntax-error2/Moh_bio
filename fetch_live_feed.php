@@ -1,4 +1,5 @@
 <?php
+define('FAST_DB_INIT', true);
 include_once('dbcon.php');
 
 $currentDate = date('Y-m-d');

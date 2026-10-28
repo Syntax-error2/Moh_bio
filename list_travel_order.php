@@ -11,30 +11,14 @@
   
     $day=date("l"); //Mon-Sun
     
-    $date_from = isset($_POST['date_from']) ? $_POST['date_from'] : date('Y-m-01');
-    $date_to = isset($_POST['date_to']) ? $_POST['date_to'] : date('Y-m-t');
-
-    $filterDate = isset($_POST['filterDate']) ? ($_POST['reportDate'] ?? date('m/d/Y')) : date('m/d/Y');
-    ?>
-
-    <?php
-    $total_travel_orders = 0;
-    $unique_travel_personnel = 0;
-    try {
-      $summary_stmt = $conn->prepare("SELECT COUNT(DISTINCT travel_code) AS total_travel_orders, COUNT(DISTINCT personnel_id) AS unique_travel_personnel FROM personnel_official_travel_logs WHERE DATE(SUBSTRING_INDEX(travel_date, ' - ', 1)) <= :date_to AND DATE(SUBSTRING_INDEX(travel_date, ' - ', -1)) >= :date_from");
-      $summary_stmt->execute([
-        ':date_from' => $date_from,
-        ':date_to' => $date_to
-      ]);
-      $summary_row = $summary_stmt->fetch(PDO::FETCH_ASSOC);
-      if ($summary_row) {
-        $total_travel_orders = (int)($summary_row['total_travel_orders'] ?? 0);
-        $unique_travel_personnel = (int)($summary_row['unique_travel_personnel'] ?? 0);
-      }
-    } catch (PDOException $e) {
-      error_log("Error fetching travel summary: " . $e->getMessage());
-    }
-    ?>
+    if(isset($_POST['filterDate'])){
+    $filterDate= date('F d, Y', strtotime($_POST['date_from'])) . ' - ' . date('F d, Y', strtotime($_POST['date_to']));
+     
+    }else{
+        
+    $filterDate=date('F 01, Y') . ' - ' . date('F t, Y');
+   
+    } ?>
     
    
     
@@ -62,94 +46,66 @@
             </div>
           </div>      
  
-      <section class="dashboard-counts section-padding">
+      <section class="mt-30px mb-30px">
         <div class="container-fluid">
-          <div class="row mb-3">
-            <div class="col-lg-8">
-              <h2>Travel Order Bulletin</h2>
-              <p class="text-muted">View and monitor official travel orders</p>
-            </div>
-            <div class="col-lg-4 text-right">
-              <a title="Add travel order..." style="color: white !important; margin-top: 3px;" data-toggle="modal" data-target="#addTravelOrder" href="#" class="btn btn-success">
-                <i class="fa fa-plus"></i> Add Travel Order
-              </a>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-lg-12">
-              <div class="card">
-                <div class="card-body">
-                  <form method="POST" class="form-inline">
-                    <label class="mr-2"><i class="fa fa-filter"></i> Filter by Date Range:</label>
-                    <div class="form-group mr-2">
-                      <label class="mr-2">From:</label>
-                      <input type="date" name="date_from" class="form-control" value="<?php echo htmlspecialchars($date_from); ?>" required />
-                    </div>
-                    <div class="form-group mr-2">
-                      <label class="mr-2">To:</label>
-                      <input type="date" name="date_to" class="form-control" value="<?php echo htmlspecialchars($date_to); ?>" required />
-                    </div>
-                    <button type="submit" name="filterDate" class="btn btn-primary mr-2">
-                      <i class="fa fa-search"></i> Apply Filter
-                    </button>
-                    <a class="btn btn-secondary mr-2" href="list_travel_order.php">
-                      <i class="fa fa-refresh"></i> Reset
-                    </a>
-                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#print_monthly_TO" title="Print Travel Order list...">
-                      <i class="fa fa-print"></i> Print Report
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div class="row">
-            <div class="col-xl-6 col-md-6 col-12">
-              <div class="wrapper count-title d-flex">
-                <div class="icon"><i class="icon-padnote"></i></div>
-                <div class="name">
-                  <strong class="text-uppercase">Travel Orders</strong>
-                  <span>Distinct travel codes</span>
-                  <div class="count-number"><?php echo $total_travel_orders; ?></div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-6 col-md-6 col-12">
-              <div class="wrapper count-title d-flex">
-                <div class="icon"><i class="icon-user"></i></div>
-                <div class="name">
-                  <strong class="text-uppercase">Personnel</strong>
-                  <span>Personnel on travel</span>
-                  <div class="count-number"><?php echo $unique_travel_personnel; ?></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row mt-3">
             <div class="col-lg-12 col-md-12">
-              <?php include('add_travel_modal.php'); ?>
-
-              <!-- TRAVEL ORDER BULLETIN    -->
-              <div class="card">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0"><i class="fa fa-table"></i> Travel Order List</h5>
+      
+      <?php include('add_travel_modal.php'); ?>
+      
+            <?php
+            
+            $opt_query = $conn->query("SELECT DISTINCT travel_date FROM personnel_official_travel_logs ORDER BY travel_date DESC");
+ 
+            ?>
+            
+      
+            <!-- TRAVEL ORDER BULLETIN    -->
+              <div id="new-updates" class="card updates recent-updated">
+                <div id="updates-header" class="card-header d-flex justify-content-between align-items-center">
+                  
+                  <form method="POST">
+    <table>
+    <tr>
+        <td style="border: none; background-color: white;">
+            <h4>
+                <a style="color: white !important;" data-toggle="modal" data-target="#addTravelOrder" href="#" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i></a>
+                TRAVEL BULLETIN DATA TABLE
+            </h4>
+        </td>
+        <td style="border: none; background-color: white;">
+            <input type="date" name="date_from" class="form-control" value="<?php echo isset($_POST['date_from']) ? $_POST['date_from'] : date('Y-m-01'); ?>">
+        </td>
+        <td style="border: none; background-color: white; padding-left: 10px; padding-right: 10px;">
+            To
+        </td>
+        <td style="border: none; background-color: white;">
+            <input type="date" name="date_to" class="form-control" value="<?php echo isset($_POST['date_to']) ? $_POST['date_to'] : date('Y-m-t'); ?>">
+        </td>
+        <td style="border: none; background-color: white; padding-left: 10px;">
+            <button name="filterDate" class="btn btn-primary" title="Filter Date"><i class="fa fa-filter"></i></button> 
+            <a href="list_travel_order.php?cw=list_travel" class="btn btn-secondary" title="Reset"><i class="fa fa-refresh"></i></a> <button type="submit" formtarget="_blank" formaction="print_travel_report.php" class="btn btn-info" title="Print Report"><i class="fa fa-print"></i></button>
+            
+        </td>
+    </tr>
+    </table>
+</form>
+                  
+                  <a data-toggle="collapse" data-parent="#new-updates" href="#updates-boxContacts" aria-expanded="true" aria-controls="updates-boxContacts"><i class="fa fa-angle-down"></i></a>
+                
                 </div>
                 
                 <div id="updates-boxContacts" role="tabpanel" class="collapse show">
                 
-                <div class="card-body">
-                <div class="table-responsive">
-                <table id="travelOrdersTable" class="table table-striped table-bordered table-hover" style="width:100%">
+                <div class="col-lg-12">
+                <div class="table-responsive" style="margin-top: 12px;">
+                <table id="" class="display" style="width:100%">
                       <thead>
                         <tr>
-                          <th>TO Code</th>
-                          <th>Travel Dates</th>
+                          <th>#</th>
+                          <th>TO CODE<br /><small>Travel Date</small></th>
                           <th>PERSONNEL</th>
-                          <th>PURPOSE / LOCATION</th>
-                          <th>TYPE</th>
+                          <th>DETAILS</th>
                           <th></th>
                         </tr>
                       </thead>
@@ -159,71 +115,79 @@
                       <?php
                       $row_ctr=0;
                                
-                      $new_clearance_query = $conn->prepare("SELECT DISTINCT 
-                      travel_code, 
-                      travel_date,
-                      purpose,
-                      description,
-                      location,
-                      travel_type  FROM personnel_official_travel_logs WHERE DATE(SUBSTRING_INDEX(travel_date, ' - ', 1)) <= :date_to AND DATE(SUBSTRING_INDEX(travel_date, ' - ', -1)) >= :date_from ORDER BY travel_log_id ASC");
-                      $new_clearance_query->execute([
-                        ':date_from' => $date_from,
-                        ':date_to' => $date_to
-                      ]);
-                      while($nc_row = $new_clearance_query->fetch()){
-                      $row_ctr=$row_ctr+1;
+                      $date_from = isset($_POST['date_from']) ? $_POST['date_from'] : date('Y-m-01');
+$date_to = isset($_POST['date_to']) ? $_POST['date_to'] : date('Y-m-t');
+
+$new_clearance_query = $conn->query("SELECT travel_code, travel_date, purpose, description, location, travel_type, MAX(time_out) as time_out, MAX(time_in) as time_in FROM personnel_official_travel_logs GROUP BY travel_code, travel_date, purpose, description, location, travel_type ORDER BY MAX(travel_log_id) ASC");
+$filtered_travels = [];
+while($nc_row = $new_clearance_query->fetch()) {
+    $dates = explode(' - ', trim($nc_row['travel_date']));
+    $start_date_str = trim($dates[0]);
+    $end_date_str = isset($dates[1]) ? trim($dates[1]) : $start_date_str;
+    
+    // Attempt to convert to Y-m-d format
+    $start_ts = strtotime($start_date_str);
+    $end_ts = strtotime($end_date_str);
+    
+    if($start_ts && $end_ts) {
+        $dbStartDate = date('Y-m-d', $start_ts);
+        $dbEndDate = date('Y-m-d', $end_ts);
+        
+        // Check if the date range overlaps with the filter range
+        if($dbStartDate <= $date_to && $dbEndDate >= $date_from) {
+            $filtered_travels[] = $nc_row;
+        }
+    }
+}
+foreach($filtered_travels as $nc_row) {
+    $row_ctr=$row_ctr+1;
                       
                       ?>
                       
                         <tr>
-                          <td>
-                            <strong><?php echo htmlspecialchars($nc_row['travel_code']); ?></strong>
-                          </td>
+                          <td><?php echo $row_ctr; ?></td>
                           
                           <td>
-                            <?php
-                              $travel_date_parts = array_map('trim', explode(' - ', (string)$nc_row['travel_date']));
-                              $travel_date_from = $travel_date_parts[0] ?? '';
-                              $travel_date_to = $travel_date_parts[1] ?? $travel_date_from;
-                            ?>
-                            <div><strong>From:</strong> <?php echo htmlspecialchars($travel_date_from); ?></div>
-                            <div><strong>To:</strong> <?php echo htmlspecialchars($travel_date_to); ?></div>
+                          <?php echo $nc_row['travel_code']; ?><br />
+                          <small><?php echo $nc_row['travel_date']; ?></small>
                           </td>
                           
                           <td>
                           <?php
-                          $pi_stmt = $conn->prepare("SELECT personnel_id FROM personnel_official_travel_logs WHERE travel_code = :travel_code");
-                          $pi_stmt->execute([':travel_code' => $nc_row['travel_code']]);
-                          $pi_query = $pi_stmt;
-                          $personnel_names = [];
-                          while($pi_row = $pi_query->fetch()) {
-                            $studData_stmt = $conn->prepare("SELECT * FROM personnels WHERE personnel_id = :personnel_id");
-                            $studData_stmt->execute([':personnel_id' => $pi_row['personnel_id']]);
-                            $studData_query = $studData_stmt;
-                            $sd_row = $studData_query->fetch();
-
-                            if ($sd_row) {
-                              if ($sd_row['suffix'] == "-") {
-                                $personnel_names[] = $sd_row['fname'] . " " . substr($sd_row['mname'], 0, 1) . ". " . $sd_row['lname'];
-                              } else {
-                                $personnel_names[] = $sd_row['fname'] . " " . substr($sd_row['mname'], 0, 1) . ". " . $sd_row['lname'] . " " . $sd_row['suffix'];
-                              }
-                            }
-                          }
-                          echo implode('<br />', array_map(function ($name) {
-                            return htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-                          }, $personnel_names));
+                          $pi_query = $conn->prepare("SELECT personnel_id FROM personnel_official_travel_logs WHERE travel_code=? AND purpose=? AND travel_date=?");
+                          $pi_query->execute([$nc_row['travel_code'], $nc_row['purpose'], $nc_row['travel_date']]);
+                          while($pi_row = $pi_query->fetch())
+                          {
+                          
+                           $studData_query = $conn->query("SELECT * FROM personnels WHERE personnel_id='$pi_row[personnel_id]'");
+                           $sd_row=$studData_query->fetch();
+                           
+                           if($sd_row) {
+                               if($sd_row['suffix']=="-")
+                               {
+                                 echo $p_name=$sd_row['fname']." ".substr($sd_row['mname'], 0,1).". ".$sd_row['lname'];
+                               
+                               }else{
+                                 
+                                 echo $p_name=$sd_row['fname']." ".substr($sd_row['mname'], 0,1).". ".$sd_row['lname']." ".$sd_row['suffix'];
+                               
+                               } 
+                               echo "<br />"; 
+                           }
+                           } ?>
+                          
+                          </td>
+                          
+                          <td>
+                          <strong style="font-weight: bold;">PURPOSE:</strong> <?php echo $nc_row['purpose']; ?><br />
+                          <strong style="font-weight: bold;">DESCRIPTION:</strong> <?php echo $nc_row['description']; ?><br />
+                          <strong style="font-weight: bold;">LOCATION:</strong> <?php echo $nc_row['location']; ?><br />
+                          <strong style="font-weight: bold;">TYPE:</strong> <?php echo $nc_row['travel_type']; ?>
+                          <?php if (!empty($nc_row['time_out']) || !empty($nc_row['time_in'])) { 
+                              $t_str = trim(($nc_row['time_out'] ?? '') . ' - ' . ($nc_row['time_in'] ?? ''), ' -');
                           ?>
-                          
-                          </td>
-                          
-                          <td>
-                          <div><strong>Purpose:</strong> <?php echo htmlspecialchars($nc_row['purpose']); ?></div>
-                          <div><strong>Location:</strong> <?php echo htmlspecialchars($nc_row['location']); ?></div>
-                          </td>
-
-                          <td>
-                            <span class="badge badge-info"><?php echo htmlspecialchars($nc_row['travel_type']); ?></span>
+                          <br /><strong style="font-weight: bold;">TIME:</strong> <?php echo htmlspecialchars($t_str); ?>
+                          <?php } ?>
                           </td>
                           
                           
@@ -275,23 +239,25 @@
                       </tbody>
                       <tfoot>
                       <tr>
-                          <td colspan="5">Total Travel Orders as of: <strong style="font-size: 20px;"><?php echo htmlspecialchars($date_from); ?> to <?php echo htmlspecialchars($date_to); ?></strong></td>
+                          <td colspan="4">Total Files from <strong style="font-size: 20px;"><?php echo $filterDate; ?></strong></td>
                       
-                          <td><strong style="font-size: 20px;"><?php echo $new_clearance_query->rowCount(); ?></strong></td>
+                          <td><strong style="font-size: 20px;"><?php echo count($filtered_travels); ?></strong></td>
                         </tr>
                       </tfoot>
                     
                     </table>
                     </div>
                     </div>
-                    </div>
-
-
+ 
+ 
+  
                 </div>
               </div>
               <!-- TRAVEL ORDER BULLETIN End-->
-
-
+         
+              
+              
+                </div>
             </div>
         </div>
      </section>
@@ -307,27 +273,6 @@
     
     <?php include('scripts_files.php'); ?>
  
-    <script>
-      $(document).ready(function() {
-        $('#travelOrdersTable').DataTable({
-          "order": [[0, "desc"]],
-          "pageLength": 25,
-          "responsive": true,
-          "language": {
-            "search": "Search:",
-            "lengthMenu": "Show _MENU_ entries",
-            "info": "Showing _START_ to _END_ of _TOTAL_ travel orders",
-            "infoEmpty": "No travel orders found",
-            "infoFiltered": "(filtered from _MAX_ total entries)",
-            "zeroRecords": "No matching travel orders found"
-          },
-          "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-          "columnDefs": [
-            { "orderable": false, "targets": 5 }
-          ]
-        });
-      });
-    </script>
  
 
 

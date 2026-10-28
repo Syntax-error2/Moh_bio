@@ -117,6 +117,7 @@
                 <a id="dash-x-menu" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link language dropdown-toggle active">Leave Management</a>
                 <ul aria-labelledby="dash-x-menu" class="dropdown-menu p-0">
                   <li><a class="dropdown-item" href="leave_application.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Leave Applications</a></li>
+                  <li><a class="dropdown-item" href="list_personnel_individual_details_LC.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Leave Credits Ledger</a></li>
                   <li><a class="dropdown-item active" href="leave_card.php?dept=<?php echo urlencode($dept_id); ?>&personnel_id=<?php echo urlencode($personnel_id); ?>">Leave Card</a></li>
                 </ul>
               </li>
@@ -158,25 +159,30 @@
         <div class="container-fluid">
           <div class="row">
 
-            <div class="col-lg-8">
+            <div class="col-lg-6">
               <h2>Leave Card</h2>
               <p class="text-small text-secondary">Create and manage leave requests</p>
             </div>
             
-            <div class="col-lg-4 text-right">
+            <div class="col-lg-6 text-right">
               <?php if ($can_manage_leave_card) { ?>
               <button type="button" 
                       data-toggle="modal"
                       data-target="#add_lc_entry"
                       class="btn btn-success">
-                <i class="fa fa-plus"></i> Add Leave Card Entry
+                <i class="fa fa-plus"></i> Add Entry
               </button>
               <?php } ?>
               
+              <a href="print_leave_card.php?personnel_id=<?php echo urlencode($personnel_id); ?>" 
+                 target="_blank"
+                 class="btn btn-primary" title="Print Official CSC Leave Card (Landscape)">
+                <i class="fa fa-id-card"></i> Official CSC Leave Card
+              </a>
               <button type="button" 
                       onclick="printLeaveCard()"
                       class="btn btn-info">
-                <i class="fa fa-print"></i> Print Leave Card
+                <i class="fa fa-print"></i> Quick Print
               </button>
             </div>
 

@@ -46,6 +46,8 @@ if ($session_access === 'User') {
         'list_personnel_individual_details_files.php',
         'leave_application.php',
         'leave_card.php',
+        'list_personnel_individual_details_LC.php',
+        'print_leave_card.php',
         'get_leave_application.php',
         'get_leave_application_print_data.php',
         'get_leave_card_balance.php',
@@ -116,6 +118,7 @@ $check_pass = $user_row['password'];
 if ($session_access === 'Admin' || $session_access === 'Administrator') {
     require_once('process_monthly_leave_credits.php');
     checkAndProcessMonthlyCredits($conn, $session_id);
+    require_once('auto_accrue_leaves.php');
 }
 
 ?>
